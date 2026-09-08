@@ -32,6 +32,7 @@ func initBizRouter(Router *gin.Engine, routers ...*gin.RouterGroup) {
 	hrcRouter.InitProfileRouter(v1Group)
 	hrcRouter.InitUploadRouter(v1Group)
 	hrcRouter.InitCmsRouter(v1Group)
+	hrcRouter.InitCategoryRouter(v1Group)
 	hrcRouter.InitResumeRouter(v1Group)
 	hrcRouter.InitVideoInterviewRouter(v1Group)
 	hrcRouter.InitInterviewRouter(v1Group)
