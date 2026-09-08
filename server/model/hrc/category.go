@@ -23,3 +23,13 @@ type Category struct {
 }
 
 func (Category) TableName() string { return "ms_category" }
+
+type CategoryJobs struct {
+	ID       int    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	ParentID int    `gorm:"column:parent_id;default:0" json:"parentId"`
+	Level    int    `gorm:"column:level;default:0" json:"level"` //层级，1-大类，3-小类
+	Name     string `gorm:"column:name;size:60" json:"name"`
+	Sort     int    `gorm:"column:sort;default:0" json:"sort"`
+}
+
+func (CategoryJobs) TableName() string { return "ms_category_jobs" }

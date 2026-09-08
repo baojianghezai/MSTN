@@ -55,6 +55,7 @@ func bizModel() error {
 		&hrcModel.Navigation{},
 		&hrcModel.CategoryGroup{},
 		&hrcModel.Category{},
+		&hrcModel.CategoryJobs{},
 
 		// M3 收尾批：简历五张结构化子表（04 §2.4-2.8）
 		&hrcModel.ResumeEducation{},
@@ -62,8 +63,6 @@ func bizModel() error {
 		&hrcModel.ResumeLanguage{},
 		&hrcModel.ResumeTraining{},
 		&hrcModel.ResumeCredent{},
-
-		// M4 商业化最小闭环：套餐、企业权益与订单。
 		&hrcModel.Setmeal{},
 		&hrcModel.MembersSetmeal{},
 		&hrcModel.ResumeDownload{},
@@ -77,5 +76,7 @@ func bizModel() error {
 			return err
 		}
 	}
+
+	// M4 商业化最小闭环：套餐、企业权益与订单。
 	return seedBiz(db)
 }
