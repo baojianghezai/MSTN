@@ -1,0 +1,92 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-msrc}
+      MYSQL_USER: ${MYSQL_USER:-msrc}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redis-data:/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  server:
+    build:
+      context: ../../server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      GIN_MODE: release
+      GVA_CONFIG: /go/src/github.com/flipped-aurora/gin-vue-admin/server/config.production.yaml
+    volumes:
+      - ./config.production.yaml:/go/src/github.com/flipped-aurora/gin-vue-admin/server/config.production.yaml:ro
+      - uploads-data:/go/src/github.com/flipped-aurora/gin-vue-admin/server/uploads
+      - server-logs:/go/src/github.com/flipped-aurora/gin-vue-admin/server/log
+    networks:
+      - private
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8888/health | grep -q ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  web:
+    build:
+      context: ../../web-front
+      dockerfile: ../deploy/single-host/Dockerfile.web
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - private
+    depends_on:
+      server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/health | grep -q ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
+  redis-data:
+  uploads-data:
+  server-logs:
+
+networks:
+  private:
+    driver: bridge

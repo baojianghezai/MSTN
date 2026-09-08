@@ -1,0 +1,72 @@
+jwt:
+  signing-key: CHANGE_ME_GENERATE_A_64_CHARACTER_RANDOM_SECRET
+  expires-time: 2h
+  buffer-time: 30m
+  issuer: msrc
+
+zap:
+  level: info
+  format: json
+  prefix: msrc
+  director: log
+  encode-level: LowercaseLevelEncoder
+  stacktrace-key: stacktrace
+  show-line: true
+  log-in-console: true
+  retention-day: 30
+  access-req-body: false
+  access-resp-data: false
+  access-req-headers: false
+  access-log-max-bytes: 1024
+
+redis:
+  addr: redis:6379
+  password: CHANGE_ME_MATCH_REDIS_PASSWORD
+  db: 0
+  useCluster: false
+
+system:
+  addr: 8888
+  db-type: mysql
+  oss-type: local
+  router-prefix: ""
+  use-redis: true
+  use-mongo: false
+  use-multipoint: false
+  use-strict-auth: false
+  iplimit-count: 15000
+  iplimit-time: 3600
+  # Keep false only for the first startup against a new database. Set true after migration succeeds.
+  disable-auto-migrate: false
+
+media:
+  max-file-size: 10485760
+  session-ttl: 24
+
+mysql:
+  path: mysql
+  port: "3306"
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: msrc
+  username: msrc
+  password: CHANGE_ME_MATCH_MYSQL_PASSWORD
+  max-idle-conns: 10
+  max-open-conns: 50
+  log-mode: error
+
+local:
+  path: uploads/file
+  store-path: uploads/file
+
+app:
+  node: single-host-1
+  app-id: msrc
+  env: prod
+
+# Payment remains intentionally disabled until the domain, HTTPS certificate, and merchant credentials are available.
+payment:
+  notify-base-url: ""
+  wechat:
+    enabled: false
+  alipay:
+    enabled: false

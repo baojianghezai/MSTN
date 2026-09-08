@@ -1,0 +1,395 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', Arial, sans-serif;
+  color: #334155;
+  background: #f8fafc;
+}
+
+/* B1 P2：锚点导航（简历编辑页等长表单）平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* B1 P2 修复（08-20）：本环境 UnoCSS presetWind3 的 preflight universal 规则只输出 --un-* 变量，
+   缺少 Tailwind v3 preflight 标配的 `border: 0 solid` 全局重置——后果是 border-style 保持 none，
+   按规范 border-*-width 计算值强制为 0，所有 UnoCSS border-* 工具类（border/border-t/border-b…）
+   的边框不渲染（P2 sticky 保存栏/锚点条验证时经 CDP matched-styles + computed 双通道确认）。
+   此处补等价重置；默认色取 Tailwind v3 border 默认 #e5e7eb。EP 组件自带完整边框简写，不受影响。
+
+   补充（09-07）：同一处 preflight 缺口还漏了 Tailwind v3 的 `box-sizing: border-box`，
+   于是 `max-w-[1200px] px-4` 这类「限宽 + 内边距」容器会按 content-box 把 padding 加到限宽之外，
+   顶栏/搜索区/主视觉/页脚实测 1232px 而非规范的 1200px，各区块左右边缘对不齐。 */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+}
+
+/* Element Plus 品牌色同步（B1 美化 P0）：EP 组件色对齐 UnoCSS primary 色板（500=#3b82f6）
+   light-N = 与白色按 N/10 混合，dark-2 = 与黑色按 2/10 混合（EP 2.x 静态变量需逐一覆盖） */
+:root {
+  --el-color-primary: #3b82f6;
+  --el-color-primary-light-3: #76a7f8;
+  --el-color-primary-light-5: #9dc0fa;
+  --el-color-primary-light-7: #c4dbf8;
+  --el-color-primary-light-8: #d7e6f7;
+  --el-color-primary-light-9: #ebf2f7;
+  --el-color-primary-dark-2: #2f68c4;
+  --el-border-radius-base: 6px;
+  --el-border-radius-small: 4px;
+  --el-font-size-base: 14px;
+  --el-border-color: #e2e8f0;
+  --el-border-color-light: #e8eef5;
+  --el-fill-color-light: #f8fafc;
+  --el-fill-color-lighter: #fafcff;
+  --el-text-color-primary: #1e293b;
+  --el-text-color-regular: #475569;
+  --el-text-color-secondary: #64748b;
+  --el-bg-color-page: #f6f8fb;
+}
+
+/* Element Plus 卡片层级（B1 美化 P1）：卡片头与内容区用浅底分隔线区隔，标题色对齐页面层级 */
+.el-card__header {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+body {
+  min-width: 320px;
+  line-height: 1.5;
+}
+
+button,
+a,
+.el-button,
+.el-input__wrapper,
+.el-select__wrapper,
+.el-card {
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.el-button {
+  min-height: 32px;
+  font-weight: 500;
+}
+
+.el-button--primary {
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.18);
+}
+
+.el-button--primary:hover {
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.22);
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner {
+  box-shadow: 0 0 0 1px #dbe3ee inset;
+  background: #fff;
+}
+
+.el-input__wrapper:hover,
+.el-select__wrapper:hover,
+.el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px #aebfd3 inset;
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+.el-card {
+  border-color: #e7edf5;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035), 0 2px 6px rgba(15, 23, 42, 0.025);
+}
+
+.el-card__body {
+  padding: 20px;
+}
+
+.el-table {
+  --el-table-border-color: #e8eef5;
+  --el-table-header-bg-color: #f8fafc;
+  --el-table-row-hover-bg-color: #f5f9ff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.el-table th.el-table__cell {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.el-table td.el-table__cell,
+.el-table th.el-table__cell {
+  padding: 12px 0;
+}
+
+.el-pagination {
+  --el-pagination-button-bg-color: #fff;
+  --el-pagination-hover-color: #2563eb;
+  font-weight: 500;
+}
+
+.el-pagination button,
+.el-pager li {
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+.el-dialog,
+.el-drawer {
+  border-radius: 8px 8px 0 0;
+}
+
+.el-dialog__header,
+.el-drawer__header {
+  margin-bottom: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e8eef5;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.el-dialog__body,
+.el-drawer__body {
+  padding: 20px;
+}
+
+.el-empty {
+  padding: 40px 0;
+}
+
+.el-form-item__label {
+  color: #475569;
+  font-weight: 500;
+}
+
+.public-shell main,
+.company-shell main,
+.personal-shell main {
+  min-width: 0;
+}
+
+.site-header {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.82);
+  box-shadow: 0 1px 8px rgba(15, 23, 42, 0.04);
+}
+
+.site-header__inner {
+  min-height: 60px;
+}
+
+.site-brand {
+  letter-spacing: 0;
+  color: #0f172a;
+}
+
+.site-brand__mark {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.22);
+}
+
+.site-nav-link {
+  position: relative;
+  padding: 20px 2px 17px;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav-link--active {
+  border-bottom-color: #2563eb;
+}
+
+.workspace-nav {
+  scrollbar-width: none;
+}
+
+.workspace-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.workspace-nav-link {
+  white-space: nowrap;
+}
+
+.workspace-nav-link.router-link-active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.auth-page {
+  min-height: calc(100vh - 124px);
+  justify-content: center;
+}
+
+.auth-page > .el-tabs,
+.auth-page > .el-form {
+  padding: 22px;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+}
+
+.auth-page > .el-tabs {
+  margin-top: 24px;
+}
+
+.auth-page > .el-form {
+  margin-top: 24px;
+}
+
+@media (max-width: 767px) {
+  main > .mx-auto {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .site-header__inner {
+    min-height: 56px;
+  }
+
+  .el-card__body {
+    padding: 16px;
+  }
+
+  .el-card__header {
+    padding: 12px 16px;
+  }
+
+  .el-pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .el-pagination .el-pagination__sizes,
+  .el-pagination .el-pagination__total {
+    display: none;
+  }
+
+  .el-table {
+    font-size: 13px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .el-table__inner-wrapper {
+    min-width: 640px;
+  }
+
+  .el-table__fixed-right {
+    box-shadow: -4px 0 8px rgba(15, 23, 42, 0.08);
+  }
+
+  .el-form-item {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .el-form-item__label {
+    display: flex;
+    width: 100% !important;
+    height: auto;
+    justify-content: flex-start;
+    padding: 0 0 6px !important;
+    line-height: 20px;
+    text-align: left;
+  }
+
+  .el-form-item__content {
+    margin-left: 0 !important;
+    min-height: 32px;
+  }
+
+  .el-form-item__content > .el-input,
+  .el-form-item__content > .el-select,
+  .el-form-item__content > .el-date-editor,
+  .el-form-item__content > .el-input-number {
+    width: 100%;
+  }
+
+  .el-form-item__content > .flex.w-full {
+    flex-wrap: wrap;
+  }
+
+  .el-form-item__content > .flex.w-full > .flex-1 {
+    min-width: 100%;
+  }
+
+  .el-dialog {
+    width: calc(100% - 24px) !important;
+    max-height: calc(100vh - 24px);
+    margin: 12px auto !important;
+  }
+
+  .el-dialog__body {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+  }
+
+  .el-drawer {
+    width: min(100%, 520px) !important;
+  }
+
+  .home-hero {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .home-hero h1 {
+    font-size: 30px;
+    line-height: 1.25;
+  }
+
+  .home-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-search .el-input,
+  .home-search .el-select,
+  .home-search .el-button {
+    width: 100%;
+  }
+
+  .home-promotions .el-carousel__container {
+    height: 210px !important;
+  }
+
+  .home-promotions h2 {
+    font-size: 21px;
+    line-height: 1.35;
+  }
+
+  .auth-page {
+    min-height: calc(100vh - 116px);
+    justify-content: flex-start;
+    padding-top: 44px;
+  }
+}
