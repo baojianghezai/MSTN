@@ -1,0 +1,67 @@
+package initialize
+
+import (
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
+	"io"
+	"strings"
+)
+
+type legacyJobCatalogEntry struct {
+	TopClass string
+	Category string
+	Title    string
+}
+
+// legacyJobCatalogData is the compressed 10/42/444 job directory migrated
+// from the prior system. It keeps the deployed binary self-contained.
+const legacyJobCatalogData = "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"
+
+func legacyJobCatalog() []legacyJobCatalogEntry {
+	encoded, err := base64.StdEncoding.DecodeString(legacyJobCatalogData)
+	if err != nil {
+		panic("invalid legacy job catalogue encoding")
+	}
+	reader, err := gzip.NewReader(bytes.NewReader(encoded))
+	if err != nil {
+		panic("invalid legacy job catalogue compression")
+	}
+	defer reader.Close()
+	raw, err := io.ReadAll(reader)
+	if err != nil {
+		panic("cannot read legacy job catalogue")
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	entries := make([]legacyJobCatalogEntry, 0, len(lines))
+	for _, line := range lines {
+		parts := strings.Split(line, "\t")
+		if len(parts) != 3 {
+			continue
+		}
+		entries = append(entries, legacyJobCatalogEntry{
+			TopClass: strings.TrimSpace(parts[0]),
+			Category: strings.TrimSpace(parts[1]),
+			Title:    strings.TrimSpace(parts[2]),
+		})
+	}
+	return entries
+}
+
+func legacyJobTitles() []string {
+	entries := legacyJobCatalog()
+	titles := make([]string, 0, len(entries))
+	seen := make(map[string]struct{}, len(entries))
+	for _, entry := range entries {
+		if entry.Title == "" {
+			continue
+		}
+		if _, ok := seen[entry.Title]; ok {
+			continue
+		}
+		seen[entry.Title] = struct{}{}
+		titles = append(titles, entry.Title)
+	}
+	return titles
+}

@@ -1,0 +1,433 @@
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 11:48:36.824	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "INSERT INTO `ms_company_profile` (`uid`,`companyname`,`nature`,`nature_cn`,`trade`,`trade_cn`,`district`,`district_cn`,`scale`,`scale_cn`,`registered`,`address`,`contact`,`telephone`,`landline_tel`,`email`,`website`,`certificate_img`,`logo`,`contents`,`setmeal_id`,`setmeal_name`,`audit`,`addtime`,`refreshtime`,`click`,`user_status`,`tag`,`short_name`,`short_desc`) VALUES (10,'',0,'',0,'','','',0,'','','','','','','','','','','',0,'',0,1786679316,0,1,1,'','','')", "rows": 0, "elapsed_ms": 2, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1062 (23000): Duplicate entry '' for key 'ms_company_profile.idx_ms_company_profile_company_name'", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Create\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:278\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Create
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:278
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 11:50:33.164	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:95	member jwt parse failed	{"node": "", "app_id": "", "env": "", "error": "token is malformed: token contains an invalid number of segments"}
+github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc.(*MemberJWT).ParseToken
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:95
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:117
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 11:52:33.898	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "UPDATE `ms_members_info` SET `realname`='ZhangSan',`sex`=1,`sex_cn`='male',`birthday`=0,`residence`='Hangzhou',`education`=4,`education_cn`='bachelor',`major`=1,`major_cn`='cs',`experience`=3,`experience_cn`='3-5y',`phone`='13900001111',`height`='170',`marriage`=1,`marriage_cn`='single',`display_name`=1,`qq`='123',`weixin`='wx' WHERE uid = 9", "rows": 0, "elapsed_ms": 1, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1406 (22001): Data too long for column 'marriage_cn' at row 1", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Updates\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Updates
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 15:25:13.191	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "INSERT INTO `ms_members` (`utype`,`username`,`email`,`email_audit`,`mobile`,`mobile_audit`,`password`,`reg_time`,`reg_ip`,`reg_address`,`last_login_time`,`last_login_ip`,`status`,`avatars`,`consultant`,`sms_num`,`reg_type`,`invitation_code`,`deleted_at`) VALUES (1,'13306487850','',0,'13306487850',1,'$2a$10$YNpj5lq8GAnXDjBqc0AmtOEMJ4z31GpzidBTYsJa9OUyD8ziCn4/W',1786692313,'','',0,'',1,'',0,0,0,'745184',0)", "rows": 0, "elapsed_ms": 3, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1062 (23000): Duplicate entry '13306487850' for key 'ms_members.idx_ms_members_mobile'", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Create\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).Register\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:179\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).Register\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:77\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Create
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).Register
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:179
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).Register
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:77
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:12:15.208	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "INSERT INTO `ms_members` (`utype`,`username`,`email`,`email_audit`,`mobile`,`mobile_audit`,`password`,`reg_time`,`reg_ip`,`reg_address`,`last_login_time`,`last_login_ip`,`status`,`avatars`,`consultant`,`sms_num`,`reg_type`,`invitation_code`,`deleted_at`) VALUES (1,'13300001111','',0,'13300001111',1,'$2a$10$DFLJJeFBQS6VA7/wQZ1fee6nsf2zJFjwqqtlP5ZFk/qXF5zniA7Am',1786695135,'','',0,'',1,'',0,0,0,'892438',0)", "rows": 0, "elapsed_ms": 2, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1062 (23000): Duplicate entry '13300001111' for key 'ms_members.idx_ms_members_username'", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Create\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:272\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Create
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:272
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:13:40.151	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "INSERT INTO `ms_members` (`utype`,`username`,`email`,`email_audit`,`mobile`,`mobile_audit`,`password`,`reg_time`,`reg_ip`,`reg_address`,`last_login_time`,`last_login_ip`,`status`,`avatars`,`consultant`,`sms_num`,`reg_type`,`invitation_code`,`deleted_at`) VALUES (1,'13300001111','',0,'13300001111',1,'$2a$10$Ox7tL/63pprjtwvnqTk/.eps.2PyDKmnW1rFBn6.8j1SFqn5b.3a2',1786695220,'','',0,'',1,'',0,0,0,'450623',0)", "rows": 0, "elapsed_ms": 2, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1062 (23000): Duplicate entry '13300001111' for key 'ms_members.idx_ms_members_username'", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Create\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:272\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Create
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:26
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*AuthService).LoginBySms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/auth_service.go:272
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*AuthApi).LoginSms
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:128
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:17:55.842	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/core/server_run.go:37	server启动失败	{"node": "", "app_id": "", "env": "", "error": "listen tcp :8888: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted."}
+github.com/flipped-aurora/gin-vue-admin/server/core.initServer.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/core/server_run.go:37
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:18:12.824	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:95	member jwt parse failed	{"node": "", "app_id": "", "env": "", "error": "token is malformed: token contains an invalid number of segments"}
+github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc.(*MemberJWT).ParseToken
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:95
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*AuthRouter).InitAuthRouter.MemberAuth.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:117
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:51:15.921	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "UPDATE `ms_members_info` SET `realname`='宝酱何在',`sex`=0,`sex_cn`='',`birthday`=1776268800,`residence`='111',`education`=2,`education_cn`='高中',`major`=0,`major_cn`='',`experience`=8,`experience_cn`='在校生',`phone`='1234567',`height`='1111111cm',`marriage`=0,`marriage_cn`='',`display_name`=1,`qq`='1808919296',`weixin`='13213123213' WHERE uid = 1", "rows": 0, "elapsed_ms": 0, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1406 (22001): Data too long for column 'height' at row 1", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Updates\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Updates
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:51:21.864	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "UPDATE `ms_members_info` SET `realname`='宝酱何在',`sex`=0,`sex_cn`='',`birthday`=1776268800,`residence`='111',`education`=2,`education_cn`='高中',`major`=0,`major_cn`='',`experience`=8,`experience_cn`='在校生',`phone`='1234567',`height`='11111cm',`marriage`=0,`marriage_cn`='',`display_name`=1,`qq`='1808919296',`weixin`='13213123213' WHERE uid = 1", "rows": 0, "elapsed_ms": 1, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1406 (22001): Data too long for column 'height' at row 1", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Updates\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Updates
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
+[github.com/flipped-aurora/gin-vue-admin/server]2026-08-14 16:51:27.050	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54	SQL 执行错误	{"node": "", "app_id": "", "env": "", "sql": "UPDATE `ms_members_info` SET `realname`='宝酱何在',`sex`=0,`sex_cn`='',`birthday`=1776268800,`residence`='111',`education`=2,`education_cn`='高中',`major`=0,`major_cn`='',`experience`=8,`experience_cn`='在校生',`phone`='1234567',`height`='1111cm',`marriage`=0,`marriage_cn`='',`display_name`=1,`qq`='1808919296',`weixin`='13213123213' WHERE uid = 1", "rows": 0, "elapsed_ms": 0, "mod": "sql", "request_id": "", "trace_id": "", "device_id": "", "client_ip": "", "http_method": "", "http_path": "", "error_msg": "Error 1406 (22001): Data too long for column 'height' at row 1", "error_stack": "github.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).assemble\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:64\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).log\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:75\ngithub.com/flipped-aurora/gin-vue-admin/server/utils/logger.(*Builder).Error\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/utils/logger/builder.go:81\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54\ngorm.io/gorm.(*processor).Execute\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140\ngorm.io/gorm.(*DB).Updates\n\tC:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413\ngithub.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46\ngithub.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.LoggerWithConfig.func1\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2\n\tC:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39\ngithub.com/gin-gonic/gin.(*Context).Next\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185\ngithub.com/gin-gonic/gin.(*Engine).handleHTTPRequest\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633\ngithub.com/gin-gonic/gin.(*Engine).ServeHTTP\n\tC:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589\nnet/http.serverHandler.ServeHTTP\n\tC:/Program Files/Go/src/net/http/server.go:3340\nnet/http.(*conn).serve\n\tC:/Program Files/Go/src/net/http/server.go:2109"}
+github.com/flipped-aurora/gin-vue-admin/server/initialize/internal.(*GormLogger).Trace
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/initialize/internal/gorm_logger_writer.go:54
+gorm.io/gorm.(*processor).Execute
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:140
+gorm.io/gorm.(*DB).Updates
+	C:/Users/18089/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:413
+github.com/flipped-aurora/gin-vue-admin/server/service/hrc.(*ProfileService).UpsertPersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/service/hrc/profile_service.go:46
+github.com/flipped-aurora/gin-vue-admin/server/api/v1/hrc.(*ProfileApi).UpdatePersonalProfile
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/profile.go:63
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.UtypeAuth.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:162
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/router/hrc.(*ProfileRouter).InitProfileRouter.MemberAuth.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/hrc/member_jwt.go:150
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/middleware.UploadResponseHeaders.func1
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/upload_security.go:25
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.LoggerWithConfig.func1
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/logger.go:249
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.AccessLog.func4
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/access_log.go:73
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.GinRecovery.func3
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/error.go:56
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/flipped-aurora/gin-vue-admin/server/initialize.Routers.RequestMeta.func2
+	C:/Users/18089/Desktop/MSTN/msrc-admin/server/middleware/request_meta.go:39
+github.com/gin-gonic/gin.(*Context).Next
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/context.go:185
+github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:633
+github.com/gin-gonic/gin.(*Engine).ServeHTTP
+	C:/Users/18089/go/pkg/mod/github.com/gin-gonic/gin@v1.10.0/gin.go:589
+net/http.serverHandler.ServeHTTP
+	C:/Program Files/Go/src/net/http/server.go:3340
+net/http.(*conn).serve
+	C:/Program Files/Go/src/net/http/server.go:2109
