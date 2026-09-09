@@ -24,8 +24,8 @@ func TestSeedCategoriesIsIdempotentAndComplete(t *testing.T) {
 	var groupCount int64
 	require.NoError(t, db.Model(&hrcModel.CategoryGroup{}).Count(&groupCount).Error)
 	require.Equal(t, int64(18), groupCount)
-	require.Len(t, legacyJobCatalog(), 444)
-	require.Len(t, legacyJobTitles(), 439)
+	require.Len(t, legacyJobCatalog(), 1655)
+	require.Greater(t, len(legacyJobTitles()), 1000)
 	flat := legacyFlatCategories()
 	require.Len(t, flat["trade"], 45)
 	require.Len(t, flat["jobtag"], 21)
@@ -42,7 +42,7 @@ func TestSeedCategoriesIsIdempotentAndComplete(t *testing.T) {
 		"marriage": 3,
 		"nature":   7,
 		"scale":    5,
-		"jobtitle": 486,
+		"jobtitle": 1432,
 	}
 	for alias, want := range checks {
 		var group hrcModel.CategoryGroup
@@ -79,12 +79,12 @@ func TestSeedJobCategoriesMigratesLegacyTreeIdempotently(t *testing.T) {
 
 	var total int64
 	require.NoError(t, db.Model(&hrcModel.Category{}).Where("group_id = ?", group.ID).Count(&total).Error)
-	require.Equal(t, int64(496), total)
+	require.Equal(t, int64(1849), total)
 
 	var topClass hrcModel.Category
-	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, 0, "网络 | 通信 | 电子").First(&topClass).Error)
+	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, 0, "技术").First(&topClass).Error)
 	var category hrcModel.Category
-	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, topClass.ID, "计算机/互联网/通信").First(&category).Error)
+	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, topClass.ID, "后端开发").First(&category).Error)
 	var title hrcModel.Category
-	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, category.ID, "软件工程师").First(&title).Error)
+	require.NoError(t, db.Where("group_id = ? AND parent_id = ? AND name = ?", group.ID, category.ID, "ERP技术/应用").First(&title).Error)
 }

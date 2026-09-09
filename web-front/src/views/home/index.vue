@@ -55,13 +55,21 @@
     <!-- 主视觉区：左侧垂直菜单 + 中间 Banner + 右侧登录面板 -->
     <section class="home-main-visual">
       <div class="mx-auto max-w-[1200px] px-4">
-        <div class="grid overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.08)] lg:h-[400px] lg:grid-cols-[200px_1fr_300px]">
-          <aside class="hidden bg-slate-800 text-white lg:block lg:min-h-0 relative z-20">
+        <div class="grid grid-wrapper relative overflow-visible rounded-2xl border border-slate-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.08)] lg:h-[400px] lg:grid-cols-[200px_1fr_300px]">
+          <aside
+            class="hidden bg-slate-800 text-white lg:block lg:min-h-0 relative z-20"
+            @mouseleave="onMenuLeave"
+          >
             <ul class="flex h-full flex-col justify-start list-none p-0 m-0 overflow-y-auto">
-              <li v-for="cat in menuCategories" :key="cat.id">
+              <li
+                v-for="cat in menuCategories"
+                :key="cat.id"
+                @mouseenter="onMenuEnter(cat)"
+              >
                 <button
                   type="button"
-                  class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-sm bg-slate-600 text-slate-100 transition-colors hover:bg-slate-700 hover:text-white"
+                  class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition-colors"
+                  :class="hoveredCategoryId === cat.id ? 'bg-white text-slate-800' : 'bg-slate-600 text-slate-100 hover:bg-slate-700 hover:text-white'"
                   @click="goCategory(cat)"
                 >
                   <span class="truncate">{{ cat.name }}</span>
@@ -70,6 +78,52 @@
               </li>
             </ul>
           </aside>
+
+          <!-- 二三级 flyout 面板（fixed 定位，覆盖 banner 区域） -->
+          <Teleport to="body">
+            <Transition name="flyout">
+              <div
+                v-if="hoveredCategory && hoveredCategory.children?.length"
+                ref="flyoutRef"
+                class="flyout-panel fixed z-[9999] flex h-[400px] flex-col border-l border-slate-200 bg-white shadow-2xl"
+                :style="{ top: flyoutPos.top + 'px', left: flyoutPos.left + 'px', width: flyoutPos.width + 'px' }"
+                @mouseenter="onFlyoutEnter"
+                @mouseleave="onMenuLeave"
+              >
+                <div class="flex-1 overflow-y-auto p-5 no-scrollbar">
+                  <div
+                    v-for="sub in hoveredCategory.children"
+                    :key="sub.id"
+                    class="mb-4 last:mb-0"
+                  >
+                    <h4 class="mb-1.5 border-b border-slate-100 pb-1.5 text-sm font-bold text-slate-700">
+                      {{ sub.name }}
+                    </h4>
+                    <div class="flex flex-wrap gap-1">
+                      <button
+                        v-for="child in sub.children"
+                        :key="child.id"
+                        type="button"
+                        class="rounded px-2.5 py-1 text-xs text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                        @click="goCategory(child)"
+                      >
+                        {{ child.name }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="border-t border-slate-100 px-5 py-2.5 text-right">
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-blue-500 hover:text-blue-600"
+                    @click="goCategory(hoveredCategory)"
+                  >
+                    查看全部「{{ hoveredCategory.name }}」职位 &gt;
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </Teleport>
 
           <div class="min-w-0 lg:h-full">
             <el-carousel
@@ -226,16 +280,17 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, reactive, ref } from 'vue'
+  import { computed, nextTick, onMounted, reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { ElMessage } from 'element-plus'
-  import { getJobFilters } from '@/api/jobs'
+  import { getJobList } from '@/api/category'
   import { getDistricts } from '@/api/content'
   import { getHomePromotions, type HomeAdItem } from '@/api/promotion'
   import { searchCompanies, type PublicCompany } from '@/api/companies'
   import { loginBySms } from '@/api/auth'
   import { useUserStore } from '@/stores/user'
   import { useSmsCode } from '@/composables/useSmsCode'
+  import { CategoryTreeNode } from '@/types/api'
   import type { CategoryItem } from '@/types/api'
 
   interface HeroSlide {
@@ -264,7 +319,36 @@
   const keyword = ref('')
   const district = ref('')
   const districts = ref<CategoryItem[]>([])
-  const menuCategories = ref<Array<{ id: number; name: string }>>([])
+  const menuCategories = ref<CategoryTreeNode[]>([])
+  const hoveredCategoryId = ref<number | null>(null)
+  const flyoutPos = ref({ top: 0, left: 0, width: 520 })
+  const flyoutRef = ref<HTMLElement | null>(null)
+  const hoveredCategory = computed(() => {
+    if (hoveredCategoryId.value === null) return null
+    return menuCategories.value.find(c => c.id === hoveredCategoryId.value) || null
+  })
+  let menuLeaveTimer: ReturnType<typeof setTimeout> | null = null
+
+  const onMenuEnter = (cat: CategoryTreeNode) => {
+    if (menuLeaveTimer) { clearTimeout(menuLeaveTimer); menuLeaveTimer = null }
+    hoveredCategoryId.value = cat.id
+    // flyout 固定在 banner 区域：取 grid-wrapper 中间列的位置
+    nextTick(() => {
+      const grid = document.querySelector('.grid-wrapper') as HTMLElement
+      if (!grid) return
+      const gridRect = grid.getBoundingClientRect()
+      flyoutPos.value = { top: gridRect.top, left: gridRect.left + 200, width: Math.max(gridRect.width - 200 - 300, 520) }
+    })
+  }
+
+  const onFlyoutEnter = () => {
+    if (menuLeaveTimer) { clearTimeout(menuLeaveTimer); menuLeaveTimer = null }
+  }
+
+  const onMenuLeave = () => {
+    menuLeaveTimer = setTimeout(() => { hoveredCategoryId.value = null }, 200)
+  }
+
   const ads = ref<HomeAdItem[]>([])
   const companies = ref<PublicCompany[]>([])
   const submitting = ref(false)
@@ -418,19 +502,16 @@
   }
 
   onMounted(() => {
-    getJobFilters()
-      .then(({ data }) => {
-        const top = (data.jobcategory || []).filter((item) => item.parentId === 0)
-        menuCategories.value = top.length
-          ? top
-              .sort((a, b) => a.sort - b.sort)
-              // .slice(0, MENU_LIMIT)
-              .map(({ id, name }) => ({ id, name }))
-          : FALLBACK_MENU
+    getJobList()
+      .then(({data}) => {
+        const topLevel = data.filter(item => item.parentId === 0)
+        menuCategories.value = topLevel
+            .sort((a, b) => ( a.id - b.id ))
       })
-      .catch(() => {
-        menuCategories.value = FALLBACK_MENU
-      })
+        .catch(() => {
+          // 出错时用 fallback（注意 fallback 数据需要符合树形结构，这里简化用空数组）
+          menuCategories.value = []
+        })
 
     getDistricts()
       .then(({ data }) => {
@@ -453,31 +534,34 @@
 </script>
 
 <style scoped>
-/* 针对该 ul 隐藏滚动条（WebKit 内核，如 Chrome/Edge/Safari） */
-ul.list-none::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  background: transparent;
+/* 隐藏滚动条（WebKit + Firefox） */
+.no-scrollbar::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+ul.list-none::-webkit-scrollbar { width: 0; height: 0; background: transparent; }
+
+/* flyout 过渡动画 */
+.flyout-enter-active,
+.flyout-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
-/* 登录面板要放进锁定 400px 的主视觉区（首页描述.md §4），EP 默认 18px 的 form-item 间距
-   与 label 行高在 3 个表单项上累计超出约 78px，这里按需压到刚好容纳，避免面板内滚动 */
-.home-login-form :deep(.el-form-item) {
-  margin-bottom: 10px;
+.flyout-enter-from,
+.flyout-leave-to {
+  opacity: 0;
+  transform: translateX(-6px);
 }
 
-.home-login-form :deep(.el-form-item__label) {
-  margin-bottom: 0;
-  padding-bottom: 2px;
-  line-height: 18px;
-}
+.home-login-form :deep(.el-form-item) { margin-bottom: 10px; }
+.home-login-form :deep(.el-form-item__label) { margin-bottom: 0; padding-bottom: 2px; line-height: 18px; }
 
 @media (max-width: 767px) {
-  .home-banner-carousel :deep(.el-carousel__container) {
-    height: 320px !important;
-  }
+  .home-banner-carousel :deep(.el-carousel__container) { height: 320px !important; }
+  .home-main-visual .grid { border-radius: 0; }
+}
+</style>
 
-  .home-main-visual .grid {
-    border-radius: 0;
-  }
+<style>
+/* flyout panel 不受 scoped 限制（Teleport 到 body） */
+.flyout-panel {
+  max-height: 400px;
 }
 </style>

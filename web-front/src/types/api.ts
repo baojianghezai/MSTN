@@ -94,6 +94,15 @@ export interface Categories {
   age?: CategoryItem[]
 }
 
+// 职位三级分类
+export interface CategoryTreeNode {
+    id: number
+    parentId: number
+    level: number
+    name: string
+    children?: CategoryTreeNode[] // 递归引用
+}
+
 // 企业资料（02-account.md #107）
 export interface CompanyProfile {
   companyname: string | null
