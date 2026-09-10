@@ -2,12 +2,12 @@
   <div class="home-page min-h-screen bg-gradient-to-b from-blue-50 via-white to-white">
     <!-- 搜索头部区 -->
     <section class="home-search-header">
-      <div class="mx-auto flex max-w-[1200px] flex-col items-center gap-4 px-4 py-6 sm:flex-row sm:justify-between">
-        <router-link to="/" class="home-logo text-3xl font-black tracking-tight text-[#0066ff]">
+      <div class="mx-auto flex max-w-[1200px] items-center gap-4 px-4 py-6">
+        <router-link to="/" class="home-logo flex-none text-3xl font-black tracking-tight text-[#0066ff]">
           名硕人才网
         </router-link>
 
-        <div class="flex w-full max-w-2xl items-center gap-2 rounded-full border border-blue-200 bg-white p-2 shadow-sm sm:flex-1 sm:px-4">
+        <div class="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-full border border-blue-200 bg-white p-2 shadow-sm px-4">
           <span class="i-lucide-search hidden text-xl text-slate-400 sm:block" aria-hidden="true" />
           <el-input
             v-model="keyword"
@@ -39,14 +39,6 @@
           >
             <span class="i-lucide-message-circle" aria-hidden="true" />
             公众号
-          </button>
-          <button
-            type="button"
-            class="flex h-10 items-center gap-1.5 rounded-lg bg-orange-500 px-3 text-sm font-medium text-white shadow-sm transition-transform hover:-translate-y-0.5"
-            @click="comingSoon('下载APP')"
-          >
-            <span class="i-lucide-smartphone" aria-hidden="true" />
-            APP
           </button>
         </div>
       </div>
@@ -182,14 +174,20 @@
                   <p class="text-xs text-slate-500">{{ userStore.utype === 2 ? '企业会员' : '个人会员' }}</p>
                 </div>
               </div>
-              <el-button
-                type="primary"
-                class="mt-5 w-full"
+              <button
+                type="button"
+                class="mt-5 w-full rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700 hover:text-white"
                 @click="router.push(userStore.utype === 2 ? { name: 'Company' } : { name: 'Personal' })"
               >
                 进入{{ userStore.utype === 2 ? '企业' : '个人' }}中心
-              </el-button>
-              <el-button class="mt-2 w-full" @click="handleLogout">退出登录</el-button>
+              </button>
+              <button
+                type="button"
+                class="mt-2 w-full rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700 hover:text-white"
+                @click="handleLogout"
+              >
+                退出登录
+              </button>
             </div>
 
             <template v-else>
@@ -238,14 +236,6 @@
               <p class="mt-4 text-xs leading-5 text-slate-400">
                 已阅读并同意《用户服务协议》和《隐私政策》
               </p>
-              <button
-                type="button"
-                class="mt-3 flex w-full items-center justify-center gap-1 text-sm font-medium text-red-500 transition-colors hover:text-red-600"
-                @click="comingSoon('国家网络身份认证登录')"
-              >
-                <span class="i-lucide-shield-check" aria-hidden="true" />
-                国家网络身份认证登录
-              </button>
             </template>
           </aside>
         </div>

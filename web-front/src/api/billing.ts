@@ -38,6 +38,7 @@ export interface BillingOrder {
   paidAt: number
   payment: string
   transactionId: string | null
+  expireAt: number // 后端 Redis 返回的过期时间戳（unix），0 表示无倒计时
 }
 
 export interface PaymentStart {

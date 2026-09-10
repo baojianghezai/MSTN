@@ -14,7 +14,7 @@
           >
             <el-option v-for="c in cityOptions" :key="c" :label="c" :value="c" />
           </el-select>
-          <button type="button" class="text-xs text-blue-100 transition-colors hover:text-white" @click="applyCity">
+          <button type="button" class="rounded bg-white/15 px-2 py-0.5 text-xs text-white transition-colors hover:bg-white/25" @click="applyCity">
             切换
           </button>
         </div>
@@ -45,7 +45,7 @@
             </router-link>
             <button
               type="button"
-              class="rounded px-3 py-1 text-blue-50 transition-colors hover:bg-white/10 hover:text-white"
+              class="rounded bg-white/15 px-3 py-1 text-sm text-white transition-colors hover:bg-white/25"
               @click="handleLogout"
             >
               退出

@@ -18,8 +18,8 @@
 
     <el-card class="mt-5" shadow="never">
       <template #header>当前权益</template>
-      <div v-if="current" class="grid gap-4 sm:grid-cols-5">
-        <div><p class="text-sm text-slate-500">当前套餐</p><p class="mt-1 font-semibold">{{ current.setmealName }}</p></div>
+      <div v-if="current" class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div><p class="text-sm text-slate-500">当前套餐</p><p class="mt-1 font-semibold truncate">{{ current.setmealName }}</p></div>
         <div><p class="text-sm text-slate-500">有效期至</p><p class="mt-1 font-semibold">{{ formatTime(current.expireAt) }}</p></div>
         <div><p class="text-sm text-slate-500">在线职位</p><p class="mt-1 font-semibold">{{ current.jobsMeanwhile || '不限' }}</p></div>
         <div><p class="text-sm text-slate-500">简历下载</p><p class="mt-1 font-semibold">{{ current.resumeDownloadsTotal - current.resumeDownloadsUsed }} / {{ current.resumeDownloadsTotal }}</p></div>
@@ -30,7 +30,7 @@
 
     <section class="mt-8">
       <h2 class="text-lg font-semibold text-slate-800">选择套餐</h2>
-      <div v-if="plans.length" class="mt-4 grid gap-4 md:grid-cols-3">
+      <div v-if="plans.length" class="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <el-card v-for="plan in plans" :key="plan.id" shadow="never" class="flex flex-col">
           <h3 class="text-lg font-semibold text-slate-800">{{ plan.name }}</h3>
           <p class="mt-3 text-3xl font-bold text-primary-600">{{ formatPrice(plan.price) }}</p>
@@ -42,7 +42,7 @@
             <li>首页广告：{{ plan.homeAdSlots }} 位</li>
             <li>视频面试：{{ plan.enableVideo ? '支持' : '暂不支持' }}</li>
           </ul>
-          <p v-if="plan.description" class="mt-4 text-sm text-slate-500">{{ plan.description }}</p>
+          <p v-if="plan.description" class="mt-4 text-sm text-slate-500 line-clamp-2">{{ plan.description }}</p>
           <el-button class="mt-5" type="primary" :loading="creatingId === plan.id" @click="createOrder(plan)">创建订单</el-button>
         </el-card>
       </div>
@@ -51,13 +51,22 @@
 
     <el-card class="mt-8" shadow="never">
       <template #header>我的订单</template>
-      <el-table :data="orders" v-loading="loading">
-        <el-table-column prop="oid" label="订单号" min-width="220" />
-        <el-table-column prop="setmealName" label="套餐" min-width="130" />
-        <el-table-column label="金额" width="120"><template #default="{ row }">{{ formatPrice(row.amount) }}</template></el-table-column>
-        <el-table-column label="状态" width="120"><template #default="{ row }"><el-tag :type="orderTag(row.isPaid)">{{ orderStatus(row.isPaid) }}</el-tag></template></el-table-column>
-        <el-table-column label="创建时间" min-width="170"><template #default="{ row }">{{ formatTime(row.createdAt) }}</template></el-table-column>
-        <el-table-column label="操作" min-width="220" fixed="right">
+      <el-table :data="orders" v-loading="loading" class="w-full">
+        <el-table-column prop="oid" label="订单号" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="setmealName" label="套餐" min-width="100" show-overflow-tooltip />
+        <el-table-column label="金额" width="90"><template #default="{ row }">{{ formatPrice(row.amount) }}</template></el-table-column>
+        <el-table-column label="状态" width="80"><template #default="{ row }"><el-tag :type="orderTag(row.isPaid)" size="small">{{ orderStatus(row.isPaid) }}</el-tag></template></el-table-column>
+        <el-table-column label="剩余时间" width="90">
+          <template #default="{ row }">
+            <template v-if="row.isPaid === 1 && row.expireAt > 0">
+              <span :class="getRemaining(row.expireAt) <= 300 ? 'text-red-500 font-semibold' : 'text-slate-600'">
+                {{ formatRemaining(getRemaining(row.expireAt)) }}
+              </span>
+            </template>
+            <span v-else class="text-slate-400">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="180" fixed="right">
           <template #default="{ row }">
             <template v-if="row.isPaid === 1">
               <el-button size="small" type="success" :loading="payingKey === `${row.id}-wechat_native`" @click="startGatewayPayment(row, 'wechat_native')">微信</el-button>
@@ -103,12 +112,42 @@
   const orders = ref<BillingOrder[]>([])
   const wechatDialogVisible = ref(false)
   const wechatQRCode = ref('')
+  const now = ref(Date.now())
   let pollTimer: ReturnType<typeof setInterval> | undefined
+  let countdownTimer: ReturnType<typeof setInterval> | undefined
 
   const formatPrice = (amount: number) => `￥${(amount / 100).toFixed(2)}`
   const formatTime = (value: number) => value ? new Date(value * 1000).toLocaleString() : '-'
   const orderStatus = (status: number) => ({ 1: '待支付', 2: '已生效', 3: '已取消' }[status] || '未知')
   const orderTag = (status: number) => ({ 1: 'warning', 2: 'success', 3: 'info' }[status] || 'info')
+
+  // 后端 expireAt 是 unix 时间戳（秒），表示订单过期的绝对时间
+  const getRemaining = (expireAt: number) => {
+    if (!expireAt) return 0
+    return Math.max(0, expireAt - Math.floor(now.value / 1000))
+  }
+
+  const formatRemaining = (seconds: number) => {
+    if (seconds <= 0) return '已超时'
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
+  const autoCancelExpired = async () => {
+    const expiredOrders = orders.value.filter(
+      (o) => o.isPaid === 1 && o.expireAt > 0 && getRemaining(o.expireAt) <= 0
+    )
+    for (const order of expiredOrders) {
+      try {
+        await cancelOrder(order.id)
+        ElMessage.warning(`订单 ${order.oid} 已超时自动取消`)
+      } catch { /* ignore */ }
+    }
+    if (expiredOrders.length > 0) {
+      await load()
+    }
+  }
 
   const load = async () => {
     loading.value = true
@@ -177,6 +216,18 @@
     await load()
   }
 
-  onMounted(load)
-  onBeforeUnmount(stopPolling)
+  onMounted(() => {
+    countdownTimer = setInterval(() => {
+      now.value = Date.now()
+      void autoCancelExpired()
+    }, 1000)
+    void load()
+  })
+  onBeforeUnmount(() => {
+    stopPolling()
+    if (countdownTimer) {
+      clearInterval(countdownTimer)
+      countdownTimer = undefined
+    }
+  })
 </script>

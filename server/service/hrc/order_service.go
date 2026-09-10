@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
@@ -13,6 +14,11 @@ import (
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+)
+
+const (
+	orderExpireKeyPrefix = "hrc:order:expire:"
+	orderExpireDuration  = 30 * time.Minute
 )
 
 var (
@@ -46,10 +52,19 @@ func (s *OrderService) CreateSetmealOrder(ctx context.Context, uid, setmealID ui
 	if err := global.GVA_DB.WithContext(ctx).Create(order).Error; err != nil {
 		return nil, err
 	}
+	// Redis 存储订单过期时间，供前端倒计时使用
+	expireAt := now + int64(orderExpireDuration.Seconds())
+	_ = global.GVA_REDIS.Set(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID), expireAt, orderExpireDuration).Err()
 	return order, nil
 }
 
-func (s *OrderService) ListMine(ctx context.Context, uid uint64, page request.PageInfo) ([]hrcModel.Order, int64, error) {
+// OrderWithExpire 扩展订单信息，包含 Redis 中的过期时间
+type OrderWithExpire struct {
+	hrcModel.Order
+	ExpireAt int64 `json:"expireAt"` // 过期时间戳（unix），0 表示无倒计时
+}
+
+func (s *OrderService) ListMine(ctx context.Context, uid uint64, page request.PageInfo) ([]OrderWithExpire, int64, error) {
 	limit, offset := page.LimitOffset()
 	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Order{}).Where("uid = ?", uid)
 	var total int64
@@ -57,8 +72,23 @@ func (s *OrderService) ListMine(ctx context.Context, uid uint64, page request.Pa
 		return nil, 0, err
 	}
 	var list []hrcModel.Order
-	err := db.Order("id desc").Limit(limit).Offset(offset).Find(&list).Error
-	return list, total, err
+	if err := db.Order("id desc").Limit(limit).Offset(offset).Find(&list).Error; err != nil {
+		return nil, 0, err
+	}
+	// 从 Redis 批量获取过期时间
+	result := make([]OrderWithExpire, len(list))
+	for i, order := range list {
+		result[i].Order = order
+		if order.IsPaid == 1 {
+			val, err := global.GVA_REDIS.Get(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Result()
+			if err == nil {
+				if v, e := strconv.ParseInt(val, 10, 64); e == nil {
+					result[i].ExpireAt = v
+				}
+			}
+		}
+	}
+	return result, total, nil
 }
 
 func (s *OrderService) AdminList(ctx context.Context, page request.PageInfo, status int8) ([]hrcModel.Order, int64, error) {
@@ -108,6 +138,8 @@ func (s *OrderService) ConfirmPaid(ctx context.Context, id uint64, payAmount int
 		}).Error; err != nil {
 			return err
 		}
+		// 支付成功，删除 Redis 过期时间
+		_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
 		return grantOrderEntitlement(tx, &order, now)
 	})
 }
@@ -154,6 +186,8 @@ func (s *OrderService) ConfirmGatewayPaid(ctx context.Context, id uint64, payAmo
 		}).Error; err != nil {
 			return err
 		}
+		// 支付成功，删除 Redis 过期时间
+		_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
 		return grantOrderEntitlement(tx, &order, now)
 	})
 }
@@ -208,6 +242,8 @@ func (s *OrderService) Close(ctx context.Context, uid, id uint64) error {
 	if result.RowsAffected == 0 {
 		return ErrOrderClosed
 	}
+	// 删除 Redis 中的过期时间
+	_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", id)).Err()
 	return nil
 }
 
