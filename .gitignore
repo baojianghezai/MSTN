@@ -8,6 +8,8 @@ server/*.dylib
 # 测试和覆盖率文件
 server/*.test
 server/*.out
+# 日志文件
+server/log
 # 依赖缓存（如果你用 vendor 模式）
 server/vendor/
 # Go workspace 文件
