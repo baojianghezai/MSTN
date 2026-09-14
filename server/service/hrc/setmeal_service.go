@@ -45,7 +45,7 @@ func (s *SetmealService) Save(ctx context.Context, plan *hrcModel.Setmeal) error
 func (s *SetmealService) Current(ctx context.Context, uid uint64) (*hrcModel.MembersSetmeal, error) {
 	var current hrcModel.MembersSetmeal
 	err := global.GVA_DB.WithContext(ctx).Where("uid = ?", uid).First(&current).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) || (err == nil && current.ExpireAt <= time.Now().Unix()) {
+	if errors.Is(err, gorm.ErrRecordNotFound) || (err == nil && current.ExpireAt.Before(time.Now())) {
 		return nil, nil
 	}
 	if err != nil {
@@ -65,11 +65,11 @@ func (s *SetmealService) ApplyJobEntitlement(ctx context.Context, uid uint64, jo
 	if current.JobsMeanwhile > 0 {
 		var jobsCount, pendingCount int64
 		if err := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
-			Where("uid = ? AND deleted_at = 0 AND display = ?", uid, 1).Count(&jobsCount).Error; err != nil {
+			Where("uid = ? AND deleted_at IS NULL AND display = ?", uid, 1).Count(&jobsCount).Error; err != nil {
 			return err
 		}
 		if err := global.GVA_DB.WithContext(ctx).Model(&hrcModel.JobsTmp{}).
-			Where("uid = ? AND deleted_at = 0 AND audit = ?", uid, 2).Count(&pendingCount).Error; err != nil {
+			Where("uid = ? AND deleted_at IS NULL AND audit = ?", uid, 2).Count(&pendingCount).Error; err != nil {
 			return err
 		}
 		if jobsCount+pendingCount >= int64(current.JobsMeanwhile) {

@@ -47,7 +47,7 @@ func (a *InterviewApi) Create(c *gin.Context) {
 	interview, err := hrcService.ServiceGroupApp.InterviewService.Create(c.Request.Context(), middlewarehrc.GetMemberUID(c), hrcService.InterviewCreateInput{
 		ResumeID:      req.ResumeID,
 		JobsID:        req.JobsID,
-		InterviewTime: req.InterviewTime,
+		InterviewTime: int64ToTime(req.InterviewTime),
 		Address:       req.Address,
 		Contact:       req.Contact,
 		Telephone:     req.Telephone,

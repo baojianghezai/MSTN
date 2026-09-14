@@ -18,8 +18,8 @@ func RegisterStatsDaily() {
 
 func statsDaily(ctx context.Context, _ json.RawMessage) error {
 	yesterday := time.Now().AddDate(0, 0, -1)
-	startOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, time.Local).Unix()
-	endOfDay := startOfDay + 86400
+	startOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, time.Local)
+	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	type stats struct {
 		NewMembers int64 `json:"newMembers"`
@@ -34,15 +34,15 @@ func statsDaily(ctx context.Context, _ json.RawMessage) error {
 
 	// 新注册会员
 	global.GVA_DB.WithContext(ctx).Model(&hrcModel.Members{}).
-		Where("addtime >= ? AND addtime < ?", startOfDay, endOfDay).Count(&s.NewMembers)
+		Where("reg_time >= ? AND reg_time < ?", startOfDay, endOfDay).Count(&s.NewMembers)
 
 	// 新发布职位
 	global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
 		Where("addtime >= ? AND addtime < ?", startOfDay, endOfDay).Count(&s.NewJobs)
 
 	// 新投递
-	global.GVA_DB.WithContext(ctx).Table("ms_jobs_applys").
-		Where("addtime >= ? AND addtime < ?", startOfDay, endOfDay).Count(&s.NewApplys)
+	global.GVA_DB.WithContext(ctx).Table("ms_personal_jobs_applys").
+		Where("apply_addtime >= ? AND apply_addtime < ?", startOfDay, endOfDay).Count(&s.NewApplys)
 
 	// 简历下载
 	global.GVA_DB.WithContext(ctx).Model(&hrcModel.ResumeDownload{}).

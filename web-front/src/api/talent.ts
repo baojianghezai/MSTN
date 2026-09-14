@@ -22,7 +22,7 @@ export interface PublicResume {
   photoImg: string
   completePercent: number
   talent: number
-  refreshtime: number
+  refreshtime: string
 }
 
 export interface PublicResumeDetail {
@@ -80,7 +80,7 @@ export interface CompanyTalentItem {
     id: number
     resumeId: number
     followUp: number
-    downloadedAt: number
+    downloadedAt: string
   }
   resume: TalentUnlockedDetail['resume']
 }
@@ -89,7 +89,7 @@ export interface FavoriteTalentItem {
   favorite: {
     id: number
     resumeId: number
-    addtime: number
+    addtime: string
   }
   resume: PublicResume
 }

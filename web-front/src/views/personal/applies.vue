@@ -71,6 +71,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { deleteApply, getApplies } from '@/api/apply'
   import type { ApplyItem } from '@/api/apply'
+  import { formatTime } from '@/utils/format'
 
   const router = useRouter()
   const loading = ref(false)
@@ -124,12 +125,5 @@
   const replyClass = (isReply: number) => {
     const map: Record<number, string> = { 0: 'text-slate-400', 1: 'text-green-600', 2: 'text-danger-500', 3: 'text-amber-500', 4: 'text-slate-500' }
     return map[isReply] ?? 'text-slate-400'
-  }
-
-  const formatTime = (ts?: number) => {
-    if (!ts) return '-'
-    const d = new Date(ts * 1000)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   }
 </script>

@@ -12,7 +12,7 @@ export interface MessageItem {
   type: string
   link: string
   msgCheck: number
-  addtime: number
+  addtime: string
 }
 
 interface MessagePage {

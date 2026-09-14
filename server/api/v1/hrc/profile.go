@@ -44,7 +44,7 @@ func (a *ProfileApi) UpdatePersonalProfile(c *gin.Context) {
 		RealName:     req.RealName,
 		Sex:          req.Sex,
 		SexCN:        req.SexCN,
-		Birthday:     req.Birthday,
+		Birthday:     int64ToTimePtr(req.Birthday),
 		Residence:    req.Residence,
 		Education:    req.Education,
 		EducationCN:  req.EducationCN,

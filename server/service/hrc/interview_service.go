@@ -24,7 +24,7 @@ var (
 type InterviewCreateInput struct {
 	ResumeID      uint64
 	JobsID        uint64
-	InterviewTime int64
+	InterviewTime time.Time
 	Address       string
 	Contact       string
 	Telephone     string
@@ -39,7 +39,7 @@ func (s *InterviewService) Create(ctx context.Context, companyUID uint64, input 
 	input.Contact = strings.TrimSpace(input.Contact)
 	input.Telephone = strings.TrimSpace(input.Telephone)
 	input.Notes = strings.TrimSpace(input.Notes)
-	if input.InterviewTime <= time.Now().Unix() {
+	if !input.InterviewTime.After(time.Now()) {
 		return nil, ErrInterviewTime
 	}
 	if input.Address == "" || input.Contact == "" || input.Telephone == "" {
@@ -52,7 +52,7 @@ func (s *InterviewService) Create(ctx context.Context, companyUID uint64, input 
 	var created hrcModel.CompanyInterview
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var resume hrcModel.Resume
-		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0", input.ResumeID).First(&resume).Error; err != nil {
+		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", input.ResumeID).First(&resume).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrResumeUnavailable
 			}
@@ -60,7 +60,7 @@ func (s *InterviewService) Create(ctx context.Context, companyUID uint64, input 
 		}
 
 		var job hrcModel.Jobs
-		if err := tx.Where("id = ? AND uid = ? AND deleted_at = 0", input.JobsID, companyUID).First(&job).Error; err != nil {
+		if err := tx.Where("id = ? AND uid = ? AND deleted_at IS NULL", input.JobsID, companyUID).First(&job).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrJobNotAvailable
 			}
@@ -91,7 +91,7 @@ func (s *InterviewService) Create(ctx context.Context, companyUID uint64, input 
 			Contact:          input.Contact,
 			Telephone:        input.Telephone,
 			Notes:            input.Notes,
-			InterviewAddtime: time.Now().Unix(),
+			InterviewAddtime: hrcModel.Now(),
 			PersonalLook:     1,
 		}
 		if err := tx.Create(&created).Error; err != nil {
@@ -101,7 +101,7 @@ func (s *InterviewService) Create(ctx context.Context, companyUID uint64, input 
 			FromUID: companyUID,
 			ToUID:   resume.UID,
 			Title:   "收到面试邀请",
-			Message: fmt.Sprintf("企业「%s」邀请您参加「%s」的线下面试，时间：%s。", job.CompanyName, job.JobsName, time.Unix(input.InterviewTime, 0).Format("2006-01-02 15:04")),
+			Message: fmt.Sprintf("企业「%s」邀请您参加「%s」的线下面试，时间：%s。", job.CompanyName, job.JobsName, input.InterviewTime.Format("2006-01-02 15:04")),
 			Type:    "interview",
 			Link:    "/personal/interviews",
 		})

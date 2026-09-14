@@ -3,6 +3,7 @@ package hrc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
@@ -12,9 +13,10 @@ func TestAdminService_ProcessAppealRestore(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Members{}, &hrcModel.MembersAppeal{})
 
 	// 已注销账号（mobile 保留）
+	deletedAt := time.Unix(1700000000, 0)
 	member := hrcModel.Members{
 		UID: 1, Utype: 1, Username: "u_匿名_1", Mobile: "13800138000",
-		Status: 3, DeletedAt: 1700000000,
+		Status: 3, DeletedAt: &deletedAt,
 	}
 	if err := db.Create(&member).Error; err != nil {
 		t.Fatalf("创建注销账号失败: %v", err)
@@ -35,8 +37,8 @@ func TestAdminService_ProcessAppealRestore(t *testing.T) {
 	if err := db.First(&got, member.UID).Error; err != nil {
 		t.Fatalf("查询会员失败: %v", err)
 	}
-	if got.Status != 1 || got.DeletedAt != 0 {
-		t.Fatalf("账号未恢复: status=%d deleted_at=%d", got.Status, got.DeletedAt)
+	if got.Status != 1 || got.DeletedAt != nil {
+		t.Fatalf("账号未恢复: status=%d deleted_at=%v", got.Status, got.DeletedAt)
 	}
 
 	var gotAppeal hrcModel.MembersAppeal

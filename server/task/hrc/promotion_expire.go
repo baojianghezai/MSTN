@@ -18,18 +18,18 @@ func RegisterPromotionExpire() {
 }
 
 func promotionExpire(ctx context.Context, _ json.RawMessage) error {
-	now := time.Now().Unix()
+	now := time.Now()
 
 	// 1. 删除套餐已过期的推广记录
 	if err := global.GVA_DB.WithContext(ctx).
-		Exec("DELETE FROM ms_job_promotion WHERE uid IN (SELECT uid FROM ms_members_setmeal WHERE expire_at > 0 AND expire_at < ?)", now).Error; err != nil {
+		Exec("DELETE FROM ms_job_promotion WHERE uid IN (SELECT uid FROM ms_members_setmeal WHERE expire_at > ? AND expire_at < ?)", time.Time{}, now).Error; err != nil {
 		return err
 	}
 
 	// 2. 重置 stick/emergency：将已过期职位的 stick/emergency 复位
 	if err := global.GVA_DB.WithContext(ctx).
 		Model(&hrcModel.Jobs{}).
-		Where("(deadline > 0 AND deadline < ?) AND (stick != 0 OR emergency != 0)", now).
+		Where("(deadline IS NOT NULL AND deadline > ? AND deadline < ?) AND (stick != 0 OR emergency != 0)", time.Time{}, now).
 		Updates(map[string]interface{}{
 			"stick":     0,
 			"emergency": 0,

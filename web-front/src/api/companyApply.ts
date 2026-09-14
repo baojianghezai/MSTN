@@ -63,9 +63,9 @@ export interface CompanyApplyItem {
   jobsName: string
   companyId: number
   companyName: string
-  applyAddtime: number
+  applyAddtime: string
   personalLook: number // 1 未读 / 2 已读
   notes: string
   isReply: number // 0 待反馈 1 合适 2 不合适 3 待定 4 未接通
-  replyTime: number
+  replyTime: string
 }

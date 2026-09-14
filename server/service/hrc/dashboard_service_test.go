@@ -12,8 +12,8 @@ import (
 
 func TestDashboardMetrics(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Members{}, &hrcModel.Resume{}, &hrcModel.CompanyProfile{}, &hrcModel.Jobs{}, &hrcModel.JobsTmp{}, &hrcModel.PersonalJobsApply{}, &hrcModel.VideoInterview{}, &hrcModel.MembersAppeal{}, &hrcModel.CompanyCancellationApply{})
-	now := time.Now().Unix()
-	yesterday := time.Now().Add(-24 * time.Hour).Unix()
+	now := time.Now()
+	yesterday := time.Now().Add(-24 * time.Hour)
 
 	// 今日：2 个人 + 1 企业注册、1 简历、1 企业、1 视频面试
 	require.NoError(t, db.Create(&hrcModel.Members{Utype: 1, Username: "u1", Mobile: "13800000001", RegTime: now}).Error)
@@ -27,7 +27,7 @@ func TestDashboardMetrics(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.PersonalJobsApply{PersonalUID: 1, ResumeID: 1, CompanyUID: 2, ApplyAddtime: now}).Error)
 	require.NoError(t, db.Create(&hrcModel.VideoInterview{CompanyUID: 2, PersonalUID: 1, AddTime: now}).Error)
 	// 待办（audit=2，老数据不参与今日新增计数）
-	require.NoError(t, db.Create(&hrcModel.CompanyProfile{UID: 3, Audit: 2, AddTime: now - 3*24*3600}).Error)
+	require.NoError(t, db.Create(&hrcModel.CompanyProfile{UID: 3, Audit: 2, AddTime: now.Add(-3 * 24 * 3600 * time.Second)}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobsTmp{JobsBase: hrcModel.JobsBase{UID: 2, Audit: 2}}).Error)
 	require.NoError(t, db.Create(&hrcModel.MembersAppeal{UID: 1, Status: 0}).Error)
 	require.NoError(t, db.Create(&hrcModel.CompanyCancellationApply{UID: 2, Status: 0}).Error)
@@ -52,11 +52,11 @@ func TestDashboardMetrics(t *testing.T) {
 func TestDashboardTrendRegister(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Members{})
 	now := time.Now()
-	require.NoError(t, db.Create(&hrcModel.Members{Utype: 1, Username: "u1", Mobile: "13800000001", RegTime: now.Unix()}).Error)
-	require.NoError(t, db.Create(&hrcModel.Members{Utype: 2, Username: "c1", Mobile: "13800000002", RegTime: now.Unix()}).Error)
+	require.NoError(t, db.Create(&hrcModel.Members{Utype: 1, Username: "u1", Mobile: "13800000001", RegTime: now}).Error)
+	require.NoError(t, db.Create(&hrcModel.Members{Utype: 2, Username: "c1", Mobile: "13800000002", RegTime: now}).Error)
 	// 3 天前注册 1 个个人
 	threeDaysAgo := now.AddDate(0, 0, -3)
-	require.NoError(t, db.Create(&hrcModel.Members{Utype: 1, Username: "u3", Mobile: "13800000003", RegTime: threeDaysAgo.Unix()}).Error)
+	require.NoError(t, db.Create(&hrcModel.Members{Utype: 1, Username: "u3", Mobile: "13800000003", RegTime: threeDaysAgo}).Error)
 
 	svc := &DashboardService{}
 	points, err := svc.Trend(context.Background(), 7, "register")
@@ -89,11 +89,11 @@ func TestDashboardTrendJobAndApplication(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Jobs{}, &hrcModel.PersonalJobsApply{})
 	now := time.Now()
 	twoDaysAgo := now.AddDate(0, 0, -2)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: now.Unix()}}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: twoDaysAgo.Unix()}}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: now.Unix(), DeletedAt: 1}}).Error)
-	require.NoError(t, db.Create(&hrcModel.PersonalJobsApply{PersonalUID: 1, ResumeID: 1, CompanyUID: 1, ApplyAddtime: now.Unix()}).Error)
-	require.NoError(t, db.Create(&hrcModel.PersonalJobsApply{PersonalUID: 2, ResumeID: 2, CompanyUID: 2, ApplyAddtime: twoDaysAgo.Unix()}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: now}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: twoDaysAgo}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, AddTime: now, DeletedAt: &now}}).Error)
+	require.NoError(t, db.Create(&hrcModel.PersonalJobsApply{PersonalUID: 1, ResumeID: 1, CompanyUID: 1, ApplyAddtime: now}).Error)
+	require.NoError(t, db.Create(&hrcModel.PersonalJobsApply{PersonalUID: 2, ResumeID: 2, CompanyUID: 2, ApplyAddtime: twoDaysAgo}).Error)
 
 	svc := &DashboardService{}
 	jobPoints, err := svc.Trend(context.Background(), 7, "job")

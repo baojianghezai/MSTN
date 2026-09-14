@@ -3,6 +3,7 @@ package hrc
 import (
 	"errors"
 	"strconv"
+	"time"
 
 	middlewarehrc "github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -226,7 +227,7 @@ func jobsFromRequest(req JobsRequest) *hrcModel.Jobs {
 		MaxWage:    req.MaxWage,
 		Negotiable: req.Negotiable,
 		Contents:   req.Contents,
-		Deadline:   req.Deadline,
+		Deadline:   int64ToTime(req.Deadline),
 		Department: req.Department,
 		MapX:       req.MapX,
 		MapY:       req.MapY,
@@ -244,4 +245,19 @@ func jobsContactFromRequest(req JobsRequest) *hrcModel.JobsContact {
 		Address:     req.Contact.Address,
 		Email:       req.Contact.Email,
 	}
+}
+
+func int64ToTime(ts int64) time.Time {
+	if ts <= 0 {
+		return time.Time{}
+	}
+	return time.Unix(ts, 0)
+}
+
+func int64ToTimePtr(ts int64) *time.Time {
+	if ts <= 0 {
+		return nil
+	}
+	t := time.Unix(ts, 0)
+	return &t
 }

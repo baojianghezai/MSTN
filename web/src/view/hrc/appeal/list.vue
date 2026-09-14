@@ -158,10 +158,10 @@
     return map[status] || 'info'
   }
 
-  // 后端 addtime 是 unix 秒，需先乘 1000 转毫秒再交给 Date
+  // 兼容 ISO8601 字符串和 unix 秒数
   const formatTime = (ts) => {
     if (!ts) return '-'
-    const d = new Date(ts * 1000)
+    const d = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts)
     const pad = (n) => String(n).padStart(2, '0')
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   }

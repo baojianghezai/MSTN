@@ -69,7 +69,7 @@ func restoreAccountByMobile(tx *gorm.DB, mobile string) error {
 		return err
 	}
 	return tx.Model(&hrcModel.Members{}).Where("uid = ?", member.UID).Updates(map[string]interface{}{
-		"deleted_at": 0,
+		"deleted_at": nil,
 		"status":     1,
 	}).Error
 }

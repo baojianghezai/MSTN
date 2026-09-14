@@ -4,8 +4,8 @@
     @click="goDetail"
   >
     <div class="flex items-start gap-4">
-      <!-- 公司首字 logo 占位（无企业 logo 接口，一期用首字色块） -->
-      <div
+      <img v-if="job.logo" :src="imageUrl(job.logo)" :alt="job.companyname" class="h-12 w-12 flex-none rounded-xl border border-slate-100 object-cover" />
+      <div v-else
         class="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-primary-50 text-lg font-bold text-primary-600"
       >
         {{ job.companyname.charAt(0) }}
@@ -64,6 +64,8 @@
   const salaryText = computed(() =>
     props.job.negotiable === 1 ? '面议' : `${props.job.minwage}-${props.job.maxwage} 元`
   )
+
+  const imageUrl = (url: string) => (url?.startsWith('http') ? url : `/${(url || '').replace(/^\//, '')}`)
 
   const goDetail = () => {
     router.push(`/jobs/${props.job.id}`)

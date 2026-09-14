@@ -100,6 +100,7 @@
   import { useUserStore } from '@/stores/user'
   import { getJobs } from '@/api/jobs'
   import type { JobItem } from '@/types/api'
+  import { formatTime } from '@/utils/format'
   import {
     createPromotion,
     deletePromotion,
@@ -118,7 +119,6 @@
   const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
 
   const eligibleJobs = computed(() => jobs.value.filter((job) => !job.pending && job.display === 1 && job.audit === 1))
-  const formatTime = (value: number) => value ? new Date(value * 1000).toLocaleString() : '-'
 
   const load = async () => {
     loading.value = true

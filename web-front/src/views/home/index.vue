@@ -254,7 +254,8 @@
             class="group overflow-hidden rounded-xl text-left text-white shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
             @click="router.push(item.to)"
           >
-            <div class="h-32 p-5" :class="item.gradient">
+            <div class="relative h-32 p-5" :class="item.gradient">
+              <img v-if="item.logo" :src="imageUrl(item.logo)" :alt="item.title" class="absolute right-4 top-4 h-12 w-12 rounded-lg border border-white/30 object-cover" />
               <p class="text-lg font-bold leading-snug">{{ item.title }}</p>
               <p class="mt-2 text-sm text-white/85">{{ item.subtitle }}</p>
             </div>
@@ -300,6 +301,7 @@
     subtitle: string
     gradient: string
     to: string
+    logo?: string
   }
 
   const router = useRouter()
@@ -434,7 +436,8 @@
       title: company.companyname,
       subtitle: `${company.tradeCn || '认证企业'} · ${company.jobsCount} 个在招职位`,
       gradient: gradients[index % gradients.length],
-      to: `/companies/${company.id}`
+      to: `/companies/${company.id}`,
+      logo: company.logo
     }))
     return [...items, ...FALLBACK_SHOWCASE.slice(items.length, 3)]
   })

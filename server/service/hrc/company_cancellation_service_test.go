@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -90,7 +91,7 @@ func TestCompanyCancellationList(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Members{UID: 2001, Utype: 2, Username: "u2001", Mobile: "13800002001", Status: 1}).Error)
 	require.NoError(t, db.Create(&hrcModel.Members{UID: 2002, Utype: 2, Username: "u2002", Mobile: "13800002002", Status: 1}).Error)
 	require.NoError(t, db.Create(&hrcModel.CompanyCancellationApply{UID: 2001, CompanyID: 1, CompanyName: "A公司", Status: 0}).Error)
-	require.NoError(t, db.Create(&hrcModel.CompanyCancellationApply{UID: 2002, CompanyID: 2, CompanyName: "B公司", Status: 1, FinishTime: 123}).Error)
+	require.NoError(t, db.Create(&hrcModel.CompanyCancellationApply{UID: 2002, CompanyID: 2, CompanyName: "B公司", Status: 1, FinishTime: time.Unix(123, 0)}).Error)
 
 	svc := &CompanyCancellationService{}
 	info := request.PageInfo{Page: 1, PageSize: 10}

@@ -164,13 +164,13 @@
   const cityOptions = ['青岛', '北京', '上海', '广州', '深圳', '杭州', '成都', '武汉']
 
   const DEFAULT_NAVS: NavItem[] = [
-    { id: 0, title: '首页', url: '/', sort: 1, display: 1, addTime: 0 },
-    { id: -1, title: '找工作', url: '/jobs', sort: 2, display: 1, addTime: 0 },
-    { id: -2, title: '找企业', url: '/companies', sort: 3, display: 1, addTime: 0 },
-    { id: -3, title: '找人才', url: '/talents', sort: 4, display: 1, addTime: 0 },
-    { id: -4, title: '招聘会', url: '/jobfairs', sort: 5, display: 1, addTime: 0 },
-    { id: -5, title: '资讯', url: '/news', sort: 6, display: 1, addTime: 0 },
-    { id: -6, title: '帮助', url: '/help', sort: 7, display: 1, addTime: 0 }
+    { id: 0, title: '首页', url: '/', sort: 1, display: 1, addTime: '' },
+    { id: -1, title: '找工作', url: '/jobs', sort: 2, display: 1, addTime: '' },
+    { id: -2, title: '找企业', url: '/companies', sort: 3, display: 1, addTime: '' },
+    { id: -3, title: '找人才', url: '/talents', sort: 4, display: 1, addTime: '' },
+    { id: -4, title: '招聘会', url: '/jobfairs', sort: 5, display: 1, addTime: '' },
+    { id: -5, title: '资讯', url: '/news', sort: 6, display: 1, addTime: '' },
+    { id: -6, title: '帮助', url: '/help', sort: 7, display: 1, addTime: '' }
   ]
 
   const ensureTalentNav = (items: NavItem[]) => {

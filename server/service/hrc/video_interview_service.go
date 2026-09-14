@@ -25,7 +25,7 @@ type VideoInterviewInput struct {
 	ResumeID      uint64
 	JobsID        uint64
 	JobsName      string
-	InterviewTime int64
+	InterviewTime time.Time
 	Contact       string
 	Telephone     string
 }
@@ -62,21 +62,21 @@ func (s *VideoInterviewService) CreateInterview(ctx context.Context, companyUID 
 	var dup int64
 	if err := global.GVA_DB.WithContext(ctx).Model(&hrcModel.VideoInterview{}).
 		Where("company_uid = ? AND personal_uid = ? AND jobs_id = ? AND deadline > ?",
-			companyUID, resume.UID, in.JobsID, time.Now().Unix()).Count(&dup).Error; err != nil {
+			companyUID, resume.UID, in.JobsID, time.Now()).Count(&dup).Error; err != nil {
 		return nil, err
 	}
 	if dup > 0 {
 		return nil, ErrVideoInterviewDuplicated
 	}
 
-	now := time.Now().Unix()
+	now := time.Now()
 	record := &hrcModel.VideoInterview{
 		CompanyUID:    companyUID,
 		PersonalUID:   resume.UID,
 		JobsID:        in.JobsID,
 		JobsName:      in.JobsName,
 		InterviewTime: in.InterviewTime,
-		Deadline:      in.InterviewTime + hrcModel.VideoDeadlineDays*24*3600,
+		Deadline:      in.InterviewTime.AddDate(0, 0, hrcModel.VideoDeadlineDays),
 		Contact:       in.Contact,
 		ContactTel:    in.Telephone,
 		AddTime:       now,

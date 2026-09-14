@@ -95,7 +95,7 @@ func (s *CompanyApplyService) DownloadResume(ctx context.Context, companyUID uin
 			}
 			return err
 		}
-		if err := tx.Where("id = ? AND uid = ? AND deleted_at = 0", apply.ResumeID, apply.PersonalUID).First(&resume).Error; err != nil {
+		if err := tx.Where("id = ? AND uid = ? AND deleted_at IS NULL", apply.ResumeID, apply.PersonalUID).First(&resume).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrResumeNotFound
 			}
@@ -112,7 +112,7 @@ func (s *CompanyApplyService) DownloadResume(ctx context.Context, companyUID uin
 				CompanyUID:   companyUID,
 				ResumeID:     resume.ID,
 				ApplyID:      apply.DID,
-				DownloadedAt: time.Now().Unix(),
+				DownloadedAt: time.Now(),
 			}).Error; err != nil {
 				return err
 			}
@@ -154,11 +154,11 @@ func (s *CompanyApplyService) consumeResumeDownload(tx *gorm.DB, companyUID uint
 	if err != nil {
 		return err
 	}
-	if entitlement.ExpireAt <= time.Now().Unix() || entitlement.ResumeDownloadsTotal <= 0 {
+	if !entitlement.ExpireAt.After(time.Now()) || entitlement.ResumeDownloadsTotal <= 0 {
 		return ErrResumeDownloadEntitlement
 	}
 	result := tx.Model(&hrcModel.MembersSetmeal{}).
-		Where("id = ? AND expire_at > ? AND resume_downloads_used < resume_downloads_total", entitlement.ID, time.Now().Unix()).
+		Where("id = ? AND expire_at > ? AND resume_downloads_used < resume_downloads_total", entitlement.ID, time.Now()).
 		UpdateColumn("resume_downloads_used", gorm.Expr("resume_downloads_used + ?", 1))
 	if result.Error != nil {
 		return result.Error

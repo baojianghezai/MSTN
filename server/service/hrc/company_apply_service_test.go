@@ -3,6 +3,7 @@ package hrc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -87,7 +88,7 @@ func TestCompanyApplyDownloadResumeConsumesQuotaOnce(t *testing.T) {
 	}
 	require.NoError(t, db.Create(&apply).Error)
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
-		UID: 100, ExpireAt: hrcModel.Now() + 3600, ResumeDownloadsTotal: 1,
+		UID: 100, ExpireAt: hrcModel.Now().Add(3600 * time.Second), ResumeDownloadsTotal: 1,
 	}).Error)
 
 	svc := &CompanyApplyService{}
@@ -144,7 +145,7 @@ func TestCompanyApplyDownloadResumeRejectsExhaustedOrMissingEntitlement(t *testi
 	require.ErrorIs(t, err, ErrResumeDownloadEntitlement)
 
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
-		UID: 200, ExpireAt: hrcModel.Now() + 3600, ResumeDownloadsTotal: 1, ResumeDownloadsUsed: 1,
+		UID: 200, ExpireAt: hrcModel.Now().Add(3600 * time.Second), ResumeDownloadsTotal: 1, ResumeDownloadsUsed: 1,
 	}).Error)
 	_, err = svc.DownloadResume(context.Background(), 200, apply.DID)
 	require.ErrorIs(t, err, ErrResumeDownloadLimit)

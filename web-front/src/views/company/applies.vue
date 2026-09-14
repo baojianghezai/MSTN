@@ -118,6 +118,7 @@
   import type { CompanyApplyItem } from '@/api/companyApply'
   import { createInterview } from '@/api/interview'
   import type { InterviewCreate } from '@/api/interview'
+  import { formatTime } from '@/utils/format'
 
   const replyOptions = [
     { value: 0, label: '待反馈' },
@@ -224,12 +225,5 @@
     } finally {
       inviting.value = false
     }
-  }
-
-  const formatTime = (ts?: number) => {
-    if (!ts) return '-'
-    const d = new Date(ts * 1000)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   }
 </script>

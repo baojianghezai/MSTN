@@ -52,7 +52,7 @@ func (s *ExportService) ExportJobs(ctx context.Context, ids []uint64) ([]byte, e
 	}
 	var list []hrcModel.Jobs
 	if err := global.GVA_DB.WithContext(ctx).
-		Where("id IN ? AND deleted_at = 0", ids).
+		Where("id IN ? AND deleted_at IS NULL", ids).
 		Order("id desc").
 		Find(&list).Error; err != nil {
 		return nil, err
@@ -82,8 +82,8 @@ func (s *ExportService) ExportJobs(ctx context.Context, ids []uint64) ([]byte, e
 			strconv.Itoa(int(j.Amount)),
 			auditStatusCN(j.Audit),
 			displayStatusCN(j.Display),
-			formatUnixCSV(j.AddTime),
-			formatUnixCSV(j.Refreshtime),
+			formatTimeCSV(j.AddTime),
+			formatTimeCSV(j.Refreshtime),
 			strconv.FormatUint(uint64(j.Click), 10),
 		})
 	}
@@ -123,11 +123,11 @@ func displayStatusCN(d int8) string {
 	}
 }
 
-func formatUnixCSV(ts int64) string {
-	if ts <= 0 {
+func formatTimeCSV(ts time.Time) string {
+	if ts.IsZero() {
 		return ""
 	}
-	return time.Unix(ts, 0).Format("2006-01-02 15:04:05")
+	return ts.Format("2006-01-02 15:04:05")
 }
 
 // buildCSV 生成带 UTF-8 BOM 的 CSV 字节（Excel 打开不乱码）

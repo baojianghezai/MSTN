@@ -3,6 +3,7 @@ package hrc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
@@ -16,7 +17,7 @@ func TestPromotionCreateListAndDelete(t *testing.T) {
 	}}
 	require.NoError(t, db.Create(&job).Error)
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
-		UID: 100, ExpireAt: hrcModel.Now() + 3600, HomePushSlots: 1, HomeAdSlots: 1,
+		UID: 100, ExpireAt: hrcModel.Now().Add(3600 * time.Second), HomePushSlots: 1, HomeAdSlots: 1,
 	}).Error)
 
 	svc := &PromotionService{}
@@ -62,7 +63,7 @@ func TestPromotionRejectsMissingEntitlementAndInvalidJob(t *testing.T) {
 	require.ErrorIs(t, err, ErrPromotionEntitlement)
 
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
-		UID: 100, ExpireAt: hrcModel.Now() + 3600, HomePushSlots: 1,
+		UID: 100, ExpireAt: hrcModel.Now().Add(3600 * time.Second), HomePushSlots: 1,
 	}).Error)
 	_, err = svc.Create(context.Background(), 100, job.ID, hrcModel.JobPromotionTypePush, PromotionCreative{})
 	require.ErrorIs(t, err, ErrPromotionJobInvalid)
@@ -81,7 +82,7 @@ func TestPromotionLegacyAdFallsBackToCompanyLogo(t *testing.T) {
 	}}
 	require.NoError(t, db.Create(&job).Error)
 	require.NoError(t, db.Create(&hrcModel.CompanyProfile{UID: 200, CompanyName: &companyName, Logo: "uploads/company-logo.png"}).Error)
-	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 200, ExpireAt: hrcModel.Now() + 3600, HomeAdSlots: 1}).Error)
+	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 200, ExpireAt: hrcModel.Now().Add(3600 * time.Second), HomeAdSlots: 1}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 200, JobID: job.ID, Type: hrcModel.JobPromotionTypeAd, CreatedAt: hrcModel.Now()}).Error)
 
 	home, err := (&PromotionService{}).ListHome(context.Background())

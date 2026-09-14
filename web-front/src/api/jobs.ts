@@ -74,6 +74,7 @@ export interface PublicJobItem {
   id: number
   jobsName: string
   companyname: string
+  logo: string
   natureCn: string
   categoryCn: string
   districtCn: string
@@ -82,8 +83,8 @@ export interface PublicJobItem {
   negotiable: number
   education: number
   experience: number
-  addtime: number
-  refreshtime: number
+  addtime: string
+  refreshtime: string
   stick: number
   emergency: number
 }

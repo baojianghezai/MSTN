@@ -14,8 +14,8 @@ import (
 func TestApplySuccess(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 200, JobsName: "前端工程师", CompanyName: "乙企业", CompanyID: 2, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 200, JobsName: "前端工程师", CompanyName: "乙企业", CompanyID: 2, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 
 	var job1, job2 hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job1).Error)
@@ -34,7 +34,7 @@ func TestApplySuccess(t *testing.T) {
 func TestApplyDuplicate(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job).Error)
 
@@ -46,7 +46,7 @@ func TestApplyDuplicate(t *testing.T) {
 
 func TestApplyNoResume(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job).Error)
 
@@ -57,7 +57,7 @@ func TestApplyNoResume(t *testing.T) {
 func TestApplyIncompleteResume(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent - 1}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job).Error)
 
@@ -68,10 +68,11 @@ func TestApplyIncompleteResume(t *testing.T) {
 // 指定已软删简历投递 → 「简历不存在或已删除」（修改批 X 文案修复）
 func TestApplyDeletedResume(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
-	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, DeletedAt: hrcModel.Now()}).Error)
+	now := hrcModel.Now()
+	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, DeletedAt: &now}).Error)
 	var r hrcModel.Resume
 	require.NoError(t, db.First(&r).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job).Error)
 
@@ -82,7 +83,7 @@ func TestApplyDeletedResume(t *testing.T) {
 func TestApplyJobNotAvailable(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "已下架", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 2, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "已下架", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 2, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "已下架").First(&job).Error)
 
@@ -94,8 +95,8 @@ func TestApplyDailyLimit(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Config{CfgGroup: "jobs", Name: "mscms_apply_jobs_max", Value: "1"}).Error)
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 200, JobsName: "前端工程师", CompanyName: "乙企业", CompanyID: 2, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 200, JobsName: "前端工程师", CompanyName: "乙企业", CompanyID: 2, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job1, job2 hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job1).Error)
 	require.NoError(t, db.Where("jobs_name = ?", "前端工程师").First(&job2).Error)
@@ -108,7 +109,7 @@ func TestApplyDailyLimit(t *testing.T) {
 func TestApplyListDelete(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour).Unix()}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
 	var job hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job).Error)
 

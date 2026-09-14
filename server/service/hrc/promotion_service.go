@@ -149,11 +149,11 @@ func (s *PromotionService) Create(ctx context.Context, uid, jobID uint64, promot
 			}
 			return err
 		}
-		if current.ExpireAt <= time.Now().Unix() || (promotionType == hrcModel.JobPromotionTypePush && current.HomePushSlots == 0) || (promotionType == hrcModel.JobPromotionTypeAd && current.HomeAdSlots == 0) {
+		if current.ExpireAt.Before(time.Now()) || (promotionType == hrcModel.JobPromotionTypePush && current.HomePushSlots == 0) || (promotionType == hrcModel.JobPromotionTypeAd && current.HomeAdSlots == 0) {
 			return ErrPromotionEntitlement
 		}
 		var job hrcModel.Jobs
-		if err := tx.Where("id = ? AND uid = ? AND display = 1 AND audit = 1 AND deleted_at = 0 AND (deadline = 0 OR deadline > ?)", jobID, uid, time.Now().Unix()).First(&job).Error; err != nil {
+		if err := tx.Where("id = ? AND uid = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL AND (deadline IS NULL OR deadline = ? OR deadline > ?)", jobID, uid, time.Time{}, time.Now()).First(&job).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrPromotionJobInvalid
 			}
@@ -178,7 +178,7 @@ func (s *PromotionService) Create(ctx context.Context, uid, jobID uint64, promot
 			promotion.AdSubtitle = creative.AdSubtitle
 			promotion.AdImage = creative.AdImage
 		}
-		promotion.CreatedAt = time.Now().Unix()
+		promotion.CreatedAt = time.Now()
 		if err := tx.Create(promotion).Error; err != nil {
 			return err
 		}
@@ -212,12 +212,12 @@ type promotionJob struct {
 }
 
 func (s *PromotionService) activeQuery(db *gorm.DB) *gorm.DB {
-	now := time.Now().Unix()
+	now := time.Now()
 	return db.Table("ms_job_promotion AS promotion").
 		Select("promotion.id AS promotion_id, promotion.type AS promotion_type, promotion.ad_title, promotion.ad_subtitle, promotion.ad_image, jobs.*, company.logo AS company_logo").
 		Joins("JOIN ms_jobs AS jobs ON jobs.id = promotion.job_id").
 		Joins("LEFT JOIN ms_company_profile AS company ON company.uid = jobs.uid").
 		Joins("JOIN ms_members_setmeal AS entitlement ON entitlement.uid = promotion.uid").
-		Where("entitlement.expire_at > ? AND jobs.display = 1 AND jobs.audit = 1 AND jobs.deleted_at = 0 AND (jobs.deadline = 0 OR jobs.deadline > ?)", now, now).
+		Where("entitlement.expire_at > ? AND jobs.display = 1 AND jobs.audit = 1 AND jobs.deleted_at IS NULL AND (jobs.deadline IS NULL OR jobs.deadline > ?)", now, now).
 		Order("promotion.type asc, promotion.sort desc, promotion.created_at desc")
 }

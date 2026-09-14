@@ -17,10 +17,10 @@ func RegisterJobExpire() {
 }
 
 func jobExpire(ctx context.Context, _ json.RawMessage) error {
-	now := time.Now().Unix()
+	now := time.Now()
 	result := global.GVA_DB.WithContext(ctx).
 		Model(&hrcModel.Jobs{}).
-		Where("deadline > 0 AND deadline < ? AND display != 0", now).
+		Where("deadline IS NOT NULL AND deadline > ? AND deadline < ? AND display != 0", time.Time{}, now).
 		Update("display", 0)
 	return result.Error
 }

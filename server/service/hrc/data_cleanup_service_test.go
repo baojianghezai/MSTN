@@ -13,9 +13,9 @@ import (
 
 func TestDataCleanupExpiredJobsAndHistory(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Jobs{}, &hrcModel.JobsTmp{}, &hrcModel.JobPromotion{}, &hrcModel.MembersSetmeal{}, &hrcModel.WxpayLog{}, &hrcModel.PaymentNotifyLog{}, &hrcModel.DataCleanupLog{})
-	now := time.Now().Unix()
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, JobsName: "过期职位", Deadline: now - 60, DeletedAt: 0}}).Error)
-	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, JobsName: "有效职位", Deadline: now + 60, DeletedAt: 0}}).Error)
+	now := time.Now()
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, JobsName: "过期职位", Deadline: now.Add(-60 * time.Second)}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 1, JobsName: "有效职位", Deadline: now.Add(60 * time.Second)}}).Error)
 
 	svc := &DataCleanupService{}
 	preview, err := svc.Preview(context.Background(), DataCleanupTargetExpiredJobs, 0)
@@ -29,10 +29,10 @@ func TestDataCleanupExpiredJobsAndHistory(t *testing.T) {
 
 	var expired hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "过期职位").First(&expired).Error)
-	require.NotZero(t, expired.DeletedAt)
+	require.NotNil(t, expired.DeletedAt)
 	var active hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "有效职位").First(&active).Error)
-	require.Zero(t, active.DeletedAt)
+	require.Nil(t, active.DeletedAt)
 
 	history, total, err := svc.ListHistory(context.Background(), request.PageInfo{Page: 1, PageSize: 10})
 	require.NoError(t, err)
@@ -44,25 +44,25 @@ func TestDataCleanupExpiredJobsAndHistory(t *testing.T) {
 
 func TestDataCleanupDeletesOnlyAllowedHistoricalRecords(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Jobs{}, &hrcModel.JobsTmp{}, &hrcModel.JobPromotion{}, &hrcModel.MembersSetmeal{}, &hrcModel.WxpayLog{}, &hrcModel.PaymentNotifyLog{}, &hrcModel.DataCleanupLog{})
-	now := time.Now().Unix()
+	now := time.Now()
 	require.NoError(t, db.Create(&hrcModel.JobsTmp{JobsBase: hrcModel.JobsBase{JobsName: "驳回草稿", Audit: 3}}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobsTmp{JobsBase: hrcModel.JobsBase{JobsName: "待审草稿", Audit: 2}}).Error)
 
 	invalidJob := hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 3, JobsName: "下线职位", Display: 2, Audit: 1}}
-	validJob := hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 4, JobsName: "在线职位", Display: 1, Audit: 1, Deadline: now + 3600}}
-	noEntitlementJob := hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 5, JobsName: "无套餐职位", Display: 1, Audit: 1, Deadline: now + 3600}}
+	validJob := hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 4, JobsName: "在线职位", Display: 1, Audit: 1, Deadline: now.Add(3600 * time.Second)}}
+	noEntitlementJob := hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 5, JobsName: "无套餐职位", Display: 1, Audit: 1, Deadline: now.Add(3600 * time.Second)}}
 	require.NoError(t, db.Create(&invalidJob).Error)
 	require.NoError(t, db.Create(&validJob).Error)
 	require.NoError(t, db.Create(&noEntitlementJob).Error)
-	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 3, ExpireAt: now + 3600}).Error)
-	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 4, ExpireAt: now + 3600}).Error)
+	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 3, ExpireAt: now.Add(3600 * time.Second)}).Error)
+	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 4, ExpireAt: now.Add(3600 * time.Second)}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 3, JobID: invalidJob.ID, Type: hrcModel.JobPromotionTypePush}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 4, JobID: validJob.ID, Type: hrcModel.JobPromotionTypePush}).Error)
 	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 5, JobID: noEntitlementJob.ID, Type: hrcModel.JobPromotionTypePush}).Error)
-	require.NoError(t, db.Create(&hrcModel.WxpayLog{TradeNo: "old", AddTime: now - 90*24*3600}).Error)
-	require.NoError(t, db.Create(&hrcModel.WxpayLog{TradeNo: "new", AddTime: now - 2*24*3600}).Error)
-	require.NoError(t, db.Create(&hrcModel.PaymentNotifyLog{OutTradeNo: "old", CreatedAt: now - 90*24*3600}).Error)
-	require.NoError(t, db.Create(&hrcModel.PaymentNotifyLog{OutTradeNo: "new", CreatedAt: now - 2*24*3600}).Error)
+	require.NoError(t, db.Create(&hrcModel.WxpayLog{TradeNo: "old", AddTime: now.Add(-90 * 24 * 3600 * time.Second)}).Error)
+	require.NoError(t, db.Create(&hrcModel.WxpayLog{TradeNo: "new", AddTime: now.Add(-2 * 24 * 3600 * time.Second)}).Error)
+	require.NoError(t, db.Create(&hrcModel.PaymentNotifyLog{OutTradeNo: "old", CreatedAt: now.Add(-90 * 24 * 3600 * time.Second)}).Error)
+	require.NoError(t, db.Create(&hrcModel.PaymentNotifyLog{OutTradeNo: "new", CreatedAt: now.Add(-2 * 24 * 3600 * time.Second)}).Error)
 
 	svc := &DataCleanupService{}
 	for _, target := range []string{DataCleanupTargetRejectedJobDrafts, DataCleanupTargetExpiredPromotions, DataCleanupTargetOldWxpayLogs, DataCleanupTargetOldPaymentNotifyLogs} {

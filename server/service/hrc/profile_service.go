@@ -76,7 +76,8 @@ func (s *ProfileService) UpsertCompanyProfile(uid uint64, p *hrcModel.CompanyPro
 	if count == 0 {
 		p.ID = 0
 		p.AddTime = hrcModel.Now()
-		p.Refreshtime = hrcModel.Now()
+		now := hrcModel.Now()
+		p.Refreshtime = &now
 		p.Click = 1
 		p.UserStatus = 1
 		return global.GVA_DB.Create(p).Error

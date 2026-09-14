@@ -2,6 +2,7 @@ package hrc
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	hrcService "github.com/flipped-aurora/gin-vue-admin/server/service/hrc"
@@ -145,10 +146,10 @@ func (a *AdminApi) CompanyCancellationList(c *gin.Context) {
 			CompanyName: v.CompanyName,
 			Username:    v.Username,
 			Mobile:      v.Mobile,
-			AddTime:     v.AddTime,
+			AddTime:     v.AddTime.Unix(),
 			Status:      v.Status,
 			StatusCN:    companyCancelStatusCN(v.Status),
-			FinishTime:  v.FinishTime,
+			FinishTime:  timeOrZeroUnix(v.FinishTime),
 		})
 	}
 	OKWithData(c, PageData{List: items, Total: total, Page: pageInfo.Page, PageSize: pageInfo.PageSize})
@@ -233,7 +234,7 @@ func (a *AdminApi) CompanyProfileList(c *gin.Context) {
 			Audit:       p.Audit,
 			AuditCN:     companyAuditCN(p.Audit),
 			AddTime:     p.AddTime,
-			Refreshtime: p.Refreshtime,
+			Refreshtime: timePtrDeref(p.Refreshtime),
 		})
 	}
 	OKWithData(c, PageData{List: items, Total: total, Page: pageInfo.Page, PageSize: pageInfo.PageSize})
@@ -293,4 +294,28 @@ func companyNameStr(name *string) string {
 		return ""
 	}
 	return *name
+}
+
+// timeOrZeroUnix *time.Time → Unix；nil 返回 0
+func timeOrZeroUnix(t time.Time) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
+}
+
+// timePtrUnix *time.Time → Unix；nil 返回 0
+func timePtrUnix(t *time.Time) int64 {
+	if t == nil || t.IsZero() {
+		return 0
+	}
+	return t.Unix()
+}
+
+// timePtrDeref *time.Time → time.Time；nil 返回零值
+func timePtrDeref(t *time.Time) time.Time {
+	if t == nil {
+		return time.Time{}
+	}
+	return *t
 }

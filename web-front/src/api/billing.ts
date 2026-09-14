@@ -18,7 +18,7 @@ export interface Setmeal {
 export interface CurrentSetmeal {
   setmealId: number
   setmealName: string
-  expireAt: number
+  expireAt: string
   jobsMeanwhile: number
   resumeDownloadsTotal: number
   resumeDownloadsUsed: number
@@ -34,8 +34,8 @@ export interface BillingOrder {
   amount: number
   payAmount: number
   isPaid: number
-  createdAt: number
-  paidAt: number
+  createdAt: string
+  paidAt: string
   payment: string
   transactionId: string | null
   expireAt: number // 后端 Redis 返回的过期时间戳（unix），0 表示无倒计时

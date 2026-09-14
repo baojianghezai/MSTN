@@ -39,7 +39,7 @@ type JobPublicDetail struct {
 // Search 职位列表（仅 display=1 & audit=1 & 未删除 & 未过期）
 func (s *JobsSearchService) Search(ctx context.Context, f JobsSearchFilter, info request.PageInfo) ([]hrcModel.Jobs, int64, error) {
 	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
-		Where("display = 1 AND audit = 1 AND deleted_at = 0 AND (deadline = 0 OR deadline > ?)", time.Now().Unix())
+		Where("display = 1 AND audit = 1 AND deleted_at IS NULL AND (deadline IS NULL OR deadline > ?)", time.Now())
 	if f.Keyword != "" {
 		kw := "%" + f.Keyword + "%"
 		db = db.Where("jobs_name LIKE ? OR companyname LIKE ?", kw, kw)
@@ -85,6 +85,26 @@ func (s *JobsSearchService) Search(ctx context.Context, f JobsSearchFilter, info
 	if err := db.Limit(limit).Offset(offset).Find(&list).Error; err != nil {
 		return nil, 0, err
 	}
+	// 批量加载企业 logo（避免 N+1）
+	if len(list) > 0 {
+		uids := make([]uint64, 0, len(list))
+		for _, j := range list {
+			uids = append(uids, j.UID)
+		}
+		var profiles []hrcModel.CompanyProfile
+		if err := global.GVA_DB.WithContext(ctx).
+			Select("uid, logo").
+			Where("uid IN ?", uids).
+			Find(&profiles).Error; err == nil {
+			logoMap := make(map[uint64]string, len(profiles))
+			for _, p := range profiles {
+				logoMap[p.UID] = p.Logo
+			}
+			for i := range list {
+				list[i].Logo = logoMap[list[i].UID]
+			}
+		}
+	}
 	return list, total, nil
 }
 
@@ -92,7 +112,7 @@ func (s *JobsSearchService) Search(ctx context.Context, f JobsSearchFilter, info
 func (s *JobsSearchService) Detail(ctx context.Context, id uint64) (*JobPublicDetail, error) {
 	db := global.GVA_DB.WithContext(ctx)
 	var j hrcModel.Jobs
-	err := db.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0", id).First(&j).Error
+	err := db.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", id).First(&j).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrJobNotFound
 	}

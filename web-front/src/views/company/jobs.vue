@@ -236,7 +236,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { createJob, deleteJob, getJob, getJobs, pauseJob, refreshJob, resumeJob, updateJob } from '@/api/jobs'
   import { getCategories } from '@/api/content'
-  import { dateInputToUnix } from '@/utils/format'
+  import { dateInputToUnix, formatTime } from '@/utils/format'
   import type { Categories, CategoryItem, JobDetail, JobItem, JobsRequest } from '@/types/api'
 
   // 工作性质固定枚举（v6 语义：1 全职 2 兼职 3 实习）
@@ -335,10 +335,10 @@
   // D1：编辑待审项时 #82 需显式带 ?pending=1 走 tmp 表重提（两表 id 重叠时避免错表）
   const editPending = ref(false)
   const detail = ref<JobDetail>({
-    id: 0, jobsId: 0, jobsName: '', companyname: '', companyId: 0, emergency: 0, stick: 0,
+    id: 0, jobsId: 0, jobsName: '', companyname: '', companyId: 0, logo: '', emergency: 0, stick: 0,
     nature: 1, natureCn: '', sex: 3, amount: 1, topclass: 0, category: 0, subclass: 0,
     categoryCn: '', trade: 0, district: '', districtCn: '', tag: '', education: 0, experience: 0,
-    minwage: 0, maxwage: 0, negotiable: 0, contents: '', addtime: 0, deadline: 0, refreshtime: 0,
+    minwage: 0, maxwage: 0, negotiable: 0, contents: '', addtime: '', deadline: '', refreshtime: '',
     audit: 0, display: 1, click: 0, department: '', mapX: 0, mapY: 0, mapZoom: 0, pending: false,
     contact: { contact: '', qq: '', telephone: '', landlineTel: '', address: '', email: '' },
     tags: [], reason: ''
@@ -513,12 +513,5 @@
     await deleteJob(row.id, row.pending)
     ElMessage.success('已删除')
     getList()
-  }
-
-  const formatTime = (ts?: number) => {
-    if (!ts) return '-'
-    const d = new Date(ts * 1000)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   }
 </script>

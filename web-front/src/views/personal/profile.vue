@@ -81,14 +81,14 @@
   import { ElMessage } from 'element-plus'
   import { getPersonalProfile, updatePersonalProfile } from '@/api/profile'
   import { getCategories } from '@/api/content'
-  import { dateInputToUnix, unixToDateInput } from '@/utils/format'
+  import { dateInputToISO, unixToDateInput } from '@/utils/format'
   import type { Categories, PersonalProfile } from '@/types/api'
 
   const emptyProfile: PersonalProfile = {
     realname: '',
     sex: 0,
     sexCn: '',
-    birthday: 0,
+    birthday: '',
     residence: '',
     education: 0,
     educationCn: '',
@@ -145,7 +145,7 @@
     try {
       await updatePersonalProfile({
         ...form,
-        birthday: dateInputToUnix(birthdayDate.value),
+        birthday: dateInputToISO(birthdayDate.value),
         height: String(heightNum.value),
         // 选中下拉后，把中文 label 一起写入 xxxCn 冗余字段（后端不查表生成）
         educationCn: categories.value.education.find((c) => c.id === form.education)?.name || '',

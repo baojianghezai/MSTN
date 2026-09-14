@@ -44,6 +44,14 @@ func RegisterTables() {
 	}
 
 	db := global.GVA_DB
+
+	// Migrate int64 unix timestamps to datetime BEFORE AutoMigrate
+	// otherwise ALTER COLUMN fails with "Incorrect datetime value"
+	if err := migrateInt64ToDatetime(db); err != nil {
+		logger.Bg().Mod("system").Err(err).Error("int64→datetime migration failed")
+		os.Exit(1)
+	}
+
 	err := db.AutoMigrate(
 
 		system.SysApi{},

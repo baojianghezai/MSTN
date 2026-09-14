@@ -78,7 +78,7 @@ func (s *AuthService) sendSmsCode(mobile, typ, clientIP string) (string, error) 
 	// reset/cancellation 场景要求手机号已注册（忘记密码只对存量账号发码、企业注销需存量企业号，防未注册号探测）
 	if typ == "reset" || typ == "cancellation" {
 		var count int64
-		global.GVA_DB.Model(&hrcModel.Members{}).Where("mobile = ? AND deleted_at = 0", mobile).Count(&count)
+		global.GVA_DB.Model(&hrcModel.Members{}).Where("mobile = ? AND deleted_at IS NULL", mobile).Count(&count)
 		if count == 0 {
 			return "", ErrAccountNotFound
 		}
@@ -210,7 +210,7 @@ func (s *AuthService) Register(mobile, code, password string, utype int8) (*hrcM
 	}
 	// 手机号唯一查重
 	var count int64
-	global.GVA_DB.Model(&hrcModel.Members{}).Where("mobile = ? AND deleted_at = 0", mobile).Count(&count)
+	global.GVA_DB.Model(&hrcModel.Members{}).Where("mobile = ? AND deleted_at IS NULL", mobile).Count(&count)
 	if count > 0 {
 		return nil, ErrAccountExists
 	}
@@ -403,7 +403,7 @@ var (
 // GetMemberByUID 按 uid 查会员
 func (s *AuthService) GetMemberByUID(uid uint64) (*hrcModel.Members, error) {
 	var member hrcModel.Members
-	err := global.GVA_DB.Where("uid = ? AND deleted_at = 0", uid).First(&member).Error
+	err := global.GVA_DB.Where("uid = ? AND deleted_at IS NULL", uid).First(&member).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrAccountNotFound
 	}
@@ -446,7 +446,7 @@ func (s *AuthService) ResetPassword(mobile, code, newPassword string) error {
 		return err
 	}
 	var member hrcModel.Members
-	err := global.GVA_DB.Where("mobile = ? AND deleted_at = 0", mobile).First(&member).Error
+	err := global.GVA_DB.Where("mobile = ? AND deleted_at IS NULL", mobile).First(&member).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return ErrAccountNotFound
 	}
@@ -472,7 +472,7 @@ func (s *AuthService) BindMobile(uid uint64, mobile, code string) error {
 	// 手机号唯一校验（排除自身）
 	var count int64
 	global.GVA_DB.Model(&hrcModel.Members{}).
-		Where("mobile = ? AND uid != ? AND deleted_at = 0", mobile, uid).Count(&count)
+		Where("mobile = ? AND uid != ? AND deleted_at IS NULL", mobile, uid).Count(&count)
 	if count > 0 {
 		return ErrMobileBound
 	}

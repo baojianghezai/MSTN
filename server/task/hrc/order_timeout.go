@@ -20,13 +20,13 @@ func RegisterOrderTimeout() {
 }
 
 func orderTimeout(ctx context.Context, _ json.RawMessage) error {
-	timeoutAt := time.Now().Add(-30 * time.Minute).Unix()
+	timeoutAt := time.Now().Add(-30 * time.Minute)
 
 	// 先查找需要关闭的订单 ID
 	var expiredIDs []uint64
 	if err := global.GVA_DB.WithContext(ctx).
 		Model(&hrcModel.Order{}).
-		Where("is_paid = 1 AND created_at > 0 AND created_at < ?", timeoutAt).
+		Where("is_paid = 1 AND created_at > ? AND created_at < ?", time.Time{}, timeoutAt).
 		Pluck("id", &expiredIDs).Error; err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func orderTimeout(ctx context.Context, _ json.RawMessage) error {
 		Where("id IN ?", expiredIDs).
 		Updates(map[string]interface{}{
 			"is_paid":   3,
-			"closed_at": time.Now().Unix(),
+			"closed_at": time.Now(),
 		}).Error; err != nil {
 		return err
 	}

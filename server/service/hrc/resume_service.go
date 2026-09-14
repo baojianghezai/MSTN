@@ -50,16 +50,16 @@ func (s *ResumeService) CreateResume(ctx context.Context, uid uint64, resume *hr
 	resume.Display = 1     // 默认公开（#54 切换）
 	resume.Audit = 1       // 简历默认通过（审核配置策略随 M3/C6 细化）
 	resume.DisplayName = 1 // 默认显示姓名
-	resume.DeletedAt = 0
+	resume.DeletedAt = nil
 	resume.AddTime = now
-	resume.Refreshtime = now
+	resume.Refreshtime = &now
 	resume.Click = 1
 
 	var id uint64
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// def 逻辑：本人首份简历标记默认（04 §2.1 def；投递默认取 def desc）
 		var count int64
-		if err := tx.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at = 0", uid).Count(&count).Error; err != nil {
+		if err := tx.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at IS NULL", uid).Count(&count).Error; err != nil {
 			return err
 		}
 		if count == 0 {
@@ -144,7 +144,7 @@ func (s *ResumeService) GetResume(ctx context.Context, uid uint64, id uint64) (*
 // ListResumes 我的简历列表（#49；仅当前 uid 未软删；默认简历在前，按创建时间倒序）
 // 仅取轻量主表字段（不返子表）
 func (s *ResumeService) ListResumes(ctx context.Context, uid uint64, info request.PageInfo) ([]hrcModel.Resume, int64, error) {
-	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at = 0", uid)
+	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at IS NULL", uid)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -175,7 +175,7 @@ func (s *ResumeService) DeleteResume(ctx context.Context, uid uint64, id uint64)
 			return nil
 		}
 		var next hrcModel.Resume
-		err = tx.Where("uid = ? AND id <> ? AND deleted_at = 0", uid, id).Order("addtime desc, id desc").First(&next).Error
+		err = tx.Where("uid = ? AND id <> ? AND deleted_at IS NULL", uid, id).Order("addtime desc, id desc").First(&next).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
 		}
@@ -205,7 +205,7 @@ func (s *ResumeService) SetDefault(ctx context.Context, uid uint64, id uint64) e
 		if _, err := getOwnedResume(tx, id, uid); err != nil {
 			return err
 		}
-		if err := tx.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at = 0 AND def = 1", uid).Update("def", 0).Error; err != nil {
+		if err := tx.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at IS NULL AND def = 1", uid).Update("def", 0).Error; err != nil {
 			return err
 		}
 		return tx.Model(&hrcModel.Resume{}).Where("id = ?", id).Update("def", 1).Error
@@ -230,7 +230,7 @@ func (s *ResumeService) GetCompleteness(ctx context.Context, uid uint64, id uint
 // getOwnedResume 归属校验（本人 + 未软删）
 func getOwnedResume(db *gorm.DB, id uint64, uid uint64) (*hrcModel.Resume, error) {
 	var r hrcModel.Resume
-	err := db.Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).First(&r).Error
+	err := db.Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).First(&r).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrResumeNotFound
 	}

@@ -51,10 +51,10 @@ func (a *CompanyCancelApi) CompanyCancelStatus(c *gin.Context) {
 	OKWithData(c, CompanyCancellationStatusData{
 		ID:          apply.ID,
 		CompanyName: apply.CompanyName,
-		AddTime:     apply.AddTime,
+		AddTime:     apply.AddTime.Unix(),
 		Status:      apply.Status,
 		StatusCN:    companyCancelStatusCN(apply.Status),
-		FinishTime:  apply.FinishTime,
+		FinishTime:  timeOrZeroUnix(apply.FinishTime),
 	})
 }
 

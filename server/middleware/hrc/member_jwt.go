@@ -130,7 +130,7 @@ func MemberAuth() gin.HandlerFunc {
 		}
 		// 加载用户并校验状态：不存在/已注销/已暂停的账号，其 token 一律失效（防伪造 token 与注销后复用）
 		var member hrcModel.Members
-		err = global.GVA_DB.Where("uid = ? AND deleted_at = 0", claims.UID).First(&member).Error
+		err = global.GVA_DB.Where("uid = ? AND deleted_at IS NULL", claims.UID).First(&member).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(401, gin.H{"code": 1001, "message": "登录已失效，请重新登录", "data": nil})
 			return

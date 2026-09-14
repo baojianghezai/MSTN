@@ -16,7 +16,7 @@ func RegisterWxpayLogCleanup() {
 }
 
 func wxpayLogCleanup(ctx context.Context, _ json.RawMessage) error {
-	cutoff := time.Now().AddDate(0, 0, -180).Unix()
+	cutoff := time.Now().AddDate(0, 0, -180)
 	return global.GVA_DB.WithContext(ctx).
-		Exec("DELETE FROM ms_wxpay_log WHERE addtime > 0 AND addtime < ?", cutoff).Error
+		Exec("DELETE FROM ms_wxpay_log WHERE addtime > ? AND addtime < ?", time.Time{}, cutoff).Error
 }

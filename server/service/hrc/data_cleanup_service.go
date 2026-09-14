@@ -33,13 +33,13 @@ var (
 type DataCleanupService struct{}
 
 type DataCleanupPreview struct {
-	Target        string `json:"target"`
-	Title         string `json:"title"`
-	Description   string `json:"description"`
-	AffectedCount int64  `json:"affectedCount"`
-	RetentionDays int    `json:"retentionDays"`
-	CutoffAt      int64  `json:"cutoffAt"`
-	SoftDelete    bool   `json:"softDelete"`
+	Target        string    `json:"target"`
+	Title         string    `json:"title"`
+	Description   string    `json:"description"`
+	AffectedCount int64     `json:"affectedCount"`
+	RetentionDays int       `json:"retentionDays"`
+	CutoffAt      time.Time `json:"cutoffAt"`
+	SoftDelete    bool      `json:"softDelete"`
 }
 
 type DataCleanupOperator struct {
@@ -58,7 +58,7 @@ func (s *DataCleanupService) Preview(ctx context.Context, target string, retenti
 	switch target {
 	case DataCleanupTargetExpiredJobs:
 		err = db.Model(&hrcModel.Jobs{}).
-			Where("deleted_at = 0 AND deadline > 0 AND deadline < ?", preview.CutoffAt).
+			Where("deleted_at IS NULL AND deadline IS NOT NULL AND deadline < ?", preview.CutoffAt).
 			Count(&count).Error
 	case DataCleanupTargetRejectedJobDrafts:
 		err = db.Model(&hrcModel.JobsTmp{}).Where("audit = ?", 3).Count(&count).Error
@@ -90,8 +90,8 @@ func (s *DataCleanupService) Execute(ctx context.Context, target string, retenti
 		switch target {
 		case DataCleanupTargetExpiredJobs:
 			result = tx.Model(&hrcModel.Jobs{}).
-				Where("deleted_at = 0 AND deadline > 0 AND deadline < ?", preview.CutoffAt).
-				Update("deleted_at", time.Now().Unix())
+				Where("deleted_at IS NULL AND deadline IS NOT NULL AND deadline < ?", preview.CutoffAt).
+				Update("deleted_at", time.Now())
 		case DataCleanupTargetRejectedJobDrafts:
 			result = tx.Where("audit = ?", 3).Delete(&hrcModel.JobsTmp{})
 		case DataCleanupTargetExpiredPromotions:
@@ -112,7 +112,7 @@ func (s *DataCleanupService) Execute(ctx context.Context, target string, retenti
 			AffectedCount: preview.AffectedCount,
 			OperatorID:    operator.ID,
 			OperatorName:  operator.Name,
-			CreatedAt:     time.Now().Unix(),
+			CreatedAt:     time.Now(),
 		}).Error
 	})
 	if err != nil {
@@ -136,7 +136,7 @@ func (s *DataCleanupService) ListHistory(ctx context.Context, info request.PageI
 }
 
 func buildDataCleanupPreview(target string, retentionDays int) (DataCleanupPreview, error) {
-	now := time.Now().Unix()
+	now := time.Now()
 	preview := DataCleanupPreview{Target: target}
 	switch target {
 	case DataCleanupTargetExpiredJobs:
@@ -159,7 +159,7 @@ func buildDataCleanupPreview(target string, retentionDays int) (DataCleanupPrevi
 		preview.Title = "历史支付通知日志"
 		preview.Description = "物理删除保留期限之前的支付通知审计日志，不影响订单和套餐权益。"
 		preview.RetentionDays = retentionDays
-		preview.CutoffAt = time.Now().AddDate(0, 0, -retentionDays).Unix()
+		preview.CutoffAt = time.Now().AddDate(0, 0, -retentionDays)
 	case DataCleanupTargetOldWxpayLogs:
 		if err := validateRetentionDays(retentionDays); err != nil {
 			return DataCleanupPreview{}, err
@@ -167,7 +167,7 @@ func buildDataCleanupPreview(target string, retentionDays int) (DataCleanupPrevi
 		preview.Title = "历史微信支付日志"
 		preview.Description = "物理删除保留期限之前的微信支付回调日志，不影响订单和套餐权益。"
 		preview.RetentionDays = retentionDays
-		preview.CutoffAt = time.Now().AddDate(0, 0, -retentionDays).Unix()
+		preview.CutoffAt = time.Now().AddDate(0, 0, -retentionDays)
 	default:
 		return DataCleanupPreview{}, ErrDataCleanupTargetInvalid
 	}
@@ -181,9 +181,9 @@ func validateRetentionDays(days int) error {
 	return nil
 }
 
-func invalidPromotionsQuery(db *gorm.DB, now int64) *gorm.DB {
+func invalidPromotionsQuery(db *gorm.DB, now time.Time) *gorm.DB {
 	invalidJobs := db.Session(&gorm.Session{NewDB: true}).Model(&hrcModel.Jobs{}).
-		Select("id").Where("deleted_at <> 0 OR display <> 1 OR audit <> 1 OR (deadline > 0 AND deadline < ?)", now)
+		Select("id").Where("deleted_at IS NOT NULL OR display <> 1 OR audit <> 1 OR (deadline IS NOT NULL AND deadline < ?)", now)
 	validEntitlements := db.Session(&gorm.Session{NewDB: true}).Model(&hrcModel.MembersSetmeal{}).
 		Select("uid").Where("expire_at > ?", now)
 	return db.Model(&hrcModel.JobPromotion{}).Where("job_id IN (?) OR uid NOT IN (?)", invalidJobs, validEntitlements)

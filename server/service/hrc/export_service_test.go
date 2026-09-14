@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
@@ -43,13 +44,15 @@ func TestExportCompaniesEmpty(t *testing.T) {
 
 func TestExportJobs(t *testing.T) {
 	db := testutil.NewMemoryDB(t, &hrcModel.Jobs{})
+	ts := time.Unix(1700000000, 0)
 	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{
 		UID: 10, JobsName: "后端工程师", CompanyName: "甲企业", NatureCN: "全职",
 		CategoryCN: "互联网", DistrictCN: "上海", MinWage: 10000, MaxWage: 20000,
-		Amount: 2, Audit: 1, Display: 1, AddTime: 1700000000, Refreshtime: 1700000000, Click: 5,
+		Amount: 2, Audit: 1, Display: 1, AddTime: ts, Refreshtime: ts, Click: 5,
 	}}).Error)
+	deletedAt := ts
 	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{
-		UID: 11, JobsName: "已删职位", CompanyName: "乙企业", DeletedAt: 1700000100,
+		UID: 11, JobsName: "已删职位", CompanyName: "乙企业", DeletedAt: &deletedAt,
 	}}).Error)
 
 	svc := &ExportService{}

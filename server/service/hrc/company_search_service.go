@@ -26,41 +26,41 @@ type CompanySearchFilter struct {
 
 // PublicCompanyItem deliberately excludes contacts, certificates, and member data.
 type PublicCompanyItem struct {
-	ID          uint64 `json:"id"`
-	UID         uint64 `json:"uid"`
-	CompanyName string `json:"companyname"`
-	Nature      uint16 `json:"nature"`
-	NatureCN    string `json:"natureCn"`
-	Trade       uint16 `json:"trade"`
-	TradeCN     string `json:"tradeCn"`
-	District    string `json:"district"`
-	DistrictCN  string `json:"districtCn"`
-	Scale       uint16 `json:"scale"`
-	ScaleCN     string `json:"scaleCn"`
-	Logo        string `json:"logo"`
-	ShortName   string `json:"shortName"`
-	ShortDesc   string `json:"shortDesc"`
-	Tag         string `json:"tag"`
-	Refreshtime int64  `json:"refreshtime"`
-	JobsCount   int64  `json:"jobsCount"`
+	ID          uint64    `json:"id"`
+	UID         uint64    `json:"uid"`
+	CompanyName string    `json:"companyname"`
+	Nature      uint16    `json:"nature"`
+	NatureCN    string    `json:"natureCn"`
+	Trade       uint16    `json:"trade"`
+	TradeCN     string    `json:"tradeCn"`
+	District    string    `json:"district"`
+	DistrictCN  string    `json:"districtCn"`
+	Scale       uint16    `json:"scale"`
+	ScaleCN     string    `json:"scaleCn"`
+	Logo        string    `json:"logo"`
+	ShortName   string    `json:"shortName"`
+	ShortDesc   string    `json:"shortDesc"`
+	Tag         string    `json:"tag"`
+	Refreshtime time.Time `json:"refreshtime"`
+	JobsCount   int64     `json:"jobsCount"`
 }
 
 type PublicCompanyJob struct {
-	ID          uint64 `json:"id"`
-	JobsName    string `json:"jobsName"`
-	NatureCN    string `json:"natureCn"`
-	CategoryCN  string `json:"categoryCn"`
-	DistrictCN  string `json:"districtCn"`
-	Education   uint16 `json:"education"`
-	Experience  uint16 `json:"experience"`
-	MinWage     int    `json:"minwage"`
-	MaxWage     int    `json:"maxwage"`
-	Negotiable  int8   `json:"negotiable"`
-	Amount      uint16 `json:"amount"`
-	Emergency   int8   `json:"emergency"`
-	Stick       int8   `json:"stick"`
-	AddTime     int64  `json:"addtime"`
-	Refreshtime int64  `json:"refreshtime"`
+	ID          uint64    `json:"id"`
+	JobsName    string    `json:"jobsName"`
+	NatureCN    string    `json:"natureCn"`
+	CategoryCN  string    `json:"categoryCn"`
+	DistrictCN  string    `json:"districtCn"`
+	Education   uint16    `json:"education"`
+	Experience  uint16    `json:"experience"`
+	MinWage     int       `json:"minwage"`
+	MaxWage     int       `json:"maxwage"`
+	Negotiable  int8      `json:"negotiable"`
+	Amount      uint16    `json:"amount"`
+	Emergency   int8      `json:"emergency"`
+	Stick       int8      `json:"stick"`
+	AddTime     time.Time `json:"addtime"`
+	Refreshtime time.Time `json:"refreshtime"`
 }
 
 type PublicCompanyDetail struct {
@@ -76,13 +76,13 @@ type CompanySearchService struct{}
 
 func publicJobsQuery(ctx context.Context, companyID uint64) *gorm.DB {
 	return global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
-		Where("company_id = ? AND display = 1 AND audit = 1 AND deleted_at = 0 AND (deadline = 0 OR deadline > ?)", companyID, time.Now().Unix())
+		Where("company_id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL AND (deadline IS NULL OR deadline > ?)", companyID, time.Now())
 }
 
 func publicCompanyQuery(ctx context.Context) *gorm.DB {
 	activeJobs := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
 		Select("company_id, COUNT(*) AS jobs_count").
-		Where("display = 1 AND audit = 1 AND deleted_at = 0 AND (deadline = 0 OR deadline > ?)", time.Now().Unix()).
+		Where("display = 1 AND audit = 1 AND deleted_at IS NULL AND (deadline IS NULL OR deadline > ?)", time.Now()).
 		Group("company_id")
 
 	return global.GVA_DB.WithContext(ctx).

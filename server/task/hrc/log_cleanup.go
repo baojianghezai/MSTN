@@ -24,10 +24,9 @@ func logCleanup(ctx context.Context, _ json.RawMessage) error {
 		return err
 	}
 
-	// 会员操作日志：使用 log_addtime (unix timestamp)
-	cutoffUnix := cutoff.Unix()
+	// 会员操作日志：使用 log_addtime (time.Time)
 	if err := global.GVA_DB.WithContext(ctx).
-		Exec("DELETE FROM ms_members_log WHERE log_addtime > 0 AND log_addtime < ?", cutoffUnix).Error; err != nil {
+		Exec("DELETE FROM ms_members_log WHERE log_addtime > ? AND log_addtime < ?", time.Time{}, cutoff).Error; err != nil {
 		return err
 	}
 

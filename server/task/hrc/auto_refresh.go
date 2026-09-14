@@ -17,7 +17,7 @@ func RegisterAutoRefresh() {
 }
 
 func autoRefresh(ctx context.Context, _ json.RawMessage) error {
-	now := time.Now().Unix()
+	now := time.Now()
 
 	// 查找有有效套餐的用户
 	var entitlements []hrcModel.MembersSetmeal
@@ -31,7 +31,7 @@ func autoRefresh(ctx context.Context, _ json.RawMessage) error {
 		// 批量刷新该用户的在线职位（重置 refreshtime）
 		result := global.GVA_DB.WithContext(ctx).
 			Model(&hrcModel.Jobs{}).
-			Where("uid = ? AND display = 1 AND audit = 1 AND deleted_at = 0", ent.UID).
+			Where("uid = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", ent.UID).
 			Update("refreshtime", now)
 
 		if result.Error != nil {

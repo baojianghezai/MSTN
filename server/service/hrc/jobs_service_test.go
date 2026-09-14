@@ -42,7 +42,7 @@ func validJob() *hrcModel.Jobs {
 		MinWage:    10000,
 		MaxWage:    15000,
 		Contents:   "负责后端服务开发",
-		Deadline:   time.Now().Add(30 * 24 * time.Hour).Unix(),
+		Deadline:   time.Now().Add(30 * 24 * time.Hour),
 	}}
 }
 
@@ -260,7 +260,7 @@ func TestJobsPauseResumeDelete(t *testing.T) {
 
 	require.NoError(t, svc.DeleteJob(context.Background(), 1, id, false))
 	require.NoError(t, db.First(&j, id).Error)
-	require.NotZero(t, j.DeletedAt)
+	require.NotNil(t, j.DeletedAt)
 	require.ErrorIs(t, svc.DeleteJob(context.Background(), 1, id, false), ErrJobNotFound)
 	require.ErrorIs(t, svc.PauseJob(context.Background(), 2, id), ErrJobNotFound)
 }
@@ -362,7 +362,7 @@ func TestJobsTmpOnlyResubmitAfterReject(t *testing.T) {
 	db.Model(&hrcModel.Jobs{}).Count(&jobCount)
 	require.Equal(t, int64(1), jobCount)
 	var tmpCount int64
-	db.Model(&hrcModel.JobsTmp{}).Where("deleted_at = 0").Count(&tmpCount)
+	db.Model(&hrcModel.JobsTmp{}).Where("deleted_at IS NULL").Count(&tmpCount)
 	require.Zero(t, tmpCount)
 	var j hrcModel.Jobs
 	require.NoError(t, db.Where("jobs_name = ?", "Go 高级工程师").First(&j).Error)
@@ -420,13 +420,13 @@ func TestJobsTmpOnlyDelete(t *testing.T) {
 	require.NoError(t, svc.DeleteJob(context.Background(), 1, id, false))
 	var tmp hrcModel.JobsTmp
 	require.NoError(t, db.First(&tmp, id).Error)
-	require.NotZero(t, tmp.DeletedAt)
+	require.NotNil(t, tmp.DeletedAt)
 
 	// 显式 pending 路径（tmp 主键已被上一查询置位，必须换新变量，否则 gorm 附加旧主键条件）
 	require.NoError(t, svc.DeleteJob(context.Background(), 1, id2, true))
 	var tmp2 hrcModel.JobsTmp
 	require.NoError(t, db.First(&tmp2, id2).Error)
-	require.NotZero(t, tmp2.DeletedAt)
+	require.NotNil(t, tmp2.DeletedAt)
 
 	// 已删/他人 → ErrJobNotFound（两路径都隔离）
 	require.ErrorIs(t, svc.DeleteJob(context.Background(), 1, id, false), ErrJobNotFound)

@@ -17,7 +17,7 @@ func TestVideoInterviewCreate(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 10, FullName: "张三"}).Error)
 
 	svc := &VideoInterviewService{}
-	interviewTime := time.Now().Add(24 * time.Hour).Unix()
+	interviewTime := time.Now().Add(24 * time.Hour)
 	v, err := svc.CreateInterview(context.Background(), 20, VideoInterviewInput{
 		ResumeID: 1, JobsID: 100, JobsName: "Go 开发", InterviewTime: interviewTime, Contact: "李四", Telephone: "13800138000",
 	})
@@ -28,7 +28,7 @@ func TestVideoInterviewCreate(t *testing.T) {
 	require.Len(t, v.CompanyCode, 6)
 	require.Len(t, v.PersonalCode, 6)
 	require.NotEqual(t, v.CompanyCode, v.PersonalCode)
-	require.Equal(t, interviewTime+15*24*3600, v.Deadline)
+	require.Equal(t, interviewTime.Add(15*24*time.Hour), v.Deadline)
 }
 
 func TestVideoInterviewClosed(t *testing.T) {
@@ -52,7 +52,7 @@ func TestVideoInterviewDuplicated(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Config{CfgGroup: "video", Name: "video_interview_open", Value: "1"}).Error)
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 10, FullName: "张三"}).Error)
 	svc := &VideoInterviewService{}
-	in := VideoInterviewInput{ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour).Unix(), Contact: "李", Telephone: "1"}
+	in := VideoInterviewInput{ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour), Contact: "李", Telephone: "1"}
 
 	_, err := svc.CreateInterview(context.Background(), 20, in)
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestVideoInterviewRoomByCode(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 10, FullName: "张三"}).Error)
 	svc := &VideoInterviewService{}
 	v, err := svc.CreateInterview(context.Background(), 20, VideoInterviewInput{
-		ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour).Unix(), Contact: "李", Telephone: "1",
+		ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour), Contact: "李", Telephone: "1",
 	})
 	require.NoError(t, err)
 
@@ -91,7 +91,7 @@ func TestVideoInterviewCompanyDelete(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 10, FullName: "张三"}).Error)
 	svc := &VideoInterviewService{}
 	v, err := svc.CreateInterview(context.Background(), 20, VideoInterviewInput{
-		ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour).Unix(), Contact: "李", Telephone: "1",
+		ResumeID: 1, JobsID: 100, JobsName: "Go", InterviewTime: time.Now().Add(24 * time.Hour), Contact: "李", Telephone: "1",
 	})
 	require.NoError(t, err)
 
@@ -110,8 +110,8 @@ func TestVideoInterviewAdminList(t *testing.T) {
 	require.NoError(t, db.Create(&hrcModel.Resume{UID: 11, FullName: "王五"}).Error)
 	name := "甲企业"
 	require.NoError(t, db.Create(&hrcModel.CompanyProfile{UID: 20, CompanyName: &name}).Error)
-	require.NoError(t, db.Create(&hrcModel.VideoInterview{CompanyUID: 20, PersonalUID: 10, JobsID: 1, JobsName: "后端", InterviewTime: time.Now().Unix()}).Error)
-	require.NoError(t, db.Create(&hrcModel.VideoInterview{CompanyUID: 21, PersonalUID: 11, JobsID: 2, JobsName: "前端", InterviewTime: time.Now().Unix()}).Error)
+	require.NoError(t, db.Create(&hrcModel.VideoInterview{CompanyUID: 20, PersonalUID: 10, JobsID: 1, JobsName: "后端", InterviewTime: time.Now()}).Error)
+	require.NoError(t, db.Create(&hrcModel.VideoInterview{CompanyUID: 21, PersonalUID: 11, JobsID: 2, JobsName: "前端", InterviewTime: time.Now()}).Error)
 
 	svc := &VideoInterviewService{}
 	info := request.PageInfo{Page: 1, PageSize: 10}

@@ -33,27 +33,27 @@ type TalentSearch struct {
 // PublicResume is deliberately contact-free so it can safely be used by
 // public search, public detail, and the company favorites list.
 type PublicResume struct {
-	ID              uint64 `json:"id"`
-	Title           string `json:"title"`
-	FullName        string `json:"fullname"`
-	Sex             int8   `json:"sex"`
-	SexCN           string `json:"sexCn"`
-	Birthdate       uint16 `json:"birthdate"`
-	Education       uint16 `json:"education"`
-	EducationCN     string `json:"educationCn"`
-	MajorCN         string `json:"majorCn"`
-	Experience      uint16 `json:"experience"`
-	ExperienceCN    string `json:"experienceCn"`
-	District        string `json:"district"`
-	DistrictCN      string `json:"districtCn"`
-	Wage            uint16 `json:"wage"`
-	WageCN          string `json:"wageCn"`
-	IntentionJobs   string `json:"intentionJobs"`
-	Specialty       string `json:"specialty"`
-	PhotoImg        string `json:"photoImg"`
-	CompletePercent int8   `json:"completePercent"`
-	Talent          int8   `json:"talent"`
-	Refreshtime     int64  `json:"refreshtime"`
+	ID              uint64    `json:"id"`
+	Title           string    `json:"title"`
+	FullName        string    `json:"fullname"`
+	Sex             int8      `json:"sex"`
+	SexCN           string    `json:"sexCn"`
+	Birthdate       uint16    `json:"birthdate"`
+	Education       uint16    `json:"education"`
+	EducationCN     string    `json:"educationCn"`
+	MajorCN         string    `json:"majorCn"`
+	Experience      uint16    `json:"experience"`
+	ExperienceCN    string    `json:"experienceCn"`
+	District        string    `json:"district"`
+	DistrictCN      string    `json:"districtCn"`
+	Wage            uint16    `json:"wage"`
+	WageCN          string    `json:"wageCn"`
+	IntentionJobs   string    `json:"intentionJobs"`
+	Specialty       string    `json:"specialty"`
+	PhotoImg        string    `json:"photoImg"`
+	CompletePercent int8      `json:"completePercent"`
+	Talent          int8      `json:"talent"`
+	Refreshtime     time.Time `json:"refreshtime"`
 }
 
 type PublicResumeDetail struct {
@@ -92,7 +92,7 @@ type TalentService struct{}
 
 func (s *TalentService) Search(ctx context.Context, info request.PageInfo, search TalentSearch) ([]PublicResume, int64, error) {
 	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Resume{}).
-		Where("display = 1 AND audit = 1 AND deleted_at = 0")
+		Where("display = 1 AND audit = 1 AND deleted_at IS NULL")
 	if search.TalentOnly {
 		db = db.Where("talent = 1")
 	}
@@ -132,7 +132,7 @@ func (s *TalentService) Search(ctx context.Context, info request.PageInfo, searc
 func (s *TalentService) PublicDetail(ctx context.Context, resumeID uint64) (*PublicResumeDetail, error) {
 	db := global.GVA_DB.WithContext(ctx)
 	var resume hrcModel.Resume
-	if err := db.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0", resumeID).First(&resume).Error; err != nil {
+	if err := db.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", resumeID).First(&resume).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrTalentNotFound
 		}
@@ -153,7 +153,7 @@ func (s *TalentService) Unlock(ctx context.Context, companyUID uint64, resumeID 
 	var subs ResumeSubTables
 	newlyUnlocked := false
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0", resumeID).First(&resume).Error; err != nil {
+		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", resumeID).First(&resume).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrTalentNotFound
 			}
@@ -168,7 +168,7 @@ func (s *TalentService) Unlock(ctx context.Context, companyUID uint64, resumeID 
 			if err := tx.Create(&hrcModel.ResumeDownload{
 				CompanyUID:   companyUID,
 				ResumeID:     resumeID,
-				DownloadedAt: time.Now().Unix(),
+				DownloadedAt: time.Now(),
 			}).Error; err != nil {
 				return err
 			}
@@ -204,7 +204,7 @@ func (s *TalentService) GetUnlocked(ctx context.Context, companyUID uint64, resu
 		return nil, err
 	}
 	var resume hrcModel.Resume
-	if err := db.Where("id = ? AND deleted_at = 0", resumeID).First(&resume).Error; err != nil {
+	if err := db.Where("id = ? AND deleted_at IS NULL", resumeID).First(&resume).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrTalentNotFound
 		}
@@ -235,7 +235,7 @@ func (s *TalentService) ListUnlocked(ctx context.Context, companyUID uint64, inf
 	resumeMap := make(map[uint64]hrcModel.Resume, len(resumeIDs))
 	if len(resumeIDs) > 0 {
 		var resumes []hrcModel.Resume
-		if err := global.GVA_DB.WithContext(ctx).Where("id IN ? AND deleted_at = 0", resumeIDs).Find(&resumes).Error; err != nil {
+		if err := global.GVA_DB.WithContext(ctx).Where("id IN ? AND deleted_at IS NULL", resumeIDs).Find(&resumes).Error; err != nil {
 			return nil, 0, err
 		}
 		for _, resume := range resumes {
@@ -285,7 +285,7 @@ func (s *TalentService) ListFavorites(ctx context.Context, companyUID uint64, in
 	resumeMap := make(map[uint64]hrcModel.Resume, len(resumeIDs))
 	if len(resumeIDs) > 0 {
 		var resumes []hrcModel.Resume
-		if err := global.GVA_DB.WithContext(ctx).Where("id IN ? AND display = 1 AND audit = 1 AND deleted_at = 0", resumeIDs).Find(&resumes).Error; err != nil {
+		if err := global.GVA_DB.WithContext(ctx).Where("id IN ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", resumeIDs).Find(&resumes).Error; err != nil {
 			return nil, 0, err
 		}
 		for _, resume := range resumes {
@@ -305,7 +305,7 @@ func (s *TalentService) Favorite(ctx context.Context, companyUID uint64, resumeI
 	var favorite hrcModel.CompanyFavorite
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var resume hrcModel.Resume
-		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0", resumeID).First(&resume).Error; err != nil {
+		if err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL", resumeID).First(&resume).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrTalentNotFound
 			}
@@ -318,7 +318,7 @@ func (s *TalentService) Favorite(ctx context.Context, companyUID uint64, resumeI
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		favorite = hrcModel.CompanyFavorite{CompanyUID: companyUID, ResumeID: resumeID, AddTime: time.Now().Unix()}
+		favorite = hrcModel.CompanyFavorite{CompanyUID: companyUID, ResumeID: resumeID, AddTime: time.Now()}
 		return tx.Create(&favorite).Error
 	})
 	if err != nil {
@@ -346,13 +346,17 @@ func publicResumeFromModel(resume hrcModel.Resume) PublicResume {
 	} else if resume.Photo == 1 && resume.PhotoAudit == 1 && resume.PhotoDisplay == 1 {
 		photoImg = resume.PhotoImg
 	}
+	var refreshTime time.Time
+	if resume.Refreshtime != nil {
+		refreshTime = *resume.Refreshtime
+	}
 	return PublicResume{
 		ID: resume.ID, Title: resume.Title, FullName: fullName, Sex: resume.Sex, SexCN: resume.SexCN,
 		Birthdate: resume.Birthdate, Education: resume.Education, EducationCN: resume.EducationCN,
 		MajorCN: resume.MajorCN, Experience: resume.Experience, ExperienceCN: resume.ExperienceCN,
 		District: resume.District, DistrictCN: resume.DistrictCN, Wage: resume.Wage, WageCN: resume.WageCN,
 		IntentionJobs: resume.IntentionJobs, Specialty: resume.Specialty, PhotoImg: photoImg,
-		CompletePercent: resume.CompletePercent, Talent: resume.Talent, Refreshtime: resume.Refreshtime,
+		CompletePercent: resume.CompletePercent, Talent: resume.Talent, Refreshtime: refreshTime,
 	}
 }
 

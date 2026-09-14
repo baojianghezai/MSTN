@@ -1,6 +1,10 @@
 package hrc
 
-import hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
+import (
+	"time"
+
+	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
+)
 
 // ---- 认证模块 DTO（对应 09_API接口规范 §4.1）----
 
@@ -90,15 +94,15 @@ type AppealProcessRequest struct {
 
 // AppealStatusItem 申诉进度项（statusCn 由后端补充中文）
 type AppealStatusItem struct {
-	ID          uint64 `json:"id"`
-	UID         uint64 `json:"uid"`
-	RealName    string `json:"realname"`
-	Mobile      string `json:"mobile"`
-	Email       string `json:"email"`
-	Description string `json:"description"`
-	AddTime     int64  `json:"addtime"`
-	Status      int8   `json:"status"`
-	StatusCN    string `json:"statusCn"`
+	ID          uint64    `json:"id"`
+	UID         uint64    `json:"uid"`
+	RealName    string    `json:"realname"`
+	Mobile      string    `json:"mobile"`
+	Email       string    `json:"email"`
+	Description string    `json:"description"`
+	AddTime     time.Time `json:"addtime"`
+	Status      int8      `json:"status"`
+	StatusCN    string    `json:"statusCn"`
 }
 
 // ---- 个人/企业资料 DTO（09 §4.1 编号 76/77、107-110）----
@@ -190,14 +194,14 @@ type CompanyCancellationAdminItem struct {
 
 // CompanyProfileAdminItem 后台企业资料列表项
 type CompanyProfileAdminItem struct {
-	ID          uint64 `json:"id"`
-	UID         uint64 `json:"uid"`
-	CompanyName string `json:"companyname"`
-	Logo        string `json:"logo"`
-	Audit       int8   `json:"audit"`   // 0=未提交 1=通过 2=待审 3=不通过
-	AuditCN     string `json:"auditCn"` // 未提交/已通过/审核中/未通过
-	AddTime     int64  `json:"addtime"`
-	Refreshtime int64  `json:"refreshtime"`
+	ID          uint64    `json:"id"`
+	UID         uint64    `json:"uid"`
+	CompanyName string    `json:"companyname"`
+	Logo        string    `json:"logo"`
+	Audit       int8      `json:"audit"`   // 0=未提交 1=通过 2=待审 3=不通过
+	AuditCN     string    `json:"auditCn"` // 未提交/已通过/审核中/未通过
+	AddTime     time.Time `json:"addtime"`
+	Refreshtime time.Time `json:"refreshtime"`
 }
 
 // CompanyProfileAdminDetail 后台企业资料详情（含 Logo/营业执照证照，审核用）
@@ -342,13 +346,13 @@ type ResumeDetailData struct {
 
 // ResumeLite 我的简历列表项（#49 轻量主表字段，不返子表）
 type ResumeLite struct {
-	ID              uint64 `json:"id"`
-	Title           string `json:"title"`
-	CompletePercent int8   `json:"completePercent"`
-	Def             int8   `json:"def"`
-	Display         int8   `json:"display"`
-	AddTime         int64  `json:"addtime"`
-	Refreshtime     int64  `json:"refreshtime"`
+	ID              uint64    `json:"id"`
+	Title           string    `json:"title"`
+	CompletePercent int8      `json:"completePercent"`
+	Def             int8      `json:"def"`
+	Display         int8      `json:"display"`
+	AddTime         time.Time `json:"addtime"`
+	Refreshtime     time.Time `json:"refreshtime"`
 }
 
 // ResumeDisplayRequest 公开/隐藏切换请求（#54）

@@ -23,7 +23,7 @@ export interface NavItem {
   url: string
   sort: number
   display: number
-  addTime: number
+  addTime: string
 }
 
 // 申诉进度记录（02-account.md #46）
@@ -34,7 +34,7 @@ export interface AppealStatusItem {
   mobile: string
   status: number // 0 待处理 / 1 已处理 / 2 已驳回
   statusCn: string
-  addtime: number
+  addtime: string
 }
 
 // 个人资料（02-account.md #76）
@@ -42,7 +42,7 @@ export interface PersonalProfile {
   realname: string
   sex: number
   sexCn: string
-  birthday: number // unix 秒
+  birthday: string // ISO8601
   residence: string
   education: number
   educationCn: string
@@ -140,10 +140,10 @@ export interface CompanyAudit {
 export interface CompanyCancellation {
   id: number
   companyname: string
-  addtime: number
+  addtime: string
   status: number // 0 待处理 / 1 已处理
   statusCn: string
-  finishtime: number
+  finishtime: string
 }
 
 // 上传响应（03-cms.md #20 / 02-account.md #109）
@@ -243,8 +243,8 @@ export interface ResumeLite {
   completePercent: number
   def: number // 1=默认简历
   display: number // 1=公开 2=不公开
-  addtime: number
-  refreshtime: number
+  addtime: string
+  refreshtime: string
 }
 
 // 简历完善度详情（#57，与主表 completePercent 同源）
@@ -388,6 +388,7 @@ export interface JobItem {
   jobsName: string
   companyname: string
   companyId: number
+  logo: string
   emergency: number
   stick: number
   nature: number
@@ -408,9 +409,9 @@ export interface JobItem {
   maxwage: number
   negotiable: number
   contents: string
-  addtime: number
-  deadline: number
-  refreshtime: number
+  addtime: string
+  deadline: string
+  refreshtime: string
   audit: number // 0 草稿 1 通过 2 待审 3 不通过
   display: number // 1 展示 2 暂停
   click: number

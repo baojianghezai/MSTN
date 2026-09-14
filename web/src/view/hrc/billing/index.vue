@@ -94,7 +94,11 @@
   })
   const form = reactive(emptyForm())
   const yuan = (cents) => `￥${(cents / 100).toFixed(2)}`
-  const time = (value) => value ? new Date(value * 1000).toLocaleString() : '-'
+  const time = (value) => {
+    if (!value) return '-'
+    const d = typeof value === 'number' ? new Date(value * 1000) : new Date(value)
+    return d.toLocaleString()
+  }
   const statusText = (value) => ({ 1: '待确认', 2: '已生效', 3: '已取消' }[value] || '未知')
   const tagType = (value) => ({ 1: 'warning', 2: 'success', 3: 'info' }[value] || 'info')
   const resetForm = (value = emptyForm()) => Object.assign(form, value)

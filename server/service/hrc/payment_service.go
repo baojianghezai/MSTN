@@ -88,7 +88,7 @@ func (s *PaymentService) Start(ctx context.Context, uid, orderID uint64, provide
 		return nil, err
 	}
 	if err := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Order{}).Where("id = ? AND is_paid = ?", order.ID, 1).Updates(map[string]interface{}{
-		"payment": provider, "payment_started_at": time.Now().Unix(),
+		"payment": provider, "payment_started_at": time.Now(),
 	}).Error; err != nil {
 		return nil, err
 	}
@@ -243,7 +243,7 @@ func (s *PaymentService) logNotify(ctx context.Context, provider string, orderID
 	}
 	_ = global.GVA_DB.WithContext(ctx).Create(&hrcModel.PaymentNotifyLog{
 		Provider: provider, OrderID: orderID, OutTradeNo: outTradeNo, TransactionID: transactionID,
-		PayloadSHA256: fmt.Sprintf("%x", digest), Verified: verified, Message: message, CreatedAt: time.Now().Unix(),
+		PayloadSHA256: fmt.Sprintf("%x", digest), Verified: verified, Message: message, CreatedAt: time.Now(),
 	}).Error
 }
 

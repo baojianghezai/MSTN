@@ -3,6 +3,7 @@ package hrc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
@@ -61,7 +62,7 @@ func TestTalentUnlockConsumesQuotaAndNotifiesOnce(t *testing.T) {
 	}
 	require.NoError(t, global.GVA_DB.Create(&resume).Error)
 	require.NoError(t, global.GVA_DB.Create(&hrcModel.MembersSetmeal{
-		UID: 20, ExpireAt: hrcModel.Now() + 3600, ResumeDownloadsTotal: 1,
+		UID: 20, ExpireAt: hrcModel.Now().Add(3600 * time.Second), ResumeDownloadsTotal: 1,
 	}).Error)
 
 	svc := &TalentService{}

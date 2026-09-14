@@ -277,7 +277,7 @@ func TestResumeDeleteSoft(t *testing.T) {
 
 	var r1 hrcModel.Resume
 	require.NoError(t, db.First(&r1, id1).Error)
-	require.NotZero(t, r1.DeletedAt, "主表应软删")
+	require.NotNil(t, r1.DeletedAt, "主表应软删")
 	require.Equal(t, int8(0), r1.Def, "软删行 def 应清零（Issue B）")
 
 	// 子表保留（合规审计）
@@ -316,7 +316,7 @@ func TestResumeSetDefaultMutualExclusion(t *testing.T) {
 
 	require.NoError(t, svc.SetDefault(context.Background(), 1, id2))
 	var defCount int64
-	require.NoError(t, db.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at = 0 AND def = 1", 1).Count(&defCount).Error)
+	require.NoError(t, db.Model(&hrcModel.Resume{}).Where("uid = ? AND deleted_at IS NULL AND def = 1", 1).Count(&defCount).Error)
 	require.Equal(t, int64(1), defCount, "同 uid 内 def 应互斥")
 
 	var r2 hrcModel.Resume

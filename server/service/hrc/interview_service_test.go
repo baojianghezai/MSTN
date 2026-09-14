@@ -15,7 +15,7 @@ func interviewTestInput(resumeID, jobsID uint64) InterviewCreateInput {
 	return InterviewCreateInput{
 		ResumeID:      resumeID,
 		JobsID:        jobsID,
-		InterviewTime: time.Now().Add(time.Hour).Unix(),
+		InterviewTime: time.Now().Add(time.Hour),
 		Address:       "上海市浦东新区示例路 1 号",
 		Contact:       "王经理",
 		Telephone:     "13800138000",

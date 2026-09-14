@@ -91,6 +91,7 @@
   import { onBeforeUnmount, onMounted, ref } from 'vue'
   import QRCode from 'qrcode'
   import { ElMessage, ElMessageBox } from 'element-plus'
+  import { formatTime } from '@/utils/format'
   import {
     cancelOrder,
     createSetmealOrder,
@@ -117,7 +118,6 @@
   let countdownTimer: ReturnType<typeof setInterval> | undefined
 
   const formatPrice = (amount: number) => `￥${(amount / 100).toFixed(2)}`
-  const formatTime = (value: number) => value ? new Date(value * 1000).toLocaleString() : '-'
   const orderStatus = (status: number) => ({ 1: '待支付', 2: '已生效', 3: '已取消' }[status] || '未知')
   const orderTag = (status: number) => ({ 1: 'warning', 2: 'success', 3: 'info' }[status] || 'info')
 

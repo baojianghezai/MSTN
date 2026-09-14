@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -89,11 +90,11 @@ func (s *JobsService) CreateJob(ctx context.Context, uid uint64, job *hrcModel.J
 	job.AddMode = 1
 	job.AddTime = now
 	job.Refreshtime = now
-	job.DeletedAt = 0
-	if job.Deadline == 0 {
-		job.Deadline = now + 30*24*3600 // 默认 30 天有效期
+	job.DeletedAt = nil
+	if job.Deadline.IsZero() {
+		d := now.Add(24 * time.Hour * 30)
+		job.Deadline = d
 	}
-
 	var id uint64
 	err = global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if mode == 1 {
@@ -136,7 +137,7 @@ func (s *JobsService) UpdateJob(ctx context.Context, uid uint64, id uint64, pend
 			return s.updateTmpInPlace(tx, uid, id, job, contact, tags)
 		}
 		var old hrcModel.Jobs
-		if err := tx.Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).First(&old).Error; err != nil {
+		if err := tx.Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).First(&old).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return s.updateTmpInPlace(tx, uid, id, job, contact, tags)
 			}
@@ -155,7 +156,7 @@ func (s *JobsService) UpdateJob(ctx context.Context, uid uint64, id uint64, pend
 			tmp.Display = old.Display
 			tmp.Click = old.Click
 			tmp.AddTime = old.AddTime
-			tmp.DeletedAt = 0
+			tmp.DeletedAt = nil
 			if err := tx.Create(tmp).Error; err != nil {
 				return err
 			}
@@ -170,7 +171,7 @@ func (s *JobsService) UpdateJob(ctx context.Context, uid uint64, id uint64, pend
 		job.Display = old.Display
 		job.Click = old.Click
 		job.AddTime = old.AddTime
-		job.DeletedAt = 0
+		job.DeletedAt = nil
 		job.Refreshtime = hrcModel.Now()
 		if err := tx.Save(job).Error; err != nil {
 			return err
@@ -191,7 +192,7 @@ func (s *JobsService) DeleteJob(ctx context.Context, uid uint64, id uint64, pend
 	db := global.GVA_DB.WithContext(ctx)
 	if !pending {
 		res := db.Model(&hrcModel.Jobs{}).
-			Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).
+			Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).
 			Update("deleted_at", hrcModel.Now())
 		if res.Error != nil {
 			return res.Error
@@ -202,7 +203,7 @@ func (s *JobsService) DeleteJob(ctx context.Context, uid uint64, id uint64, pend
 	}
 	// tmp 行（pending 项或 jobs 未命中回退）；contact/tag 随 pid 保留即可（职位已不可见）
 	res := db.Model(&hrcModel.JobsTmp{}).
-		Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).
+		Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).
 		Update("deleted_at", hrcModel.Now())
 	if res.Error != nil {
 		return res.Error
@@ -221,13 +222,13 @@ func (s *JobsService) PauseJob(ctx context.Context, uid uint64, id uint64) error
 // ResumeJob 恢复（display=1，需未过期）
 func (s *JobsService) ResumeJob(ctx context.Context, uid uint64, id uint64) error {
 	var j hrcModel.Jobs
-	if err := global.GVA_DB.WithContext(ctx).Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).First(&j).Error; err != nil {
+	if err := global.GVA_DB.WithContext(ctx).Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).First(&j).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrJobNotFound
 		}
 		return err
 	}
-	if j.Deadline > 0 && j.Deadline < hrcModel.Now() {
+	if j.Deadline.Unix() > 0 && j.Deadline.Before(hrcModel.Now()) {
 		return ErrJobExpired
 	}
 	return s.setJobDisplay(ctx, uid, id, 1)
@@ -236,7 +237,7 @@ func (s *JobsService) ResumeJob(ctx context.Context, uid uint64, id uint64) erro
 // RefreshJob 刷新（重置 refreshtime）
 func (s *JobsService) RefreshJob(ctx context.Context, uid uint64, id uint64) error {
 	res := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
-		Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).
+		Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).
 		Update("refreshtime", hrcModel.Now())
 	if res.Error != nil {
 		return res.Error
@@ -251,12 +252,12 @@ func (s *JobsService) RefreshJob(ctx context.Context, uid uint64, id uint64) err
 // 编辑中（jobs audit=2 且存在对应 tmp）的 jobs 行由 tmp 行代表，避免重复展示
 func (s *JobsService) ListJobs(ctx context.Context, uid uint64, info request.PageInfo) ([]CompanyJobItem, int64, error) {
 	var jobs []hrcModel.Jobs
-	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at = 0", uid).Find(&jobs).Error; err != nil {
+	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at IS NULL", uid).Find(&jobs).Error; err != nil {
 		return nil, 0, err
 	}
 	// D1 补充（08-21）：tmp 行也过滤软删（#83 软删后列表不应再显示）
 	var tmps []hrcModel.JobsTmp
-	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at = 0", uid).Find(&tmps).Error; err != nil {
+	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at IS NULL", uid).Find(&tmps).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -312,7 +313,7 @@ func (s *JobsService) GetJob(ctx context.Context, uid uint64, id uint64, pending
 		detail.Pending = true
 	} else {
 		var j hrcModel.Jobs
-		if err := db.Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).First(&j).Error; err != nil {
+		if err := db.Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).First(&j).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, ErrJobNotFound
 			}
@@ -383,7 +384,7 @@ func (s *JobsService) AuditJob(ctx context.Context, id uint64, audit int8, reaso
 			job := &hrcModel.Jobs{JobsBase: tmp.JobsBase}
 			job.Audit = 1
 			job.Display = 1
-			job.DeletedAt = 0
+			job.DeletedAt = nil
 			if err := tx.Create(job).Error; err != nil {
 				return err
 			}
@@ -403,7 +404,7 @@ func (s *JobsService) AuditJob(ctx context.Context, id uint64, audit int8, reaso
 			job.Display = old.Display
 			job.Click = old.Click
 			job.AddTime = old.AddTime
-			job.DeletedAt = 0
+			job.DeletedAt = nil
 			if err := tx.Save(job).Error; err != nil {
 				return err
 			}
@@ -417,7 +418,7 @@ func (s *JobsService) AuditJob(ctx context.Context, id uint64, audit int8, reaso
 
 // AdminListJobs 后台职位列表（关键字 + audit 筛选）
 func (s *JobsService) AdminListJobs(ctx context.Context, info request.PageInfo, audit int8, keyword string) ([]hrcModel.Jobs, int64, error) {
-	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).Where("deleted_at = 0")
+	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).Where("deleted_at IS NULL")
 	if audit >= 0 {
 		db = db.Where("audit = ?", audit)
 	}
@@ -468,7 +469,7 @@ func (s *JobsService) AdminGetJobDetail(ctx context.Context, id uint64) (*AdminJ
 		detail.Source = "tmp"
 	} else if errors.Is(tmpErr, gorm.ErrRecordNotFound) {
 		var job hrcModel.Jobs
-		if err := db.Where("id = ? AND deleted_at = 0", id).First(&job).Error; err != nil {
+		if err := db.Where("id = ? AND deleted_at IS NULL", id).First(&job).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, ErrJobNotFound
 			}
@@ -578,7 +579,7 @@ func (s *JobsService) jobsDisplayMode(ctx context.Context) (int8, error) {
 
 func (s *JobsService) setJobDisplay(ctx context.Context, uid uint64, id uint64, display int8) error {
 	res := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Jobs{}).
-		Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).
+		Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).
 		Update("display", display)
 	if res.Error != nil {
 		return res.Error
@@ -594,7 +595,7 @@ func (s *JobsService) setJobDisplay(ctx context.Context, uid uint64, id uint64, 
 // 其他状态（如 1 通过——正常流程不存在，防御）报「该职位状态不可编辑」。
 func (s *JobsService) updateTmpInPlace(tx *gorm.DB, uid, id uint64, job *hrcModel.Jobs, contact *hrcModel.JobsContact, tags []uint32) error {
 	var old hrcModel.JobsTmp
-	if err := tx.Where("id = ? AND uid = ? AND deleted_at = 0", id, uid).First(&old).Error; err != nil {
+	if err := tx.Where("id = ? AND uid = ? AND deleted_at IS NULL", id, uid).First(&old).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrJobNotFound
 		}
@@ -610,7 +611,7 @@ func (s *JobsService) updateTmpInPlace(tx *gorm.DB, uid, id uint64, job *hrcMode
 	job.Display = old.Display
 	job.Click = old.Click
 	job.AddTime = old.AddTime
-	job.DeletedAt = 0
+	job.DeletedAt = nil
 	job.Refreshtime = hrcModel.Now()
 	tmp := &hrcModel.JobsTmp{ID: old.ID, JobsID: old.JobsID, JobsBase: job.JobsBase}
 	if err := tx.Save(tmp).Error; err != nil {

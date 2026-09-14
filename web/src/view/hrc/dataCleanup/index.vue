@@ -198,7 +198,8 @@
 
   const formatTime = (value) => {
     if (!value) return '-'
-    return new Date(value * 1000).toLocaleString()
+    const d = typeof value === 'number' ? new Date(value * 1000) : new Date(value)
+    return d.toLocaleString()
   }
 
   loadPreview()

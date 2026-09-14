@@ -17,7 +17,7 @@ export interface PublicCompany {
   shortName: string
   shortDesc: string
   tag: string
-  refreshtime: number
+  refreshtime: string
   jobsCount: number
 }
 
@@ -35,8 +35,8 @@ export interface PublicCompanyJob {
   amount: number
   emergency: number
   stick: number
-  addtime: number
-  refreshtime: number
+  addtime: string
+  refreshtime: string
 }
 
 export interface PublicCompanyDetail {

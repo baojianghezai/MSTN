@@ -73,7 +73,7 @@ func TestConfirmPaidGrantsEntitlementOnce(t *testing.T) {
 	require.Equal(t, plan.HomePushSlots, entitlement.HomePushSlots)
 	require.Equal(t, plan.HomeAdSlots, entitlement.HomeAdSlots)
 	require.True(t, entitlement.EnableVideo)
-	require.Greater(t, entitlement.ExpireAt, time.Now().Unix())
+	require.True(t, entitlement.ExpireAt.After(time.Now()))
 
 	var company hrcModel.CompanyProfile
 	require.NoError(t, db.Where("uid = ?", 101).First(&company).Error)
@@ -138,18 +138,17 @@ func TestConfirmGatewayPaidRejectsIncorrectAmountAndClosedOrder(t *testing.T) {
 
 func TestApplyJobEntitlementEnforcesOnlineLimit(t *testing.T) {
 	db := newBillingMemoryDB(t)
-	now := time.Now().Unix()
+	now := time.Now()
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
 		UID:           101,
 		SetmealID:     1,
 		SetmealName:   "Starter",
-		ExpireAt:      now + 86400,
+		ExpireAt:      now.Add(86400 * time.Second),
 		JobsMeanwhile: 1,
 	}).Error)
 	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{
-		UID:       101,
-		Display:   1,
-		DeletedAt: 0,
+		UID:     101,
+		Display: 1,
 	}}).Error)
 
 	err := (&SetmealService{}).ApplyJobEntitlement(context.Background(), 101, &hrcModel.Jobs{})

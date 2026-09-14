@@ -32,7 +32,7 @@ func (a *VideoInterviewApi) CreateInterview(c *gin.Context) {
 		ResumeID:      req.ResumeID,
 		JobsID:        req.JobsID,
 		JobsName:      req.JobsName,
-		InterviewTime: req.InterviewTime,
+		InterviewTime: int64ToTime(req.InterviewTime),
 		Contact:       req.Contact,
 		Telephone:     req.Telephone,
 	})
@@ -173,8 +173,8 @@ func (a *VideoInterviewApi) RoomByCode(c *gin.Context) {
 	OKWithData(c, VideoInterviewRoomData{
 		ID:            v.ID,
 		JobsName:      v.JobsName,
-		InterviewTime: v.InterviewTime,
-		Deadline:      v.Deadline,
+		InterviewTime: v.InterviewTime.Unix(),
+		Deadline:      v.Deadline.Unix(),
 		RoomStatus:    videoRoomStatusCN(v.InterviewTime, v.Deadline),
 		Utype:         utype,
 	})
@@ -213,11 +213,11 @@ func videoInterviewItemFromModel(v *hrcModel.VideoInterview, resumeID uint64, fu
 		PersonalUID:   v.PersonalUID,
 		JobsID:        v.JobsID,
 		JobsName:      v.JobsName,
-		InterviewTime: v.InterviewTime,
-		Deadline:      v.Deadline,
+		InterviewTime: v.InterviewTime.Unix(),
+		Deadline:      v.Deadline.Unix(),
 		Contact:       v.Contact,
 		ContactTel:    v.ContactTel,
-		AddTime:       v.AddTime,
+		AddTime:       v.AddTime.Unix(),
 		CompanyCode:   v.CompanyCode,
 		PersonalCode:  v.PersonalCode,
 		RoomStatus:    videoRoomStatusCN(v.InterviewTime, v.Deadline),
@@ -233,14 +233,13 @@ func videoInterviewItemFromService(it hrcService.VideoInterviewItem) VideoInterv
 }
 
 // videoRoomStatusCN 房间状态机（不落库，按时间计算）：nostart/opened/overtime
-func videoRoomStatusCN(interviewTime, deadline int64) string {
-	now := time.Now().Unix()
-	if deadline < now {
+func videoRoomStatusCN(interviewTime, deadline time.Time) string {
+	now := time.Now()
+	if deadline.Before(now) {
 		return "overtime"
 	}
-	day := time.Unix(interviewTime, 0)
-	midnight := time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location()).Unix()
-	if now < midnight {
+	midnight := time.Date(interviewTime.Year(), interviewTime.Month(), interviewTime.Day(), 0, 0, 0, 0, interviewTime.Location())
+	if now.Before(midnight) {
 		return "nostart"
 	}
 	return "opened"

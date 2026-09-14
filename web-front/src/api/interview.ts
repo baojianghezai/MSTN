@@ -11,12 +11,12 @@ export interface CompanyInterview {
   companyId: number
   companyName: string
   companyUid: number
-  interviewTime: number
+  interviewTime: string
   address: string
   contact: string
   telephone: string
   notes: string
-  interviewAddtime: number
+  interviewAddtime: string
   personalLook: number
 }
 

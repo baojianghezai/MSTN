@@ -38,7 +38,7 @@ func (s *OrderService) CreateSetmealOrder(ctx context.Context, uid, setmealID ui
 		}
 		return nil, err
 	}
-	now := time.Now().Unix()
+	now := time.Now()
 	order := &hrcModel.Order{
 		OID:         newOrderID(),
 		UID:         uid,
@@ -53,8 +53,10 @@ func (s *OrderService) CreateSetmealOrder(ctx context.Context, uid, setmealID ui
 		return nil, err
 	}
 	// Redis 存储订单过期时间，供前端倒计时使用
-	expireAt := now + int64(orderExpireDuration.Seconds())
-	_ = global.GVA_REDIS.Set(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID), expireAt, orderExpireDuration).Err()
+	expireAt := now.Add(orderExpireDuration)
+	if global.GVA_REDIS != nil {
+		_ = global.GVA_REDIS.Set(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID), expireAt.Unix(), orderExpireDuration).Err()
+	}
 	return order, nil
 }
 
@@ -79,7 +81,7 @@ func (s *OrderService) ListMine(ctx context.Context, uid uint64, page request.Pa
 	result := make([]OrderWithExpire, len(list))
 	for i, order := range list {
 		result[i].Order = order
-		if order.IsPaid == 1 {
+		if order.IsPaid == 1 && global.GVA_REDIS != nil {
 			val, err := global.GVA_REDIS.Get(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Result()
 			if err == nil {
 				if v, e := strconv.ParseInt(val, 10, 64); e == nil {
@@ -132,14 +134,16 @@ func (s *OrderService) ConfirmPaid(ctx context.Context, id uint64, payAmount int
 		if payAmount != order.Amount {
 			return errors.New("实收金额与订单金额不一致")
 		}
-		now := time.Now().Unix()
+		now := time.Now()
 		if err := tx.Model(&hrcModel.Order{}).Where("id = ? AND is_paid = ?", order.ID, 1).Updates(map[string]interface{}{
 			"is_paid": 2, "pay_amount": payAmount, "payment": payment, "paid_at": now,
 		}).Error; err != nil {
 			return err
 		}
 		// 支付成功，删除 Redis 过期时间
-		_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
+		if global.GVA_REDIS != nil {
+			_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
+		}
 		return grantOrderEntitlement(tx, &order, now)
 	})
 }
@@ -180,19 +184,21 @@ func (s *OrderService) ConfirmGatewayPaid(ctx context.Context, id uint64, payAmo
 			return err
 		}
 
-		now := time.Now().Unix()
+		now := time.Now()
 		if err := tx.Model(&hrcModel.Order{}).Where("id = ? AND is_paid = ?", order.ID, 1).Updates(map[string]interface{}{
 			"is_paid": 2, "pay_amount": payAmount, "payment": provider, "transaction_id": transactionID, "paid_at": now,
 		}).Error; err != nil {
 			return err
 		}
 		// 支付成功，删除 Redis 过期时间
-		_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
+		if global.GVA_REDIS != nil {
+			_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", order.ID)).Err()
+		}
 		return grantOrderEntitlement(tx, &order, now)
 	})
 }
 
-func grantOrderEntitlement(tx *gorm.DB, order *hrcModel.Order, now int64) error {
+func grantOrderEntitlement(tx *gorm.DB, order *hrcModel.Order, now time.Time) error {
 	var plan hrcModel.Setmeal
 	if err := tx.First(&plan, order.SetmealID).Error; err != nil {
 		return ErrSetmealNotFound
@@ -203,14 +209,14 @@ func grantOrderEntitlement(tx *gorm.DB, order *hrcModel.Order, now int64) error 
 		return err
 	}
 	base := now
-	if err == nil && current.ExpireAt > base {
+	if err == nil && current.ExpireAt.After(now) {
 		base = current.ExpireAt
 	}
 	entitlement := hrcModel.MembersSetmeal{
 		UID:                  order.UID,
 		SetmealID:            plan.ID,
 		SetmealName:          plan.Name,
-		ExpireAt:             base + int64(plan.DurationDays)*86400,
+		ExpireAt:             base.AddDate(0, 0, plan.DurationDays),
 		JobsMeanwhile:        plan.JobsMeanwhile,
 		ResumeDownloadsTotal: plan.ResumeDownloads,
 		HomePushSlots:        plan.HomePushSlots,
@@ -234,7 +240,7 @@ func grantOrderEntitlement(tx *gorm.DB, order *hrcModel.Order, now int64) error 
 
 func (s *OrderService) Close(ctx context.Context, uid, id uint64) error {
 	result := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Order{}).Where("id = ? AND uid = ? AND is_paid = ?", id, uid, 1).Updates(map[string]interface{}{
-		"is_paid": 3, "closed_at": time.Now().Unix(),
+		"is_paid": 3, "closed_at": time.Now(),
 	})
 	if result.Error != nil {
 		return result.Error
@@ -243,7 +249,9 @@ func (s *OrderService) Close(ctx context.Context, uid, id uint64) error {
 		return ErrOrderClosed
 	}
 	// 删除 Redis 中的过期时间
-	_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", id)).Err()
+	if global.GVA_REDIS != nil {
+		_ = global.GVA_REDIS.Del(ctx, orderExpireKeyPrefix+fmt.Sprintf("%d", id)).Err()
+	}
 	return nil
 }
 

@@ -45,7 +45,7 @@ func (s *MessageService) SendSystemNotice(tx *gorm.DB, notice SystemNotice) erro
 		return errors.New("站内信字段长度超出限制")
 	}
 
-	now := time.Now().Unix()
+	now := time.Now()
 	if err := tx.Create(&hrcModel.Pms{
 		MsgFrom:  notice.FromUID,
 		MsgTouid: notice.ToUID,
@@ -126,7 +126,7 @@ func (s *MessageService) syncUnreadTip(tx *gorm.DB, uid uint64) error {
 	if err := tx.Model(&hrcModel.Pms{}).Where("msgtouid = ? AND msg_check = 0", uid).Count(&unread).Error; err != nil {
 		return err
 	}
-	now := time.Now().Unix()
+	now := time.Now()
 	return tx.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "uid"}, {Name: "type"}},
 		DoUpdates: clause.Assignments(map[string]interface{}{

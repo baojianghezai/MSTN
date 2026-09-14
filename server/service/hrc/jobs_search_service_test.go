@@ -19,8 +19,8 @@ func seedVisibleJob(t *testing.T, db *gorm.DB, name string, uid uint64, opts ...
 		CompanyName: "甲企业",
 		Audit:       1,
 		Display:     1,
-		Refreshtime: time.Now().Unix(),
-		Deadline:    time.Now().Add(24 * time.Hour).Unix(),
+		Refreshtime: time.Now(),
+		Deadline:    time.Now().Add(24 * time.Hour),
 	}}
 	for _, o := range opts {
 		o(j)
@@ -40,7 +40,7 @@ func TestJobsSearchList(t *testing.T) {
 	seedVisibleJob(t, db, "前端工程师", 2, func(j *hrcModel.Jobs) { j.Trade = 1; j.Education = 4 })
 	seedVisibleJob(t, db, "已暂停职位", 1, func(j *hrcModel.Jobs) { j.Display = 2 })
 	seedVisibleJob(t, db, "未过审职位", 1, func(j *hrcModel.Jobs) { j.Audit = 2 })
-	seedVisibleJob(t, db, "已过期职位", 1, func(j *hrcModel.Jobs) { j.Deadline = time.Now().Add(-time.Hour).Unix() })
+	seedVisibleJob(t, db, "已过期职位", 1, func(j *hrcModel.Jobs) { j.Deadline = time.Now().Add(-time.Hour) })
 
 	svc := &JobsSearchService{}
 	info := request.PageInfo{Page: 1, PageSize: 10}

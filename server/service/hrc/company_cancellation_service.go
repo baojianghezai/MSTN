@@ -24,7 +24,7 @@ type CompanyCancellationService struct{}
 // ApplyCompanyCancellation 企业注销申请（短信二次确认；已有 status=0 未处理申请则拒绝）
 func (s *CompanyCancellationService) ApplyCompanyCancellation(ctx context.Context, uid uint64, code string) error {
 	var member hrcModel.Members
-	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at = 0", uid).First(&member).Error; err != nil {
+	if err := global.GVA_DB.WithContext(ctx).Where("uid = ? AND deleted_at IS NULL", uid).First(&member).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ErrAccountNotFound
 		}

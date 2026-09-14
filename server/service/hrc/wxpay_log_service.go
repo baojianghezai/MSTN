@@ -14,7 +14,7 @@ type WxpayLogService struct{}
 
 // Record 记录一条支付回调日志（M4 支付回调调用）
 func (s *WxpayLogService) Record(ctx context.Context, log *hrcModel.WxpayLog) error {
-	if log.AddTime == 0 {
+	if log.AddTime.IsZero() {
 		log.AddTime = hrcModel.Now()
 	}
 	return global.GVA_DB.WithContext(ctx).Create(log).Error

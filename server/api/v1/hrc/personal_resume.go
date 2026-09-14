@@ -62,7 +62,7 @@ func (a *ResumeApi) List(c *gin.Context) {
 			Def:             r.Def,
 			Display:         r.Display,
 			AddTime:         r.AddTime,
-			Refreshtime:     r.Refreshtime,
+			Refreshtime:     timePtrDeref(r.Refreshtime),
 		})
 	}
 	OKWithData(c, response.PageResult{List: lite, Total: total, Page: pageInfo.Page, PageSize: pageInfo.PageSize})

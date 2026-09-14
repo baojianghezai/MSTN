@@ -80,10 +80,10 @@ type CompanyDistribution struct {
 // Dashboard 看板指标（今日/昨日/待办/收入）
 func (s *DashboardService) Dashboard(ctx context.Context) (*DashboardData, error) {
 	now := time.Now()
-	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).Unix()
-	yesterdayStart := todayStart - 24*3600
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	yesterdayStart := todayStart.AddDate(0, 0, -1)
 
-	today, err := s.dayMetrics(ctx, todayStart, now.Unix()+1)
+	today, err := s.dayMetrics(ctx, todayStart, now)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,6 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 	}
 	now := time.Now()
 	startDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -(days - 1))
-	start := startDay.Unix()
 
 	points := make([]TrendPoint, days)
 	for i := range points {
@@ -117,7 +116,7 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 	switch metric {
 	case "register":
 		var members []hrcModel.Members
-		if err := db.Select("utype", "reg_time").Where("reg_time >= ?", start).Find(&members).Error; err != nil {
+		if err := db.Select("utype", "reg_time").Where("reg_time >= ?", startDay).Find(&members).Error; err != nil {
 			return nil, err
 		}
 		for _, m := range members {
@@ -131,7 +130,7 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 		}
 	case "resume":
 		var resumes []hrcModel.Resume
-		if err := db.Select("addtime").Where("addtime >= ?", start).Find(&resumes).Error; err != nil {
+		if err := db.Select("addtime").Where("addtime >= ?", startDay).Find(&resumes).Error; err != nil {
 			return nil, err
 		}
 		for _, r := range resumes {
@@ -141,7 +140,7 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 		}
 	case "company":
 		var profiles []hrcModel.CompanyProfile
-		if err := db.Select("addtime").Where("addtime >= ?", start).Find(&profiles).Error; err != nil {
+		if err := db.Select("addtime").Where("addtime >= ?", startDay).Find(&profiles).Error; err != nil {
 			return nil, err
 		}
 		for _, p := range profiles {
@@ -151,7 +150,7 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 		}
 	case "job":
 		var jobs []hrcModel.Jobs
-		if err := db.Select("addtime").Where("addtime >= ? AND deleted_at = 0", start).Find(&jobs).Error; err != nil {
+		if err := db.Select("addtime").Where("addtime >= ? AND deleted_at IS NULL", startDay).Find(&jobs).Error; err != nil {
 			return nil, err
 		}
 		for _, job := range jobs {
@@ -161,7 +160,7 @@ func (s *DashboardService) Trend(ctx context.Context, days int, metric string) (
 		}
 	case "application":
 		var applications []hrcModel.PersonalJobsApply
-		if err := db.Select("apply_addtime").Where("apply_addtime >= ?", start).Find(&applications).Error; err != nil {
+		if err := db.Select("apply_addtime").Where("apply_addtime >= ?", startDay).Find(&applications).Error; err != nil {
 			return nil, err
 		}
 		for _, application := range applications {
@@ -206,7 +205,7 @@ func (s *DashboardService) CompanyDistribution(ctx context.Context) (*CompanyDis
 }
 
 // dayMetrics 单日新增指标（[start, end)）
-func (s *DashboardService) dayMetrics(ctx context.Context, start, end int64) (DayMetrics, error) {
+func (s *DashboardService) dayMetrics(ctx context.Context, start, end time.Time) (DayMetrics, error) {
 	var m DayMetrics
 	db := global.GVA_DB.WithContext(ctx)
 	if err := db.Model(&hrcModel.Members{}).Where("utype = 1 AND reg_time >= ? AND reg_time < ?", start, end).Count(&m.PersonalUsers).Error; err != nil {
@@ -221,7 +220,7 @@ func (s *DashboardService) dayMetrics(ctx context.Context, start, end int64) (Da
 	if err := db.Model(&hrcModel.CompanyProfile{}).Where("addtime >= ? AND addtime < ?", start, end).Count(&m.Companies).Error; err != nil {
 		return m, err
 	}
-	if err := db.Model(&hrcModel.Jobs{}).Where("addtime >= ? AND addtime < ? AND deleted_at = 0", start, end).Count(&m.Jobs).Error; err != nil {
+	if err := db.Model(&hrcModel.Jobs{}).Where("addtime >= ? AND addtime < ? AND deleted_at IS NULL", start, end).Count(&m.Jobs).Error; err != nil {
 		return m, err
 	}
 	if err := db.Model(&hrcModel.PersonalJobsApply{}).Where("apply_addtime >= ? AND apply_addtime < ?", start, end).Count(&m.Applications).Error; err != nil {
@@ -243,7 +242,7 @@ func (s *DashboardService) todoMetrics(ctx context.Context) (TodoMetrics, error)
 	if err := db.Model(&hrcModel.Resume{}).Where("audit = 2").Count(&t.ResumeAudit).Error; err != nil {
 		return t, err
 	}
-	if err := db.Model(&hrcModel.JobsTmp{}).Where("audit = 2 AND deleted_at = 0").Count(&t.JobAudit).Error; err != nil {
+	if err := db.Model(&hrcModel.JobsTmp{}).Where("audit = 2 AND deleted_at IS NULL").Count(&t.JobAudit).Error; err != nil {
 		return t, err
 	}
 	if err := db.Model(&hrcModel.MembersAppeal{}).Where("status = 0").Count(&t.Appeal).Error; err != nil {
@@ -270,9 +269,8 @@ func (s *DashboardService) distribution(ctx context.Context, table, codeCol, cnC
 	return items, err
 }
 
-// dayIndex 时间戳 → 相对 startDay 的天偏移（越界返回 -1）
-func dayIndex(ts int64, startDay time.Time) int {
-	t := time.Unix(ts, 0)
+// dayIndex 时间 → 相对 startDay 的天偏移（越界返回 -1）
+func dayIndex(t time.Time, startDay time.Time) int {
 	d := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	return int(d.Sub(startDay).Hours() / 24)
 }

@@ -52,18 +52,18 @@ func (s *ApplyService) Apply(ctx context.Context, uid uint64, jobsIDs []uint64, 
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, todayStart.Location())
 	var todayCount int64
 	if err := global.GVA_DB.WithContext(ctx).Model(&hrcModel.PersonalJobsApply{}).
-		Where("personal_uid = ? AND apply_addtime >= ?", uid, todayStart.Unix()).Count(&todayCount).Error; err != nil {
+		Where("personal_uid = ? AND apply_addtime >= ?", uid, todayStart).Count(&todayCount).Error; err != nil {
 		return err
 	}
 	if todayCount+int64(len(jobsIDs)) > int64(max) {
 		return ErrApplyDailyLimit
 	}
 
-	now := time.Now().Unix()
+	now := time.Now()
 	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, jobsID := range jobsIDs {
 			var job hrcModel.Jobs
-			err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at = 0 AND (deadline = 0 OR deadline > ?)", jobsID, now).First(&job).Error
+			err := tx.Where("id = ? AND display = 1 AND audit = 1 AND deleted_at IS NULL AND (deadline IS NULL OR deadline > ?)", jobsID, now).First(&job).Error
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrJobNotAvailable
 			}
@@ -146,7 +146,7 @@ func (s *ApplyService) selectResume(ctx context.Context, uid uint64, resumeID ui
 	db := global.GVA_DB.WithContext(ctx)
 	if resumeID > 0 {
 		var resume hrcModel.Resume
-		err := db.Where("id = ? AND uid = ? AND audit = 1 AND deleted_at = 0", resumeID, uid).First(&resume).Error
+		err := db.Where("id = ? AND uid = ? AND audit = 1 AND deleted_at IS NULL", resumeID, uid).First(&resume).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrResumeUnavailable // 指定简历不存在/已删/未过审
 		}
@@ -156,7 +156,7 @@ func (s *ApplyService) selectResume(ctx context.Context, uid uint64, resumeID ui
 		return &resume, nil
 	}
 	var resume hrcModel.Resume
-	err := db.Where("uid = ? AND audit = 1 AND deleted_at = 0", uid).Order("def desc, id desc").First(&resume).Error
+	err := db.Where("uid = ? AND audit = 1 AND deleted_at IS NULL", uid).Order("def desc, id desc").First(&resume).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, ErrResumeRequired
 	}

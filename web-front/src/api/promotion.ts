@@ -11,7 +11,7 @@ export interface CompanyPromotionItem {
   adSubtitle: string
   adImage: string
   sort: number
-  createdAt: number
+  createdAt: string
   jobsName: string
   companyname: string
 }
