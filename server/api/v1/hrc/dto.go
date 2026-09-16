@@ -262,8 +262,8 @@ type ResumeWorkRequest struct {
 	StartMonth   uint8  `json:"startmonth"`
 	EndYear      uint16 `json:"endyear"`
 	EndMonth     uint8  `json:"endmonth"`
-	ToDate       int8   `json:"todate"` // 至今标记（0=已结束 1=至今）
-	WorkType     int8   `json:"workType"`     // 1=工作 2=实习
+	ToDate       int8   `json:"todate"`   // 至今标记（0=已结束 1=至今）
+	WorkType     int8   `json:"workType"` // 1=工作 2=实习
 	CompanyName  string `json:"companyname"`
 	Jobs         string `json:"jobs"`
 	Achievements string `json:"achievements"`
@@ -338,8 +338,8 @@ type ResumeRequest struct {
 	ExperienceCN  string                       `json:"experienceCn"`
 	District      string                       `json:"district"`
 	DistrictCN    string                       `json:"districtCn"`
-	WageMin       uint16                       `json:"wageMin"`       // 期望薪资下限
-	WageMax       uint16                       `json:"wageMax"`       // 期望薪资上限
+	WageMin       uint16                       `json:"wageMin"` // 期望薪资下限
+	WageMax       uint16                       `json:"wageMax"` // 期望薪资上限
 	IntentionJobs string                       `json:"intentionJobs"`
 	Specialty     string                       `json:"specialty"`
 	Telephone     string                       `json:"telephone"`
@@ -359,26 +359,6 @@ type ResumeRequest struct {
 	Skill         []ResumeSkillRequest         `json:"skill"`
 	Portfolio     []ResumePortfolioRequest     `json:"portfolio"`
 	StudentLeader []ResumeStudentLeaderRequest `json:"studentLeader"`
-}
-	DistrictCN    string                   `json:"districtCn"`
-	Wage          uint16                   `json:"wage"`
-	WageCN        string                   `json:"wageCn"`
-	IntentionJobs string                   `json:"intentionJobs"`
-	Specialty     string                   `json:"specialty"`
-	Telephone     string                   `json:"telephone"`
-	Email         string                   `json:"email"`
-	DisplayName   int8                     `json:"displayName"`
-	Current       uint16                   `json:"current"`
-	CurrentCN     string                   `json:"currentCn"`
-	MobileAudit   int8                     `json:"mobileAudit"`
-	Talent        int8                     `json:"talent"`
-	Entrust       int8                     `json:"entrust"`
-	Projects      []ResumeProjectRequest   `json:"projects"`   // 项目经历子表（限 6 条）
-	Educations    []ResumeEducationRequest `json:"educations"` // 教育经历子表（键名复数，避免与主表学历编码 education 冲突）
-	Work          []ResumeWorkRequest      `json:"work"`       // 工作经历子表
-	Language      []ResumeLanguageRequest  `json:"language"`   // 语言能力子表
-	Training      []ResumeTrainingRequest  `json:"training"`   // 培训经历子表
-	Credent       []ResumeCredentRequest   `json:"credent"`    // 证书子表
 }
 
 // ResumeDetailData 简历详情返回（编辑回显：主表字段平铺 + 6 子表数组，子表按 id 升序）
