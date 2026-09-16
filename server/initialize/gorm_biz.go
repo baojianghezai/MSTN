@@ -60,6 +60,8 @@ func bizModel() error {
 		&hrcModel.CategoryGroup{},
 		&hrcModel.Category{},
 		&hrcModel.CategoryJobs{},
+		// 内容一期简版（资讯/招聘会/帮助）
+		&hrcModel.Article{},
 
 		// M3 收尾批：简历五张结构化子表（04 §2.4-2.8）
 		&hrcModel.ResumeEducation{},

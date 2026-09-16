@@ -37,6 +37,15 @@
           <span class="font-semibold">基本信息</span>
         </template>
 
+        <el-form-item label="简历模板">
+          <el-radio-group v-model="form.template">
+            <el-radio-button :value="1">经典</el-radio-button>
+            <el-radio-button :value="2">简约</el-radio-button>
+            <el-radio-button :value="3">紧凑</el-radio-button>
+          </el-radio-group>
+          <span class="ml-2 text-xs text-slate-400">企业下载本简历时按此模板生成 PDF</span>
+        </el-form-item>
+
         <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
           <el-form-item label="姓名">
             <el-input v-model="form.fullname" maxlength="15" placeholder="请输入姓名" clearable />
@@ -806,6 +815,7 @@
 
   const emptyResume = (): Resume => ({
     title: '',
+    template: 1,
     fullname: '',
     sex: 0,
     sexCn: '',
@@ -1045,6 +1055,7 @@
     form.experience = toNum(form.experience)
     form.wageMin = toNum(form.wageMin)
     form.wageMax = toNum(form.wageMax)
+    form.template = toNum(form.template, 1) || 1
     form.educations.forEach((e) => {
       e.education = toNum(e.education)
       e.startyear = toNum(e.startyear)
@@ -1186,6 +1197,7 @@
     if (isEdit) {
       const { data } = await getResume(resumeId)
       Object.assign(form, data)
+      form.template = data.template || 1
       // 回显子表（后端可能返回 null，兜底为空数组）；注意教育经历读 educations 复数键
       form.educations = data.educations || []
       form.work = (data.work || []).map((w) => ({ ...w, workType: w.workType || 1 }))

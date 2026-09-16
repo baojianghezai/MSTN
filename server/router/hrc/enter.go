@@ -25,6 +25,7 @@ type RouterGroup struct {
 	MessageRouter
 	TalentRouter
 	ChatRouter
+	CompanyHRRouter
 	Category
 }
 
@@ -56,4 +57,5 @@ var (
 	hrcCategoryApi       = api.ApiGroupApp.HrcApiGroup.CategoryApi
 	hrcChatApi           = api.ApiGroupApp.HrcApiGroup.ChatApi
 	hrcChatWsApi         = api.ApiGroupApp.HrcApiGroup.ChatWsApi
+	hrcCompanyHRApi      = api.ApiGroupApp.HrcApiGroup.CompanyHRApi
 )

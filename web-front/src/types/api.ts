@@ -57,6 +57,7 @@ export interface PersonalProfile {
   displayName: number
   qq: string
   weixin: string
+  avatar: string
 }
 
 // 分类项（03-cms.md #21）
@@ -293,6 +294,7 @@ export interface ResumeCompleteness {
 export interface Resume {
   id?: number
   title: string
+  template: number // 简历模板：1=经典 2=简约 3=紧凑
   fullname: string
   sex: number
   sexCn: string
@@ -381,7 +383,29 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     utype?: number
     chatScope?: 'personal' | 'company'
+    contentType?: number
+    contentTitle?: string
+    detailName?: string
   }
+}
+
+// 内容文章（#17：资讯/招聘会/帮助，ms_article）
+export interface ArticleItem {
+  id: number
+  type: number // 1=资讯 2=招聘会 3=帮助
+  title: string
+  summary: string
+  cover: string
+  content: string
+  source: string
+  holdTime: string
+  address: string
+  organizer: string
+  sort: number
+  display: number
+  click: number
+  addtime: string
+  updateTime: string
 }
 
 // 职位联系方式（09-jobs.md，ms_jobs_contact）

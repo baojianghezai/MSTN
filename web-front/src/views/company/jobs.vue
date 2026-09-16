@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-4xl px-4 py-16">
+  <div class="mx-auto max-w-7xl px-4 py-16">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-slate-800">职位管理</h1>
       <el-button type="primary" @click="openCreate">发布职位</el-button>

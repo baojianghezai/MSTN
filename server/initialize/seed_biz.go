@@ -25,7 +25,33 @@ func seedBiz(db *gorm.DB) error {
 	if err := seedJobsDisplayConfig(db); err != nil {
 		return err
 	}
+	if err := seedArticles(db); err != nil {
+		return err
+	}
 	return seedSetmeals(db)
+}
+
+// seedArticles 内容一期简版种子（资讯/招聘会/帮助，仅首次建库时插入）
+func seedArticles(db *gorm.DB) error {
+	var count int64
+	if err := db.Model(&hrcModel.Article{}).Count(&count).Error; err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+	now := hrcModel.Now()
+	articles := []hrcModel.Article{
+		{Type: hrcModel.ArticleTypeNews, Title: "名硕人才网正式上线，助力企业高效招聘", Summary: "汇聚真实职位与优质人才，让求职招聘更简单。", Content: "名硕人才网正式上线，平台聚焦真实职位直投、企业招聘与人才服务。\n\n企业可发布职位、下载简历、发起面试；求职者可在线制作简历、投递职位并实时沟通。", Source: "名硕人才网", Sort: 10, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeNews, Title: "简历制作小技巧：让 HR 一眼看中你", Summary: "填好期望薪资、突出项目经历，完善度越高越容易被下载。", Content: "1. 完善基本信息与求职意向；\n2. 量化工作业绩与项目成果；\n3. 按需添加技能、证书等加分项；\n4. 上传 PDF 附件简历，企业下载更专业。", Source: "名硕人才网", Sort: 9, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeNews, Title: "春季招聘会预告：百余家企业现场纳才", Summary: "线上线下同步，覆盖互联网、制造、医疗等行业。", Content: "春季招聘会即将启动，百余家企业现场纳才，欢迎求职者到场应聘。", Source: "名硕人才网", Sort: 8, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeJobfair, Title: "名硕人才网春季大型综合招聘会", Summary: "互联网/制造/医疗/教育多行业专场。", Content: "现场设企业展位、简历诊断、面试洽谈区，欢迎求职者携简历参加。", HoldTime: "2026-03-15 09:00-16:00", Address: "市人才市场一楼大厅", Organizer: "名硕人才网", Sort: 10, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeJobfair, Title: "互联网专场招聘会", Summary: "聚焦研发、产品、设计、运营岗位。", Content: "面向互联网从业者的专场招聘会，覆盖研发、产品、设计、运营等岗位。", HoldTime: "2026-04-20 13:30-17:30", Address: "高新区人力资源产业园", Organizer: "名硕人才网", Sort: 9, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeHelp, Title: "如何发布职位？", Summary: "企业中心 → 职位管理 → 发布职位。", Content: "登录企业账号后，进入「职位管理」点击「发布职位」，填写职位信息与联系方式，提交后等待审核，审核通过即展示。", Sort: 10, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeHelp, Title: "如何下载简历？", Summary: "收到简历 → 下载简历，消耗套餐下载权益。", Content: "企业进入「收到简历」，点击「下载简历」即可下载；有 PDF 附件简历时优先下发附件，否则按求职者所选模板生成 PDF。首次下载消耗套餐下载次数，重复下载不扣。", Sort: 9, Display: 1, AddTime: now, UpdateTime: now},
+		{Type: hrcModel.ArticleTypeHelp, Title: "如何发起在线沟通？", Summary: "职位详情/收到简历页可发起在线对话。", Content: "求职者可在职位详情页点击「在线沟通」，企业可在「收到简历」列表点击「在线沟通」，双方实时对话。", Sort: 8, Display: 1, AddTime: now, UpdateTime: now},
+	}
+	return db.Create(&articles).Error
 }
 
 func seedSetmeals(db *gorm.DB) error {

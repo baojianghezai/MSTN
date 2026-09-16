@@ -5,11 +5,15 @@ import (
 	"errors"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
 	"gorm.io/gorm"
 )
 
-var ErrPageNotFound = errors.New("静态页不存在")
+var (
+	ErrPageNotFound    = errors.New("静态页不存在")
+	ErrArticleNotFound = errors.New("内容不存在")
+)
 
 // CmsService 内容/配置服务（静态页、导航、分类、系统配置）
 type CmsService struct{}
@@ -22,6 +26,40 @@ func (s *CmsService) GetPage(ctx context.Context, alias string) (*hrcModel.Page,
 		return nil, ErrPageNotFound
 	}
 	return &page, err
+}
+
+// ListArticles 内容列表（资讯/招聘会/帮助；仅展示中，sort 降序 + 时间倒序）
+func (s *CmsService) ListArticles(ctx context.Context, typ int8, info request.PageInfo) ([]hrcModel.Article, int64, error) {
+	db := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Article{}).Where("display = 1")
+	if typ > 0 {
+		db = db.Where("type = ?", typ)
+	}
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	limit, offset := info.LimitOffset()
+	var list []hrcModel.Article
+	if err := db.Order("sort desc, addtime desc, id desc").Limit(limit).Offset(offset).Find(&list).Error; err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}
+
+// GetArticle 内容详情（仅展示中；click 自增）
+func (s *CmsService) GetArticle(ctx context.Context, id uint64) (*hrcModel.Article, error) {
+	db := global.GVA_DB.WithContext(ctx)
+	var article hrcModel.Article
+	if err := db.Where("id = ? AND display = 1", id).First(&article).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrArticleNotFound
+		}
+		return nil, err
+	}
+	if err := db.Model(&hrcModel.Article{}).Where("id = ?", id).UpdateColumn("click", gorm.Expr("click + 1")).Error; err != nil {
+		return nil, err
+	}
+	return &article, nil
 }
 
 // GetNavigations 前台导航（显示中的，按 sort 升序）

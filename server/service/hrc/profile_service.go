@@ -20,30 +20,43 @@ var (
 // ProfileService 个人/企业资料服务（02 §2.2 / §3.1）
 type ProfileService struct{}
 
-// GetPersonalProfile 个人资料读取（ms_members_info）
+// GetPersonalProfile 个人资料读取（ms_members_info；头像取 ms_members.avatars）
 func (s *ProfileService) GetPersonalProfile(uid uint64) (*hrcModel.MembersInfo, error) {
 	var info hrcModel.MembersInfo
 	err := global.GVA_DB.Where("uid = ?", uid).First(&info).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, ErrProfileNotFound
+		// 空资料：仍返回空对象（头像可单独存在）
+		info = hrcModel.MembersInfo{UID: uid}
+	} else if err != nil {
+		return nil, err
 	}
-	return &info, err
+	var member hrcModel.Members
+	if err := global.GVA_DB.Select("avatars").Where("uid = ?", uid).First(&member).Error; err == nil {
+		info.Avatar = member.Avatars
+	}
+	return &info, nil
 }
 
-// UpsertPersonalProfile 个人资料维护（存在更新，不存在创建）
+// UpsertPersonalProfile 个人资料维护（存在更新，不存在创建；头像同步写 ms_members.avatars）
 func (s *ProfileService) UpsertPersonalProfile(uid uint64, info *hrcModel.MembersInfo) error {
 	info.UID = uid
 	var count int64
 	global.GVA_DB.Model(&hrcModel.MembersInfo{}).Where("uid = ?", uid).Count(&count)
 	if count == 0 {
 		info.ID = 0
-		return global.GVA_DB.Create(info).Error
-	}
-	return global.GVA_DB.Model(&hrcModel.MembersInfo{}).Where("uid = ?", uid).
+		if err := global.GVA_DB.Create(info).Error; err != nil {
+			return err
+		}
+	} else if err := global.GVA_DB.Model(&hrcModel.MembersInfo{}).Where("uid = ?", uid).
 		Select("realname", "sex", "sex_cn", "birthday", "residence", "education", "education_cn",
 			"major", "major_cn", "experience", "experience_cn", "phone", "height", "marriage",
 			"marriage_cn", "display_name", "qq", "weixin").
-		Updates(info).Error
+		Updates(info).Error; err != nil {
+		return err
+	}
+	// 头像存会员主表（传空字符串表示清空）
+	return global.GVA_DB.Model(&hrcModel.Members{}).Where("uid = ?", uid).
+		Update("avatars", info.Avatar).Error
 }
 
 // GetCompanyProfile 企业资料读取（ms_company_profile）

@@ -61,6 +61,7 @@ func (a *ProfileApi) UpdatePersonalProfile(c *gin.Context) {
 		DisplayName:  req.DisplayName,
 		QQ:           req.QQ,
 		Weixin:       req.Weixin,
+		Avatar:       req.Avatar,
 	}
 	if err := hrcService.ServiceGroupApp.ProfileService.UpsertPersonalProfile(uid, info); err != nil {
 		Fail(c, CodeParamError, err.Error())

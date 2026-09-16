@@ -26,6 +26,7 @@
                 <el-dropdown-item @click="router.push({ name: 'CompanyTalentLibrary' })">人才库</el-dropdown-item>
                 <el-dropdown-item @click="router.push({ name: 'CompanyInterviews' })">面试邀请</el-dropdown-item>
                 <el-dropdown-item @click="router.push({ name: 'CompanyChat' })">在线对话</el-dropdown-item>
+                <el-dropdown-item @click="router.push({ name: 'CompanyHRs' })">员工账号（HR）</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>

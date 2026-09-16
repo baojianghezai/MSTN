@@ -4,7 +4,9 @@
     <el-card shadow="never" class="border-t-3 border-t-primary-500">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-50 text-xl text-primary-600"><span class="i-lucide-user-round" aria-hidden="true" /></div>
+          <el-avatar :size="52" :src="avatarUrl" class="bg-primary-50 text-primary-600">
+            <span class="i-lucide-user-round" aria-hidden="true" />
+          </el-avatar>
           <div>
           <h1 class="text-xl font-bold text-slate-800">个人中心</h1>
           <p class="mt-1 text-sm text-slate-500">
@@ -134,16 +136,41 @@
 </template>
 
 <script setup lang="ts">
-  import { reactive, ref } from 'vue'
+  import { computed, onMounted, reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { useUserStore } from '@/stores/user'
+  import { useChatStore } from '@/stores/chat'
   import { useSmsCode } from '@/composables/useSmsCode'
+  import { getPersonalProfile } from '@/api/profile'
   import { bindMobile, cancelAccount, changePassword, unbindMobile } from '@/api/auth'
   import { isStrongPassword, PASSWORD_RULE_HINT } from '@/utils/password'
 
   const router = useRouter()
   const userStore = useUserStore()
+  const chatStore = useChatStore()
+
+  // 头像（#16）：有则显示，无则默认头像
+  const avatar = ref('')
+  const avatarUrl = computed(() => {
+    if (!avatar.value) return '/default-avatar.svg'
+    return /^https?:\/\//.test(avatar.value) ? avatar.value : `/${avatar.value}`
+  })
+  onMounted(async () => {
+    try {
+      const { data } = await getPersonalProfile()
+      avatar.value = data.avatar || ''
+    } catch {
+      // 忽略
+    }
+  })
+
+  // 退出登录（#15：退出入口收敛到个人中心，不再放顶栏）
+  const handleLogout = () => {
+    chatStore.disconnect()
+    userStore.logout()
+    router.push({ name: 'Home' })
+  }
 
   // 滚动到页内卡片（九宫格里的安全类入口）
   const scrollTo = (id: string) => {
@@ -160,7 +187,8 @@
     { label: '修改密码', icon: 'i-lucide-key-round', action: () => scrollTo('card-password') },
     { label: '换绑手机', icon: 'i-lucide-smartphone', action: () => scrollTo('card-bind') },
     { label: '解绑手机', icon: 'i-lucide-unplug', action: () => scrollTo('card-unbind') },
-    { label: '注销账号', icon: 'i-lucide-shield-alert', danger: true, action: () => scrollTo('card-cancel') }
+    { label: '注销账号', icon: 'i-lucide-shield-alert', danger: true, action: () => scrollTo('card-cancel') },
+    { label: '退出登录', icon: 'i-lucide-log-out', danger: true, action: handleLogout }
   ]
 
   // 换绑手机 & 注销各用一份独立的验证码倒计时

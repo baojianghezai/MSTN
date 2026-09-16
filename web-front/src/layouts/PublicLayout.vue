@@ -103,6 +103,20 @@
             <p class="mt-3 max-w-xs text-sm leading-6">
               专注真实职位直投、企业招聘与人才服务，让求职更简单，招聘更高效。
             </p>
+            <!-- 公众号二维码（#20）：把截图放到 web-front/public/mp-qrcode.png 即可 -->
+            <div class="mt-5 flex items-center gap-3">
+              <img
+                v-if="qrOk"
+                src="/mp-qrcode.png"
+                alt="名硕人才网公众号二维码"
+                class="h-20 w-20 rounded bg-white object-contain p-1"
+                @error="qrOk = false"
+              />
+              <div v-else class="flex h-20 w-20 items-center justify-center rounded bg-white/10 text-center text-[10px] leading-tight text-slate-400">
+                公众号<br />二维码
+              </div>
+              <div class="text-xs leading-5 text-slate-400">扫码关注<br />名硕人才网公众号</div>
+            </div>
           </div>
 
           <div>
@@ -170,6 +184,8 @@
 
   const city = ref('青岛')
   const cityOptions = ['青岛', '北京', '上海', '广州', '深圳', '杭州', '成都', '武汉']
+  // 页脚公众号二维码是否可用（截图缺失时显示占位块）
+  const qrOk = ref(true)
 
   const DEFAULT_NAVS: NavItem[] = [
     { id: 0, title: '首页', url: '/', sort: 1, display: 1, addTime: '' },

@@ -38,6 +38,7 @@ func initBizRouter(Router *gin.Engine, routers ...*gin.RouterGroup) {
 	hrcRouter.InitInterviewRouter(v1Group)
 	hrcRouter.InitMessageRouter(v1Group)
 	hrcRouter.InitChatRouter(v1Group)
+	hrcRouter.InitCompanyHRRouter(v1Group)
 	hrcRouter.InitTalentRouter(v1Group)
 	hrcRouter.InitJobsRouter(v1Group)
 	hrcRouter.InitCompanyPublicRouter(v1Group)

@@ -144,7 +144,15 @@ func MemberAuth() gin.HandlerFunc {
 			c.AbortWithStatusJSON(401, gin.H{"code": 1001, "message": "账号状态异常，请联系管理员", "data": nil})
 			return
 		}
-		c.Set("member_uid", claims.UID)
+		// 多 HR（#21）：HR 子账号以所属企业主账号 uid 作为数据归属，
+		// 业务层沿用 member_uid 即可共享企业数据；member_real_uid 保留真实登录账号。
+		effectiveUID := claims.UID
+		if member.CompanyUID > 0 {
+			effectiveUID = member.CompanyUID
+		}
+		c.Set("member_uid", effectiveUID)
+		c.Set("member_real_uid", claims.UID)
+		c.Set("member_is_owner", member.CompanyUID == 0)
 		c.Set("member_utype", claims.Utype)
 		c.Set("member_claims", claims)
 		c.Next()
@@ -163,13 +171,29 @@ func UtypeAuth(utype int8) gin.HandlerFunc {
 	}
 }
 
-// GetMemberUID 从上下文取会员 uid
+// GetMemberUID 从上下文取会员 uid（企业 HR 子账号返回所属企业主账号 uid）
 func GetMemberUID(c *gin.Context) uint64 {
 	v, _ := c.Get("member_uid")
 	if v == nil {
 		return 0
 	}
 	return v.(uint64)
+}
+
+// GetMemberRealUID 从上下文取真实登录账号 uid（HR 子账号即其自身 uid）
+func GetMemberRealUID(c *gin.Context) uint64 {
+	if v, ok := c.Get("member_real_uid"); ok && v != nil {
+		return v.(uint64)
+	}
+	return GetMemberUID(c)
+}
+
+// IsMemberOwner 是否为企业主账号（非 HR 子账号）
+func IsMemberOwner(c *gin.Context) bool {
+	if v, ok := c.Get("member_is_owner"); ok && v != nil {
+		return v.(bool)
+	}
+	return true
 }
 
 // GetMemberUtype 从上下文取会员类型

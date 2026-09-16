@@ -7,6 +7,7 @@ import "time"
 type Members struct {
 	UID            uint64     `gorm:"column:uid;primaryKey;autoIncrement"`
 	Utype          int8       `gorm:"column:utype;default:1"`              // 1个人 2企业
+	CompanyUID     uint64     `gorm:"column:company_uid;index"`            // 企业 HR 子账号：归属企业主账号 uid（0=自身即企业主账号）
 	Username       string     `gorm:"column:username;size:60;uniqueIndex"` // 唯一
 	Email          string     `gorm:"column:email;size:80"`
 	EmailAudit     int8       `gorm:"column:email_audit;default:0"`
@@ -52,6 +53,7 @@ type MembersInfo struct {
 	DisplayName  int8       `gorm:"column:display_name;default:1" json:"displayName"`
 	QQ           string     `gorm:"column:qq;size:30" json:"qq"`
 	Weixin       string     `gorm:"column:weixin;size:30" json:"weixin"`
+	Avatar       string     `gorm:"-" json:"avatar"` // 头像 URL（实际存 ms_members.avatars，非本表字段）
 }
 
 func (MembersInfo) TableName() string { return "ms_members_info" }

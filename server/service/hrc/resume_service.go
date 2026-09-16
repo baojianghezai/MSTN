@@ -42,7 +42,7 @@ func (s *ResumeSubTables) safe() *ResumeSubTables {
 // ResumeService 简历服务（04 §3.1 创建/编辑全量替换；#49 列表 / #52 软删 / #54 公开隐藏 / #55 设默认 / #57 完善度）
 type ResumeService struct{}
 
-// CreateResume 创建简历（主表 + 6 子表同一事务；项目经历限 6 条；首份简历标记 def=1；
+// CreateResume 创建简历（主表 + 子表同一事务；项目经历限 6 条；首份简历标记 def=1；
 // 完善度与搜索索引按提交数据计算并同事务写入，04 §3.1 步骤 4）
 func (s *ResumeService) CreateResume(ctx context.Context, uid uint64, resume *hrcModel.Resume, subs *ResumeSubTables) (uint64, error) {
 	subs = subs.safe()
@@ -60,6 +60,9 @@ func (s *ResumeService) CreateResume(ctx context.Context, uid uint64, resume *hr
 	resume.Refreshtime = &now
 	resume.Click = 1
 	resume.Title = defaultResumeTitle(resume.Title, resume.FullName)
+	if resume.Template < hrcModel.ResumeTemplateMin || resume.Template > hrcModel.ResumeTemplateMax {
+		resume.Template = hrcModel.ResumeTemplateMin
+	}
 
 	var id uint64
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -85,7 +88,7 @@ func (s *ResumeService) CreateResume(ctx context.Context, uid uint64, resume *hr
 	return id, err
 }
 
-// UpdateResume 编辑简历（归属校验 + 6 子表全量替换删旧插新 + 完善度/搜索索引重算，04 §3.1）
+// UpdateResume 编辑简历（归属校验 + 子表全量替换删旧插新 + 完善度/搜索索引重算，04 §3.1）
 func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64, resume *hrcModel.Resume, subs *ResumeSubTables) error {
 	subs = subs.safe()
 	if len(subs.Project) > hrcModel.ResumeProjectMax {
@@ -126,6 +129,9 @@ func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64,
 		if title := strings.TrimSpace(resume.Title); title != "" {
 			updates["title"] = title
 		}
+		if resume.Template >= hrcModel.ResumeTemplateMin && resume.Template <= hrcModel.ResumeTemplateMax {
+			updates["template"] = resume.Template
+		}
 		if err := tx.Model(&hrcModel.Resume{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 			return err
 		}
@@ -136,7 +142,7 @@ func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64,
 	})
 }
 
-// GetResume 简历详情（编辑回显：主表 + 6 子表；仅本人未软删）
+// GetResume 简历详情（编辑回显：主表 + 子表；仅本人未软删）
 func (s *ResumeService) GetResume(ctx context.Context, uid uint64, id uint64) (*hrcModel.Resume, *ResumeSubTables, error) {
 	db := global.GVA_DB.WithContext(ctx)
 	resume, err := getOwnedResume(db, id, uid)
@@ -160,7 +166,7 @@ func (s *ResumeService) ListResumes(ctx context.Context, uid uint64, info reques
 	}
 	limit, offset := info.LimitOffset()
 	var list []hrcModel.Resume
-	err := db.Select("id", "title", "complete_percent", "def", "display", "addtime", "refreshtime").
+	err := db.Select("id", "title", "complete_percent", "def", "display", "template", "addtime", "refreshtime").
 		Order("def desc, addtime desc").
 		Limit(limit).Offset(offset).Find(&list).Error
 	return list, total, err

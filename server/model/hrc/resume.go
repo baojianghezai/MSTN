@@ -5,6 +5,12 @@ import "time"
 // ResumeProjectMax 项目经历上限（个人端同一简历限 6 条，04 §2.3）
 const ResumeProjectMax = 6
 
+// 简历模板编号范围（#22）：1=经典 2=简约 3=紧凑
+const (
+	ResumeTemplateMin int8 = 1
+	ResumeTemplateMax int8 = 3
+)
+
 // Resume 简历主表
 // 设计依据：01_数据库设计 §2.3
 type Resume struct {
@@ -13,6 +19,7 @@ type Resume struct {
 	Display           int8       `gorm:"column:display;default:1" json:"display"`   // 1=公开 2=不公开
 	Audit             int8       `gorm:"column:audit;default:1;index" json:"audit"` // 审核状态（01 §3.1 权威枚举）
 	Title             string     `gorm:"column:title;size:80" json:"title"`         // 简历标题
+	Template          int8       `gorm:"column:template;default:1" json:"template"` // 简历模板（1=经典 2=简约 3=紧凑）
 	FullName          string     `gorm:"column:fullname;size:15" json:"fullname"`   // 姓名
 	Sex               int8       `gorm:"column:sex" json:"sex"`                     // 性别
 	SexCN             string     `gorm:"column:sex_cn;size:3" json:"sexCn"`

@@ -11,4 +11,6 @@ func (r *CmsRouter) InitCmsRouter(Router *gin.RouterGroup) {
 	Router.GET("navigations", hrcCmsApi.Navigations)
 	Router.GET("categories", hrcCmsApi.Categories)
 	Router.GET("categories/districts", hrcCmsApi.Districts)
+	Router.GET("articles", hrcCmsApi.Articles)
+	Router.GET("articles/:id", hrcCmsApi.Article)
 }

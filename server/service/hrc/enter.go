@@ -30,6 +30,7 @@ type ServiceGroup struct {
 	TalentService              TalentService
 	CategoryService            CategoryService
 	ChatService                ChatService
+	CompanyHRService           CompanyHRService
 }
 
 var ServiceGroupApp = new(ServiceGroup)

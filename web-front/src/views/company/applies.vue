@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-5xl px-4 py-16">
+  <div class="mx-auto max-w-7xl px-4 py-16">
     <h1 class="text-2xl font-bold text-slate-800">收到的简历</h1>
     <p class="mt-2 text-sm text-slate-500">查看求职者投递，标记已看并回复</p>
 

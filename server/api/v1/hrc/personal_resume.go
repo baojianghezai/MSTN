@@ -285,6 +285,7 @@ func (a *ResumeApi) DeleteOutward(c *gin.Context) {
 func resumeFromRequest(req ResumeRequest) *hrcModel.Resume {
 	return &hrcModel.Resume{
 		Title:         req.Title,
+		Template:      req.Template,
 		FullName:      req.FullName,
 		Sex:           req.Sex,
 		SexCN:         req.SexCN,

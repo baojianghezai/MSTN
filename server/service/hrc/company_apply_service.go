@@ -145,7 +145,7 @@ func (s *CompanyApplyService) DownloadResume(ctx context.Context, companyUID uin
 		return nil, err
 	}
 
-	// 优先下载求职者上传的附件简历（PDF）；没有附件时回退为在线简历 HTML 快照
+	// 优先下载求职者上传的附件简历（PDF）；无附件时按所选模板生成 PDF；字体缺失才回退 HTML 快照
 	if strings.TrimSpace(resume.WordResume) != "" {
 		if content, loadErr := loadOutwardFile(ctx, resume.WordResume); loadErr == nil && len(content) > 0 {
 			return &ResumeDownloadFile{
@@ -154,6 +154,13 @@ func (s *CompanyApplyService) DownloadResume(ctx context.Context, companyUID uin
 				Content:     content,
 			}, nil
 		}
+	}
+	if content, pdfErr := RenderResumePDF(&resume, &subs, resume.Template); pdfErr == nil {
+		return &ResumeDownloadFile{
+			Filename:    resumePDFFilename(&resume),
+			ContentType: "application/pdf",
+			Content:     content,
+		}, nil
 	}
 	return &ResumeDownloadFile{
 		Filename:    fmt.Sprintf("resume-%d.html", resume.ID),

@@ -29,6 +29,7 @@ type ApiGroup struct {
 	CategoryApi       CategoryApi
 	ChatApi           ChatApi
 	ChatWsApi         ChatWsApi
+	CompanyHRApi      CompanyHRApi
 }
 
 var ApiGroupApp = new(ApiGroup)

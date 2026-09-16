@@ -4,6 +4,25 @@
     <p class="mt-2 text-sm text-slate-500">完善资料有助于求职</p>
 
     <el-form :model="form" label-width="80px" class="mt-8" @submit.prevent>
+      <el-form-item label="头像">
+        <div class="flex items-center gap-4">
+          <el-avatar :size="64" :src="avatarUrl" />
+          <div>
+            <el-upload
+              action="/api/v1/upload"
+              :headers="uploadHeaders"
+              :show-file-list="false"
+              accept="image/*"
+              :on-success="onAvatarUploaded"
+              :before-upload="beforeAvatarUpload"
+            >
+              <el-button>上传头像</el-button>
+            </el-upload>
+            <p class="mt-1 text-xs text-slate-400">支持 jpg/png，不超过 5MB；不传则用默认头像</p>
+          </div>
+        </div>
+      </el-form-item>
+
       <el-form-item label="姓名">
         <el-input v-model="form.realname" placeholder="请输入真实姓名" clearable />
       </el-form-item>
@@ -86,12 +105,15 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, reactive, ref, watch } from 'vue'
+  import { computed, onMounted, reactive, ref, watch } from 'vue'
   import { ElMessage } from 'element-plus'
   import { getPersonalProfile, updatePersonalProfile } from '@/api/profile'
   import { getCategories, getDistricts } from '@/api/content'
   import { dateInputToISO, unixToDateInput } from '@/utils/format'
+  import { useUserStore } from '@/stores/user'
   import type { Categories, CategoryItem, PersonalProfile } from '@/types/api'
+
+  const userStore = useUserStore()
 
   const emptyProfile: PersonalProfile = {
     realname: '',
@@ -111,7 +133,8 @@
     marriageCn: '',
     displayName: 1,
     qq: '',
-    weixin: ''
+    weixin: '',
+    avatar: ''
   }
 
   const form = reactive<PersonalProfile>({ ...emptyProfile })
@@ -130,6 +153,33 @@
   const birthdayDate = ref('')
   const heightInput = ref('')
   const saving = ref(false)
+
+  // 头像（#16）：上传后随资料保存；未设置时用默认头像
+  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
+  const avatarUrl = computed(() => {
+    const url = form.avatar
+    if (!url) return '/default-avatar.svg'
+    return /^https?:\/\//.test(url) ? url : `/${url}`
+  })
+  const beforeAvatarUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      ElMessage.warning('请上传图片文件')
+      return false
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      ElMessage.warning('头像不能超过 5MB')
+      return false
+    }
+    return true
+  }
+  const onAvatarUploaded = (res: { code: number; message?: string; data?: { url: string } }) => {
+    if (res.code === 0 && res.data) {
+      form.avatar = res.data.url
+      ElMessage.success('头像已选择，保存后生效')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  }
 
   // 省/市/区三级联动
   const provinceId = ref<number | null>(null)

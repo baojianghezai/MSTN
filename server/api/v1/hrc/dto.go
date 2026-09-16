@@ -126,6 +126,7 @@ type PersonalProfileRequest struct {
 	DisplayName  int8   `json:"displayName"`
 	QQ           string `json:"qq"`
 	Weixin       string `json:"weixin"`
+	Avatar       string `json:"avatar"` // 头像 URL（存 ms_members.avatars）
 }
 
 type CompanyProfileRequest struct {
@@ -325,6 +326,7 @@ type ResumeStudentLeaderRequest struct {
 // ResumeRequest 创建/编辑简历请求（主表可编辑字段 + 9 子表：项目经历限 6 条，其余一期不限）
 type ResumeRequest struct {
 	Title         string                       `json:"title"`
+	Template      int8                         `json:"template"` // 简历模板（1=经典 2=简约 3=紧凑）
 	FullName      string                       `json:"fullname"`
 	Sex           int8                         `json:"sex"`
 	SexCN         string                       `json:"sexCn"`

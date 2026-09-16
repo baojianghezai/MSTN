@@ -75,20 +75,38 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'jobfairs',
         name: 'Jobfairs',
-        meta: { title: '招聘会' },
-        component: () => import('@/views/placeholder/coming-soon.vue')
+        meta: { title: '招聘会', contentType: 2, contentTitle: '招聘会', detailName: 'JobfairDetail' },
+        component: () => import('@/views/content/list.vue')
+      },
+      {
+        path: 'jobfairs/:id',
+        name: 'JobfairDetail',
+        meta: { title: '招聘会详情' },
+        component: () => import('@/views/content/detail.vue')
       },
       {
         path: 'news',
         name: 'News',
-        meta: { title: '资讯' },
-        component: () => import('@/views/placeholder/coming-soon.vue')
+        meta: { title: '资讯', contentType: 1, contentTitle: '资讯', detailName: 'NewsDetail' },
+        component: () => import('@/views/content/list.vue')
+      },
+      {
+        path: 'news/:id',
+        name: 'NewsDetail',
+        meta: { title: '资讯详情' },
+        component: () => import('@/views/content/detail.vue')
       },
       {
         path: 'help',
         name: 'Help',
-        meta: { title: '帮助' },
-        component: () => import('@/views/placeholder/coming-soon.vue')
+        meta: { title: '帮助', contentType: 3, contentTitle: '帮助中心', detailName: 'HelpDetail' },
+        component: () => import('@/views/content/list.vue')
+      },
+      {
+        path: 'help/:id',
+        name: 'HelpDetail',
+        meta: { title: '帮助详情' },
+        component: () => import('@/views/content/detail.vue')
       }
     ]
   },
@@ -247,6 +265,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CompanyPromotions',
         meta: { title: '首页推广' },
         component: () => import('@/views/company/promotions.vue')
+      },
+      {
+        path: 'hrs',
+        name: 'CompanyHRs',
+        meta: { title: '员工账号' },
+        component: () => import('@/views/company/hrs.vue')
       }
     ]
   },

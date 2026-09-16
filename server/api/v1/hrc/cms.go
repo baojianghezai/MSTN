@@ -3,11 +3,54 @@ package hrc
 import (
 	"strconv"
 
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	hrcService "github.com/flipped-aurora/gin-vue-admin/server/service/hrc"
 	"github.com/gin-gonic/gin"
 )
 
 type CmsApi struct{}
+
+// Articles 内容列表（资讯/招聘会/帮助，type: 1/2/3）
+// @Tags HrcCms
+// @Summary 内容列表
+// @Produce json
+// @Param type query int false "类型：1资讯 2招聘会 3帮助"
+// @Param page query int false "页码"
+// @Param pageSize query int false "每页大小"
+// @Success 200 {object} Response{data=PageData}
+// @Router /api/v1/articles [get]
+func (a *CmsApi) Articles(c *gin.Context) {
+	typ, _ := strconv.Atoi(c.DefaultQuery("type", "0"))
+	var pageInfo request.PageInfo
+	_ = c.ShouldBindQuery(&pageInfo)
+	list, total, err := hrcService.ServiceGroupApp.CmsService.ListArticles(c.Request.Context(), int8(typ), pageInfo)
+	if err != nil {
+		Fail(c, CodeParamError, err.Error())
+		return
+	}
+	OKWithData(c, PageData{List: list, Total: total, Page: pageInfo.Page, PageSize: pageInfo.PageSize})
+}
+
+// Article 内容详情（资讯/招聘会/帮助）
+// @Tags HrcCms
+// @Summary 内容详情
+// @Produce json
+// @Param id path int true "内容 id"
+// @Success 200 {object} Response
+// @Router /api/v1/articles/{id} [get]
+func (a *CmsApi) Article(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		Fail(c, CodeParamError, "参数错误")
+		return
+	}
+	article, err := hrcService.ServiceGroupApp.CmsService.GetArticle(c.Request.Context(), id)
+	if err != nil {
+		Fail(c, CodeParamError, err.Error())
+		return
+	}
+	OKWithData(c, article)
+}
 
 // Page 静态页（按 alias）
 // @Tags HrcCms

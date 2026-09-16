@@ -1,6 +1,7 @@
 package hrc
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -60,6 +61,8 @@ func TestCompanyApplyListLookedReply(t *testing.T) {
 }
 
 func TestCompanyApplyDownloadResumeConsumesQuotaOnce(t *testing.T) {
+	// 强制字体缺失 → 回退 HTML 快照（PDF 生成另有专测）
+	t.Setenv("RESUME_PDF_FONT", filepath.Join(t.TempDir(), "missing.ttf"))
 	db := testutil.NewMemoryDB(t,
 		&hrcModel.PersonalJobsApply{},
 		&hrcModel.Resume{},
@@ -167,6 +170,32 @@ func TestCompanyApplyDownloadResumePrefersAttachedPDF(t *testing.T) {
 	require.Equal(t, "张三的简历.pdf", file.Filename)
 	require.Equal(t, "application/pdf", file.ContentType)
 	require.Equal(t, pdfContent, file.Content)
+}
+
+// 在线简历按所选模板渲染 PDF（需系统可用中文 TTF，否则跳过）
+func TestRenderResumePDF(t *testing.T) {
+	if _, err := FindResumePDFFont(); err != nil {
+		t.Skip("未找到可用于 PDF 的中文 TTF 字体，跳过：", err)
+	}
+	resume := &hrcModel.Resume{
+		FullName:      "张三",
+		EducationCN:   "本科",
+		IntentionJobs: "Go 开发",
+		Telephone:     "13800138000",
+		Email:         "zhangsan@example.com",
+		Specialty:     "擅长后端开发与系统设计",
+		WageMin:       8000,
+		WageMax:       15000,
+	}
+	subs := &ResumeSubTables{
+		Work: []hrcModel.ResumeWork{{CompanyName: "某某科技", Jobs: "Go 工程师", Achievements: "负责简历模块"}},
+	}
+	for _, tpl := range []int8{1, 2, 3} {
+		out, err := RenderResumePDF(resume, subs, tpl)
+		require.NoError(t, err)
+		require.True(t, bytes.HasPrefix(out, []byte("%PDF-")), "模板 %d 应输出 PDF", tpl)
+		require.Greater(t, len(out), 1000)
+	}
 }
 
 func TestCompanyApplyDownloadResumeRejectsExhaustedOrMissingEntitlement(t *testing.T) {
