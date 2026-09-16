@@ -184,7 +184,7 @@ func buildResumeHTML(resume *hrcModel.Resume, subs *ResumeSubTables) []byte {
 	writeResumeSection(&body, "求职意向", []string{
 		"期望职位：" + resume.IntentionJobs,
 		"期望地区：" + resume.DistrictCN,
-		"期望薪资：" + resume.WageCN,
+		"期望薪资：" + formatWageRange(resume.WageMin, resume.WageMax),
 		"当前状态：" + resume.CurrentCN,
 	})
 	writeResumeEntries(&body, "教育经历", len(subs.Education), func(i int) string {
@@ -247,6 +247,19 @@ func formatResumePeriod(startYear uint16, startMonth uint8, endYear uint16, endM
 		return start + " 至今"
 	}
 	return fmt.Sprintf("%s 至 %d-%02d", start, endYear, endMonth)
+}
+
+func formatWageRange(min, max uint16) string {
+	if min == 0 && max == 0 {
+		return ""
+	}
+	if min > 0 && max > 0 {
+		return fmt.Sprintf("%d-%d 元/月", min, max)
+	}
+	if min > 0 {
+		return fmt.Sprintf("%d 元/月以上", min)
+	}
+	return fmt.Sprintf("%d 元/月以下", max)
 }
 
 func joinResumeDetails(values ...string) string {

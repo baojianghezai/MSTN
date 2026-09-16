@@ -17,17 +17,17 @@ type Resume struct {
 	Sex               int8       `gorm:"column:sex" json:"sex"`                     // 性别
 	SexCN             string     `gorm:"column:sex_cn;size:3" json:"sexCn"`
 	Birthdate         uint16     `gorm:"column:birthdate" json:"birthdate"`         // 出生年
-	Residence         string     `gorm:"column:residence;size:30" json:"residence"` // 籍贯
+	Residence         string     `gorm:"column:residence;size:30" json:"residence"` // 籍贯（省/市/区，斜杠分隔）
 	Education         uint16     `gorm:"column:education" json:"education"`         // 最高学历
 	EducationCN       string     `gorm:"column:education_cn;size:30" json:"educationCn"`
 	Major             uint16     `gorm:"column:major" json:"major"` // 专业
 	MajorCN           string     `gorm:"column:major_cn;size:50" json:"majorCn"`
 	Experience        uint16     `gorm:"column:experience" json:"experience"` // 工作年限
 	ExperienceCN      string     `gorm:"column:experience_cn;size:30" json:"experienceCn"`
-	District          string     `gorm:"column:district;size:100" json:"district"` // 期望地区
+	District          string     `gorm:"column:district;size:100" json:"district"` // 期望地区（省/市/区，斜杠分隔，含"不限"）
 	DistrictCN        string     `gorm:"column:district_cn;size:255" json:"districtCn"`
-	Wage              uint16     `gorm:"column:wage" json:"wage"` // 期望薪资
-	WageCN            string     `gorm:"column:wage_cn;size:30" json:"wageCn"`
+	WageMin           uint16     `gorm:"column:wage_min" json:"wageMin"`                      // 期望薪资下限（元/月）
+	WageMax           uint16     `gorm:"column:wage_max" json:"wageMax"`                      // 期望薪资上限（元/月）
 	IntentionJobs     string     `gorm:"column:intention_jobs;size:255" json:"intentionJobs"` // 期望职位
 	Specialty         string     `gorm:"column:specialty;size:1000" json:"specialty"`         // 自我评价
 	Telephone         string     `gorm:"column:telephone;size:50" json:"telephone"`           // 联系电话

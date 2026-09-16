@@ -49,12 +49,15 @@ var completenessRules = []completenessRule{
 	{"work", "工作经历", 15, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Work) > 0 }},
 	{"work", "项目经历", 10, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Project) > 0 }},
 	{"intention", "期望地区", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.District != "" }},
-	{"intention", "期望薪资", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.Wage != 0 }},
+	{"intention", "期望薪资", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.WageMin > 0 || r.WageMax > 0 }},
 	{"intention", "期望职位", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.IntentionJobs != "" }},
 	{"other", "语言能力", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Language) > 0 }},
 	{"other", "培训经历", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Training) > 0 }},
 	{"other", "资格证书", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Credent) > 0 }},
 	{"other", "自我评价", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.Specialty != "" }},
+	{"other", "专业技能", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Skill) > 0 }},
+	{"other", "个人作品", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Portfolio) > 0 }},
+	{"other", "学生干部经历", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.StudentLeader) > 0 }},
 }
 
 var completenessCategoryNames = []struct{ key, name string }{
@@ -117,6 +120,15 @@ func buildSearchKeys(resume *hrcModel.Resume, subs *ResumeSubTables) (string, st
 	}
 	for _, c := range subs.Credent {
 		full += c.Name
+	}
+	for _, s := range subs.Skill {
+		full += s.Name
+	}
+	for _, p := range subs.Portfolio {
+		full += p.Title + p.Description
+	}
+	for _, sl := range subs.StudentLeader {
+		full += sl.Organization + sl.Role + sl.Description
 	}
 	precise := resume.IntentionJobs
 	for _, w := range subs.Work {

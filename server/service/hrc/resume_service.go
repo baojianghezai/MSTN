@@ -17,14 +17,18 @@ var (
 )
 
 // ResumeSubTables 简历子表批量结构（04 §3.1：随 #48 创建 / #51 编辑 主表同事务全量替换）
-// 六张子表：education/work/language/training/credent/project（project 限 6 条，其余一期不限）
+// 九张子表：education/work/language/training/credent/project/skill/portfolio/student_leader
+// project 限 6 条，其余一期不限
 type ResumeSubTables struct {
-	Education []hrcModel.ResumeEducation
-	Work      []hrcModel.ResumeWork
-	Language  []hrcModel.ResumeLanguage
-	Training  []hrcModel.ResumeTraining
-	Credent   []hrcModel.ResumeCredent
-	Project   []hrcModel.ResumeProject
+	Education     []hrcModel.ResumeEducation
+	Work          []hrcModel.ResumeWork
+	Language      []hrcModel.ResumeLanguage
+	Training      []hrcModel.ResumeTraining
+	Credent       []hrcModel.ResumeCredent
+	Project       []hrcModel.ResumeProject
+	Skill         []hrcModel.ResumeSkill
+	Portfolio     []hrcModel.ResumePortfolio
+	StudentLeader []hrcModel.ResumeStudentLeader
 }
 
 func (s *ResumeSubTables) safe() *ResumeSubTables {
@@ -104,8 +108,8 @@ func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64,
 			"experience_cn":  resume.ExperienceCN,
 			"district":       resume.District,
 			"district_cn":    resume.DistrictCN,
-			"wage":           resume.Wage,
-			"wage_cn":        resume.WageCN,
+			"wage_min":       resume.WageMin,
+			"wage_max":       resume.WageMax,
 			"intention_jobs": resume.IntentionJobs,
 			"specialty":      resume.Specialty,
 			"telephone":      resume.Telephone,
@@ -240,7 +244,7 @@ func getOwnedResume(db *gorm.DB, id uint64, uid uint64) (*hrcModel.Resume, error
 	return &r, nil
 }
 
-// findSubTables 读取一份简历的 6 张子表（按 id 升序）
+// findSubTables 读取一份简历的 9 张子表（按 id 升序）
 func findSubTables(db *gorm.DB, id uint64, subs *ResumeSubTables) error {
 	subs = subs.safe()
 	if err := db.Where("pid = ?", id).Order("id asc").Find(&subs.Education).Error; err != nil {
@@ -259,6 +263,15 @@ func findSubTables(db *gorm.DB, id uint64, subs *ResumeSubTables) error {
 		return err
 	}
 	if err := db.Where("pid = ?", id).Order("id asc").Find(&subs.Project).Error; err != nil {
+		return err
+	}
+	if err := db.Where("pid = ?", id).Order("id asc").Find(&subs.Skill).Error; err != nil {
+		return err
+	}
+	if err := db.Where("pid = ?", id).Order("id asc").Find(&subs.Portfolio).Error; err != nil {
+		return err
+	}
+	if err := db.Where("pid = ?", id).Order("id asc").Find(&subs.StudentLeader).Error; err != nil {
 		return err
 	}
 	return nil
@@ -297,6 +310,21 @@ func (s *ResumeService) writeSubTables(tx *gorm.DB, id uint64, uid uint64, subs 
 			return err
 		}
 	}
+	if len(subs.Skill) > 0 {
+		if err := tx.Create(&subs.Skill).Error; err != nil {
+			return err
+		}
+	}
+	if len(subs.Portfolio) > 0 {
+		if err := tx.Create(&subs.Portfolio).Error; err != nil {
+			return err
+		}
+	}
+	if len(subs.StudentLeader) > 0 {
+		if err := tx.Create(&subs.StudentLeader).Error; err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -305,6 +333,7 @@ func (s *ResumeService) replaceSubTables(tx *gorm.DB, id uint64, uid uint64, sub
 	for _, m := range []interface{}{
 		&hrcModel.ResumeEducation{}, &hrcModel.ResumeWork{}, &hrcModel.ResumeLanguage{},
 		&hrcModel.ResumeTraining{}, &hrcModel.ResumeCredent{}, &hrcModel.ResumeProject{},
+		&hrcModel.ResumeSkill{}, &hrcModel.ResumePortfolio{}, &hrcModel.ResumeStudentLeader{},
 	} {
 		if err := tx.Where("pid = ?", id).Delete(m).Error; err != nil {
 			return err
@@ -344,6 +373,21 @@ func stampSubTables(id uint64, uid uint64, subs *ResumeSubTables) {
 		subs.Project[i].ID = 0
 		subs.Project[i].PID = id
 		subs.Project[i].UID = uid
+	}
+	for i := range subs.Skill {
+		subs.Skill[i].ID = 0
+		subs.Skill[i].PID = id
+		subs.Skill[i].UID = uid
+	}
+	for i := range subs.Portfolio {
+		subs.Portfolio[i].ID = 0
+		subs.Portfolio[i].PID = id
+		subs.Portfolio[i].UID = uid
+	}
+	for i := range subs.StudentLeader {
+		subs.StudentLeader[i].ID = 0
+		subs.StudentLeader[i].PID = id
+		subs.StudentLeader[i].UID = uid
 	}
 }
 

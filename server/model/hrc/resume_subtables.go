@@ -35,6 +35,7 @@ type ResumeWork struct {
 	EndYear      uint16 `gorm:"column:endyear" json:"endyear"`
 	EndMonth     uint8  `gorm:"column:endmonth" json:"endmonth"`
 	ToDate       int8   `gorm:"column:todate" json:"todate"`                       // 至今标记（0=已结束 1=至今）
+	WorkType     int8   `gorm:"column:work_type;default:1" json:"workType"`        // 1=工作 2=实习
 	CompanyName  string `gorm:"column:companyname;size:50" json:"companyname"`     // 公司名称
 	Jobs         string `gorm:"column:jobs;size:30" json:"jobs"`                   // 职位
 	Achievements string `gorm:"column:achievements;size:1000" json:"achievements"` // 工作业绩
@@ -87,3 +88,46 @@ type ResumeCredent struct {
 }
 
 func (ResumeCredent) TableName() string { return "ms_resume_credent" }
+
+// ResumeSkill 专业技能（可选额外项）
+// 设计依据：11 新增——用户按需添加的技能标签
+type ResumeSkill struct {
+	ID    uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	PID   uint64 `gorm:"column:pid;index" json:"pid"`     // 简历主表 id
+	UID   uint64 `gorm:"column:uid;index" json:"uid"`     // 简历所属会员 uid
+	Name  string `gorm:"column:name;size:50" json:"name"` // 技能名称
+	Level uint8  `gorm:"column:level" json:"level"`       // 熟练度 1=入门 2=熟练 3=精通
+}
+
+func (ResumeSkill) TableName() string { return "ms_resume_skill" }
+
+// ResumePortfolio 个人作品（可选额外项）
+// 设计依据：11 新增——作品集链接/描述
+type ResumePortfolio struct {
+	ID          uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	PID         uint64 `gorm:"column:pid;index" json:"pid"`                     // 简历主表 id
+	UID         uint64 `gorm:"column:uid;index" json:"uid"`                     // 简历所属会员 uid
+	Title       string `gorm:"column:title;size:100" json:"title"`              // 作品标题
+	Description string `gorm:"column:description;size:1000" json:"description"` // 作品描述
+	URL         string `gorm:"column:url;size:255" json:"url"`                  // 作品链接
+}
+
+func (ResumePortfolio) TableName() string { return "ms_resume_portfolio" }
+
+// ResumeStudentLeader 学生干部经历（可选额外项）
+// 设计依据：11 新增——学生组织/社团经历
+type ResumeStudentLeader struct {
+	ID           uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	PID          uint64 `gorm:"column:pid;index" json:"pid"`                      // 简历主表 id
+	UID          uint64 `gorm:"column:uid;index" json:"uid"`                      // 简历所属会员 uid
+	Organization string `gorm:"column:organization;size:100" json:"organization"` // 组织名称
+	Role         string `gorm:"column:role;size:50" json:"role"`                  // 担任职务
+	StartYear    uint16 `gorm:"column:startyear" json:"startyear"`                // 开始年
+	StartMonth   uint8  `gorm:"column:startmonth" json:"startmonth"`              // 开始月
+	EndYear      uint16 `gorm:"column:endyear" json:"endyear"`                    // 结束年
+	EndMonth     uint8  `gorm:"column:endmonth" json:"endmonth"`                  // 结束月
+	ToDate       int8   `gorm:"column:todate" json:"todate"`                      // 至今标记（0=已结束 1=至今）
+	Description  string `gorm:"column:description;size:1000" json:"description"`  // 经历描述
+}
+
+func (ResumeStudentLeader) TableName() string { return "ms_resume_student_leader" }

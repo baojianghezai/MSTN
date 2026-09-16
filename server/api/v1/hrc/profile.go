@@ -1,6 +1,8 @@
 package hrc
 
 import (
+	"time"
+
 	middlewarehrc "github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
 	hrcService "github.com/flipped-aurora/gin-vue-admin/server/service/hrc"
@@ -44,7 +46,7 @@ func (a *ProfileApi) UpdatePersonalProfile(c *gin.Context) {
 		RealName:     req.RealName,
 		Sex:          req.Sex,
 		SexCN:        req.SexCN,
-		Birthday:     int64ToTimePtr(req.Birthday),
+		Birthday:     parseISOTimePtr(req.Birthday),
 		Residence:    req.Residence,
 		Education:    req.Education,
 		EducationCN:  req.EducationCN,
@@ -184,4 +186,18 @@ func companyAuditCN(audit int8) string {
 	default:
 		return ""
 	}
+}
+
+// parseISOTimePtr 解析 ISO8601 日期字符串为 *time.Time
+func parseISOTimePtr(s string) *time.Time {
+	if s == "" {
+		return nil
+	}
+	layouts := []string{"2006-01-02", time.RFC3339}
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return &t
+		}
+	}
+	return nil
 }

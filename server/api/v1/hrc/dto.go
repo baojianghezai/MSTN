@@ -111,7 +111,7 @@ type PersonalProfileRequest struct {
 	RealName     string `json:"realname"`
 	Sex          int8   `json:"sex"`
 	SexCN        string `json:"sexCn"`
-	Birthday     int64  `json:"birthday"`
+	Birthday     string `json:"birthday"`
 	Residence    string `json:"residence"`
 	Education    uint16 `json:"education"`
 	EducationCN  string `json:"educationCn"`
@@ -263,6 +263,7 @@ type ResumeWorkRequest struct {
 	EndYear      uint16 `json:"endyear"`
 	EndMonth     uint8  `json:"endmonth"`
 	ToDate       int8   `json:"todate"` // 至今标记（0=已结束 1=至今）
+	WorkType     int8   `json:"workType"`     // 1=工作 2=实习
 	CompanyName  string `json:"companyname"`
 	Jobs         string `json:"jobs"`
 	Achievements string `json:"achievements"`
@@ -296,21 +297,69 @@ type ResumeCredentRequest struct {
 	Images string `json:"images"`
 }
 
-// ResumeRequest 创建/编辑简历请求（主表可编辑字段 + 6 子表：项目经历限 6 条，其余一期不限）
+// ResumeSkillRequest 专业技能子表项（11 新增：可选额外项）
+type ResumeSkillRequest struct {
+	Name  string `json:"name"`
+	Level uint8  `json:"level"` // 1=入门 2=熟练 3=精通
+}
+
+// ResumePortfolioRequest 个人作品子表项（11 新增：可选额外项）
+type ResumePortfolioRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+}
+
+// ResumeStudentLeaderRequest 学生干部经历子表项（11 新增：可选额外项）
+type ResumeStudentLeaderRequest struct {
+	Organization string `json:"organization"`
+	Role         string `json:"role"`
+	StartYear    uint16 `json:"startyear"`
+	StartMonth   uint8  `json:"startmonth"`
+	EndYear      uint16 `json:"endyear"`
+	EndMonth     uint8  `json:"endmonth"`
+	ToDate       int8   `json:"todate"`
+	Description  string `json:"description"`
+}
+
+// ResumeRequest 创建/编辑简历请求（主表可编辑字段 + 9 子表：项目经历限 6 条，其余一期不限）
 type ResumeRequest struct {
-	Title         string                   `json:"title"`
-	FullName      string                   `json:"fullname"`
-	Sex           int8                     `json:"sex"`
-	SexCN         string                   `json:"sexCn"`
-	Birthdate     uint16                   `json:"birthdate"`
-	Residence     string                   `json:"residence"`
-	Education     uint16                   `json:"education"`
-	EducationCN   string                   `json:"educationCn"`
-	Major         uint16                   `json:"major"`
-	MajorCN       string                   `json:"majorCn"`
-	Experience    uint16                   `json:"experience"`
-	ExperienceCN  string                   `json:"experienceCn"`
-	District      string                   `json:"district"`
+	Title         string                       `json:"title"`
+	FullName      string                       `json:"fullname"`
+	Sex           int8                         `json:"sex"`
+	SexCN         string                       `json:"sexCn"`
+	Birthdate     uint16                       `json:"birthdate"`
+	Residence     string                       `json:"residence"`
+	Education     uint16                       `json:"education"`
+	EducationCN   string                       `json:"educationCn"`
+	Major         uint16                       `json:"major"`
+	MajorCN       string                       `json:"majorCn"`
+	Experience    uint16                       `json:"experience"`
+	ExperienceCN  string                       `json:"experienceCn"`
+	District      string                       `json:"district"`
+	DistrictCN    string                       `json:"districtCn"`
+	WageMin       uint16                       `json:"wageMin"`       // 期望薪资下限
+	WageMax       uint16                       `json:"wageMax"`       // 期望薪资上限
+	IntentionJobs string                       `json:"intentionJobs"`
+	Specialty     string                       `json:"specialty"`
+	Telephone     string                       `json:"telephone"`
+	Email         string                       `json:"email"`
+	DisplayName   int8                         `json:"displayName"`
+	Current       uint16                       `json:"current"`
+	CurrentCN     string                       `json:"currentCn"`
+	MobileAudit   int8                         `json:"mobileAudit"`
+	Talent        int8                         `json:"talent"`
+	Entrust       int8                         `json:"entrust"`
+	Projects      []ResumeProjectRequest       `json:"projects"`
+	Educations    []ResumeEducationRequest     `json:"educations"`
+	Work          []ResumeWorkRequest          `json:"work"`
+	Language      []ResumeLanguageRequest      `json:"language"`
+	Training      []ResumeTrainingRequest      `json:"training"`
+	Credent       []ResumeCredentRequest       `json:"credent"`
+	Skill         []ResumeSkillRequest         `json:"skill"`
+	Portfolio     []ResumePortfolioRequest     `json:"portfolio"`
+	StudentLeader []ResumeStudentLeaderRequest `json:"studentLeader"`
+}
 	DistrictCN    string                   `json:"districtCn"`
 	Wage          uint16                   `json:"wage"`
 	WageCN        string                   `json:"wageCn"`

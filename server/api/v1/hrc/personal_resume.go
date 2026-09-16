@@ -235,8 +235,8 @@ func resumeFromRequest(req ResumeRequest) *hrcModel.Resume {
 		ExperienceCN:  req.ExperienceCN,
 		District:      req.District,
 		DistrictCN:    req.DistrictCN,
-		Wage:          req.Wage,
-		WageCN:        req.WageCN,
+		WageMin:       req.WageMin,
+		WageMax:       req.WageMax,
 		IntentionJobs: req.IntentionJobs,
 		Specialty:     req.Specialty,
 		Telephone:     req.Telephone,
@@ -250,7 +250,7 @@ func resumeFromRequest(req ResumeRequest) *hrcModel.Resume {
 	}
 }
 
-// resumeSubTablesFromRequest 请求 DTO → 6 子表批量结构（子表 id/pid/uid 由服务端盖章，不信任提交值）
+// resumeSubTablesFromRequest 请求 DTO → 9 子表批量结构（子表 id/pid/uid 由服务端盖章，不信任提交值）
 func resumeSubTablesFromRequest(req ResumeRequest) *hrcService.ResumeSubTables {
 	subs := &hrcService.ResumeSubTables{}
 	if req.Projects != nil {
@@ -293,6 +293,7 @@ func resumeSubTablesFromRequest(req ResumeRequest) *hrcService.ResumeSubTables {
 				EndYear:      it.EndYear,
 				EndMonth:     it.EndMonth,
 				ToDate:       it.ToDate,
+				WorkType:     it.WorkType,
 				CompanyName:  it.CompanyName,
 				Jobs:         it.Jobs,
 				Achievements: it.Achievements,
@@ -333,6 +334,40 @@ func resumeSubTablesFromRequest(req ResumeRequest) *hrcService.ResumeSubTables {
 				Year:   it.Year,
 				Month:  it.Month,
 				Images: it.Images,
+			})
+		}
+	}
+	if req.Skill != nil {
+		subs.Skill = make([]hrcModel.ResumeSkill, 0, len(req.Skill))
+		for _, it := range req.Skill {
+			subs.Skill = append(subs.Skill, hrcModel.ResumeSkill{
+				Name:  it.Name,
+				Level: it.Level,
+			})
+		}
+	}
+	if req.Portfolio != nil {
+		subs.Portfolio = make([]hrcModel.ResumePortfolio, 0, len(req.Portfolio))
+		for _, it := range req.Portfolio {
+			subs.Portfolio = append(subs.Portfolio, hrcModel.ResumePortfolio{
+				Title:       it.Title,
+				Description: it.Description,
+				URL:         it.URL,
+			})
+		}
+	}
+	if req.StudentLeader != nil {
+		subs.StudentLeader = make([]hrcModel.ResumeStudentLeader, 0, len(req.StudentLeader))
+		for _, it := range req.StudentLeader {
+			subs.StudentLeader = append(subs.StudentLeader, hrcModel.ResumeStudentLeader{
+				Organization: it.Organization,
+				Role:         it.Role,
+				StartYear:    it.StartYear,
+				StartMonth:   it.StartMonth,
+				EndYear:      it.EndYear,
+				EndMonth:     it.EndMonth,
+				ToDate:       it.ToDate,
+				Description:  it.Description,
 			})
 		}
 	}
