@@ -18,7 +18,8 @@ type TalentSearchRequest struct {
 	District   string `form:"district"`
 	Education  uint16 `form:"education"`
 	Experience uint16 `form:"experience"`
-	Wage       uint16 `form:"wage"`
+	WageMin    uint16 `form:"wageMin"`
+	WageMax    uint16 `form:"wageMax"`
 }
 
 type PublicResumePageData struct {
@@ -97,7 +98,7 @@ func (a *TalentApi) listPublic(c *gin.Context, talentOnly bool) {
 	normalizeTalentPageInfo(&req.PageInfo)
 	list, total, err := hrcService.ServiceGroupApp.TalentService.Search(c.Request.Context(), req.PageInfo, hrcService.TalentSearch{
 		Keyword: req.Keyword, District: req.District, Education: req.Education,
-		Experience: req.Experience, Wage: req.Wage, TalentOnly: talentOnly,
+		Experience: req.Experience, WageMin: req.WageMin, WageMax: req.WageMax, TalentOnly: talentOnly,
 	})
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())

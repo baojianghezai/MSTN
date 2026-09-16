@@ -27,7 +27,7 @@ export const markLooked = (did: number) =>
 export const replyApply = (did: number, isReply: number) =>
   request.put<ApiResponse>(`/company/applies/${did}/reply`, { isReply })
 
-/** #95 下载完整简历。首次下载扣套餐额度，重复下载不扣。 */
+/** #95 下载简历。有附件简历下发 PDF，无附件回退在线简历 HTML；首次下载扣套餐额度，重复下载不扣。 */
 export const downloadResume = async (did: number) => {
   const { token } = useUserStore()
   const apiBase = import.meta.env.VITE_API_BASE || '/api/v1'
@@ -43,7 +43,13 @@ export const downloadResume = async (did: number) => {
     throw new Error(error.message || '下载失败')
   }
 
-  const filename = response.headers['content-disposition']?.match(/filename="?([^";]+)"?/)?.[1] || `resume-${did}.html`
+  // 后端用 mime.FormatMediaType，中文文件名走 RFC 5987 的 filename*=utf-8''，
+  // 需优先解析 filename*（否则会退化成 resume-<did>.html）
+  const disposition: string = response.headers['content-disposition'] || ''
+  const filename =
+    parseContentDispositionFilename(disposition) ||
+    `resume-${did}.${contentType.includes('application/pdf') ? 'pdf' : 'html'}`
+
   const url = URL.createObjectURL(response.data)
   const link = document.createElement('a')
   link.href = url
@@ -54,11 +60,26 @@ export const downloadResume = async (did: number) => {
   URL.revokeObjectURL(url)
 }
 
+/** 解析 Content-Disposition 文件名，兼容 filename*=utf-8'' 与 filename="..." */
+function parseContentDispositionFilename(disposition: string): string {
+  const extended = disposition.match(/filename\*=utf-8''([^;]+)/i)
+  if (extended?.[1]) {
+    try {
+      return decodeURIComponent(extended[1])
+    } catch {
+      // 解码失败则继续尝试普通 filename
+    }
+  }
+  const plain = disposition.match(/filename="?([^";]+)"?/i)
+  return plain?.[1] ? decodeURIComponent(plain[1]) : ''
+}
+
 // 收简历列表项（11-company-apply.md #92）
 export interface CompanyApplyItem {
   did: number
   resumeId: number
   resumeName: string
+  personalUid: number
   jobsId: number
   jobsName: string
   companyId: number

@@ -365,12 +365,15 @@ type ResumeRequest struct {
 // 注意：主表学历编码仍是 education（uint16）；教育经历子表数组键名为 educations（复数，避免冲突）
 type ResumeDetailData struct {
 	hrcModel.Resume
-	Projects   []hrcModel.ResumeProject   `json:"projects"`
-	Educations []hrcModel.ResumeEducation `json:"educations"`
-	Work       []hrcModel.ResumeWork      `json:"work"`
-	Language   []hrcModel.ResumeLanguage  `json:"language"`
-	Training   []hrcModel.ResumeTraining  `json:"training"`
-	Credent    []hrcModel.ResumeCredent   `json:"credent"`
+	Projects      []hrcModel.ResumeProject       `json:"projects"`
+	Educations    []hrcModel.ResumeEducation     `json:"educations"`
+	Work          []hrcModel.ResumeWork          `json:"work"`
+	Language      []hrcModel.ResumeLanguage      `json:"language"`
+	Training      []hrcModel.ResumeTraining      `json:"training"`
+	Credent       []hrcModel.ResumeCredent       `json:"credent"`
+	Skill         []hrcModel.ResumeSkill         `json:"skill"`
+	Portfolio     []hrcModel.ResumePortfolio     `json:"portfolio"`
+	StudentLeader []hrcModel.ResumeStudentLeader `json:"studentLeader"`
 }
 
 // ResumeLite 我的简历列表项（#49 轻量主表字段，不返子表）

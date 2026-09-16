@@ -27,6 +27,8 @@ type ApiGroup struct {
 	MessageApi        MessageApi
 	TalentApi         TalentApi
 	CategoryApi       CategoryApi
+	ChatApi           ChatApi
+	ChatWsApi         ChatWsApi
 }
 
 var ApiGroupApp = new(ApiGroup)

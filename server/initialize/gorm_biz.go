@@ -49,6 +49,10 @@ func bizModel() error {
 		&hrcModel.CompanyInterview{},
 		&hrcModel.CompanyFavorite{},
 
+		// 在线对话（IM：个人 ↔ 企业，WebSocket 实时）
+		&hrcModel.ImSession{},
+		&hrcModel.ImMessage{},
+
 		// M1 基建：内容/配置/分类
 		&hrcModel.Config{},
 		&hrcModel.Page{},
@@ -63,6 +67,10 @@ func bizModel() error {
 		&hrcModel.ResumeLanguage{},
 		&hrcModel.ResumeTraining{},
 		&hrcModel.ResumeCredent{},
+		// 简历可选加分项子表（专业技能/个人作品/学生干部经历）
+		&hrcModel.ResumeSkill{},
+		&hrcModel.ResumePortfolio{},
+		&hrcModel.ResumeStudentLeader{},
 		&hrcModel.Setmeal{},
 		&hrcModel.MembersSetmeal{},
 		&hrcModel.ResumeDownload{},
@@ -73,6 +81,13 @@ func bizModel() error {
 
 	for _, m := range hrcModels {
 		if err := db.AutoMigrate(m); err != nil {
+			return err
+		}
+	}
+
+	// 投递去重由「企业级」放宽为「职位级」：AutoMigrate 不会删除旧唯一索引，显式清理
+	if db.Migrator().HasIndex(&hrcModel.PersonalJobsApply{}, "uk_uid_resume_company") {
+		if err := db.Migrator().DropIndex(&hrcModel.PersonalJobsApply{}, "uk_uid_resume_company"); err != nil {
 			return err
 		}
 	}

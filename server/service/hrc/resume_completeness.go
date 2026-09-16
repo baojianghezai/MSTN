@@ -15,6 +15,7 @@ import (
 //	期望     15：期望地区 5 / 期望薪资 5 / 期望职位 5
 //	其他     20：语言 5 / 培训 5 / 证书 5 / 自我评价 5
 //	（「其他」类设计含「作品」项；ms_resume_img 后置，其分值暂由「自我评价」代位，作品上线后重拆）
+//	专业技能 / 个人作品 / 学生干部经历为「按需添加的额外加分项」，不计入 100 分基线。
 
 // CompletenessCategory 单一完善度类别
 type CompletenessCategory struct {
@@ -55,9 +56,6 @@ var completenessRules = []completenessRule{
 	{"other", "培训经历", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Training) > 0 }},
 	{"other", "资格证书", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Credent) > 0 }},
 	{"other", "自我评价", 5, func(r *hrcModel.Resume, _ *ResumeSubTables) bool { return r.Specialty != "" }},
-	{"other", "专业技能", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Skill) > 0 }},
-	{"other", "个人作品", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.Portfolio) > 0 }},
-	{"other", "学生干部经历", 5, func(_ *hrcModel.Resume, subs *ResumeSubTables) bool { return len(subs.StudentLeader) > 0 }},
 }
 
 var completenessCategoryNames = []struct{ key, name string }{

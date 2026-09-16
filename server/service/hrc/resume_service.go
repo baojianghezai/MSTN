@@ -3,6 +3,7 @@ package hrc
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -58,6 +59,7 @@ func (s *ResumeService) CreateResume(ctx context.Context, uid uint64, resume *hr
 	resume.AddTime = now
 	resume.Refreshtime = &now
 	resume.Click = 1
+	resume.Title = defaultResumeTitle(resume.Title, resume.FullName)
 
 	var id uint64
 	err := global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -94,7 +96,6 @@ func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64,
 			return err
 		}
 		updates := map[string]interface{}{
-			"title":          resume.Title,
 			"fullname":       resume.FullName,
 			"sex":            resume.Sex,
 			"sex_cn":         resume.SexCN,
@@ -120,6 +121,10 @@ func (s *ResumeService) UpdateResume(ctx context.Context, uid uint64, id uint64,
 			"mobile_audit":   resume.MobileAudit,
 			"talent":         resume.Talent,
 			"entrust":        resume.Entrust,
+		}
+		// 简历标题已从表单移除：显式传入才更新，留空则保留原值
+		if title := strings.TrimSpace(resume.Title); title != "" {
+			updates["title"] = title
 		}
 		if err := tx.Model(&hrcModel.Resume{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 			return err
@@ -229,6 +234,46 @@ func (s *ResumeService) GetCompleteness(ctx context.Context, uid uint64, id uint
 	}
 	result := CalculateCompleteness(resume, subs)
 	return &result, nil
+}
+
+// defaultResumeTitle 生成默认简历标题（表单已移除标题字段；空值时按姓名兜底）
+func defaultResumeTitle(title, fullName string) string {
+	if t := strings.TrimSpace(title); t != "" {
+		return t
+	}
+	if name := strings.TrimSpace(fullName); name != "" {
+		return name + "的简历"
+	}
+	return "我的简历"
+}
+
+// SetOutward 保存附件简历（PDF）：上传成功后写入主表 word_resume 系列字段
+func (s *ResumeService) SetOutward(ctx context.Context, uid uint64, id uint64, url string, title string) error {
+	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if _, err := getOwnedResume(tx, id, uid); err != nil {
+			return err
+		}
+		now := hrcModel.Now()
+		return tx.Model(&hrcModel.Resume{}).Where("id = ?", id).Updates(map[string]interface{}{
+			"word_resume":         url,
+			"word_resume_title":   title,
+			"word_resume_addtime": now,
+		}).Error
+	})
+}
+
+// ClearOutward 删除附件简历（清空主表 word_resume 系列字段）
+func (s *ResumeService) ClearOutward(ctx context.Context, uid uint64, id uint64) error {
+	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if _, err := getOwnedResume(tx, id, uid); err != nil {
+			return err
+		}
+		return tx.Model(&hrcModel.Resume{}).Where("id = ?", id).Updates(map[string]interface{}{
+			"word_resume":         "",
+			"word_resume_title":   "",
+			"word_resume_addtime": nil,
+		}).Error
+	})
 }
 
 // getOwnedResume 归属校验（本人 + 未软删）

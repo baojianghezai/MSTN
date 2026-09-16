@@ -51,11 +51,12 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="250" align="center">
+        <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
             <el-button v-if="row.personalLook !== 2" type="primary" link @click="handleLooked(row)">标记已看</el-button>
             <el-button type="warning" link @click="openInterview(row)">邀请面试</el-button>
             <el-button type="primary" link @click="handleDownload(row)">下载简历</el-button>
+            <el-button type="success" link @click="handleChat(row)">在线沟通</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -113,6 +114,7 @@
 
 <script setup lang="ts">
   import { onMounted, reactive, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { ElMessage } from 'element-plus'
   import { downloadResume, getCompanyApplies, markLooked, replyApply } from '@/api/companyApply'
   import type { CompanyApplyItem } from '@/api/companyApply'
@@ -128,6 +130,7 @@
     { value: 4, label: '未接通' }
   ]
 
+  const router = useRouter()
   const loading = ref(false)
   const tableData = ref<CompanyApplyItem[]>([])
   const total = ref(0)
@@ -193,6 +196,17 @@
     } catch {
       // 下载接口会自行显示业务错误
     }
+  }
+
+  const handleChat = (row: CompanyApplyItem) => {
+    router.push({
+      name: 'CompanyChat',
+      query: {
+        peerUid: String(row.personalUid),
+        jobsId: String(row.jobsId),
+        jobsName: row.jobsName
+      }
+    })
   }
 
   const openInterview = (row: CompanyApplyItem) => {

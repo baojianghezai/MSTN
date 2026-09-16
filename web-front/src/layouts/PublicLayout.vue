@@ -37,6 +37,7 @@
           </router-link>
 
           <template v-if="userStore.token">
+            <MessageInbox :scope="chatScope" />
             <router-link
               :to="userStore.utype === 2 ? { name: 'Company' } : { name: 'Personal' }"
               class="rounded px-3 py-1 text-blue-50 transition-colors hover:bg-white/10 hover:text-white"
@@ -149,16 +150,23 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import MessageInbox from '@/components/message-inbox.vue'
   import { useUserStore } from '@/stores/user'
+  import { useMessageStore } from '@/stores/message'
+  import { useChatStore } from '@/stores/chat'
   import { getNavigations } from '@/api/content'
   import type { NavItem } from '@/types/api'
 
   const route = useRoute()
   const router = useRouter()
   const userStore = useUserStore()
+  const messageStore = useMessageStore()
+  const chatStore = useChatStore()
   const currentYear = new Date().getFullYear()
+
+  const chatScope = computed<'personal' | 'company'>(() => (userStore.utype === 2 ? 'company' : 'personal'))
 
   const city = ref('青岛')
   const cityOptions = ['青岛', '北京', '上海', '广州', '深圳', '杭州', '成都', '武汉']
@@ -192,6 +200,20 @@
     }
   })
 
+  // 登录态变化时建立/断开在线对话连接，并刷新未读
+  watch(
+    () => userStore.token,
+    async (token) => {
+      if (token) {
+        chatStore.connect(chatScope.value, token)
+        await messageStore.refreshUnread(chatScope.value)
+      } else {
+        chatStore.disconnect()
+      }
+    },
+    { immediate: true }
+  )
+
   const isNavActive = (nav: NavItem) => {
     const url = nav.url || '/'
     if (url === '/') return route.path === '/'
@@ -206,6 +228,7 @@
   }
 
   const handleLogout = () => {
+    chatStore.disconnect()
     userStore.logout()
     router.push({ name: 'Home' })
   }

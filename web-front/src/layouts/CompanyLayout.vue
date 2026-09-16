@@ -25,12 +25,11 @@
                 <el-dropdown-item @click="router.push({ name: 'CompanyPromotions' })">首页推广</el-dropdown-item>
                 <el-dropdown-item @click="router.push({ name: 'CompanyTalentLibrary' })">人才库</el-dropdown-item>
                 <el-dropdown-item @click="router.push({ name: 'CompanyInterviews' })">面试邀请</el-dropdown-item>
+                <el-dropdown-item @click="router.push({ name: 'CompanyChat' })">在线对话</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <el-badge :value="messageStore.unread" :max="99" :hidden="messageStore.unread === 0">
-            <el-button @click="router.push({ name: 'CompanyMessages' })">站内信</el-button>
-          </el-badge>
+          <MessageInbox scope="company" />
           <el-button @click="handleLogout">退出</el-button>
         </div>
       </div>
@@ -56,18 +55,23 @@
 <script setup lang="ts">
   import { onMounted } from 'vue'
   import { useRouter } from 'vue-router'
+  import MessageInbox from '@/components/message-inbox.vue'
   import { useMessageStore } from '@/stores/message'
+  import { useChatStore } from '@/stores/chat'
   import { useUserStore } from '@/stores/user'
 
   const router = useRouter()
   const userStore = useUserStore()
   const messageStore = useMessageStore()
+  const chatStore = useChatStore()
 
   onMounted(async () => {
     await messageStore.refreshUnread('company')
+    chatStore.connect('company', userStore.token)
   })
 
   const handleLogout = () => {
+    chatStore.disconnect()
     userStore.logout()
     router.push({ name: 'Home' })
   }

@@ -40,9 +40,23 @@
           <el-select v-model="query.experience" placeholder="工作经验" clearable>
             <el-option v-for="item in filters.experience" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
-          <el-select v-model="query.wage" placeholder="期望薪资" clearable>
-            <el-option v-for="item in filters.wage" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
+          <div class="flex items-center gap-2">
+            <el-input-number
+              v-model="query.wageMin"
+              :min="0"
+              :controls="false"
+              placeholder="薪资下限"
+              class="flex-1"
+            />
+            <span class="text-slate-400">-</span>
+            <el-input-number
+              v-model="query.wageMax"
+              :min="0"
+              :controls="false"
+              placeholder="薪资上限"
+              class="flex-1"
+            />
+          </div>
           <div class="flex gap-2">
             <el-button type="primary" @click="handleSearch">
               <span class="mr-1 i-lucide-search" aria-hidden="true" />
@@ -198,7 +212,8 @@
     district: undefined as string | undefined,
     education: undefined as number | undefined,
     experience: undefined as number | undefined,
-    wage: undefined as number | undefined,
+    wageMin: undefined as number | undefined,
+    wageMax: undefined as number | undefined,
     talentOnly: false,
     page: 1,
     pageSize: 10
@@ -214,7 +229,8 @@
         district: query.district,
         education: query.education,
         experience: query.experience,
-        wage: query.wage
+        wageMin: query.wageMin,
+        wageMax: query.wageMax
       }
       const { data } = query.talentOnly ? await searchPremiumTalents(params) : await searchTalents(params)
       resumes.value = data.list
@@ -243,7 +259,8 @@
     query.district = undefined
     query.education = undefined
     query.experience = undefined
-    query.wage = undefined
+    query.wageMin = undefined
+    query.wageMax = undefined
     query.talentOnly = false
     query.page = 1
     loadList()

@@ -40,8 +40,27 @@ func TestApplyDuplicate(t *testing.T) {
 
 	svc := &ApplyService{}
 	require.NoError(t, svc.Apply(context.Background(), 1, []uint64{job.ID}, 1, ""))
-	// 同企业同简历再投（即使换职位）→ 拒绝
+	// 同一职位重复投递 → 拒绝（去重为职位级，非企业级）
 	require.ErrorIs(t, svc.Apply(context.Background(), 1, []uint64{job.ID}, 1, ""), ErrAlreadyApplied)
+}
+
+// 同一企业不同职位允许分别投递（2026-09 决议：去重由企业级放宽为职位级）
+func TestApplySameCompanyDifferentJobsAllowed(t *testing.T) {
+	db := testutil.NewMemoryDB(t, &hrcModel.PersonalJobsApply{}, &hrcModel.Resume{}, &hrcModel.Jobs{}, &hrcModel.Config{}, &hrcModel.Pms{}, &hrcModel.MembersMsgtip{})
+	require.NoError(t, db.Create(&hrcModel.Resume{UID: 1, FullName: "张三", Audit: 1, CompletePercent: MinApplyResumeCompletePercent}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "Go 工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
+	require.NoError(t, db.Create(&hrcModel.Jobs{JobsBase: hrcModel.JobsBase{UID: 100, JobsName: "前端工程师", CompanyName: "甲企业", CompanyID: 1, Audit: 1, Display: 1, Deadline: time.Now().Add(24 * time.Hour)}}).Error)
+	var job1, job2 hrcModel.Jobs
+	require.NoError(t, db.Where("jobs_name = ?", "Go 工程师").First(&job1).Error)
+	require.NoError(t, db.Where("jobs_name = ?", "前端工程师").First(&job2).Error)
+
+	svc := &ApplyService{}
+	require.NoError(t, svc.Apply(context.Background(), 1, []uint64{job1.ID}, 1, ""))
+	require.NoError(t, svc.Apply(context.Background(), 1, []uint64{job2.ID}, 1, ""), "同企业不同职位应允许分别投递")
+
+	var count int64
+	require.NoError(t, db.Model(&hrcModel.PersonalJobsApply{}).Count(&count).Error)
+	require.Equal(t, int64(2), count)
 }
 
 func TestApplyNoResume(t *testing.T) {

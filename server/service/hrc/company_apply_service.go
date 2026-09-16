@@ -6,6 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"io"
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -22,8 +27,9 @@ var (
 )
 
 type ResumeDownloadFile struct {
-	Filename string
-	Content  []byte
+	Filename    string
+	ContentType string
+	Content     []byte
 }
 
 // CompanyApplyService 企业收简历服务（05 §2.2；一期脱敏=快照字段，联系方式需下载 M4）
@@ -139,10 +145,62 @@ func (s *CompanyApplyService) DownloadResume(ctx context.Context, companyUID uin
 		return nil, err
 	}
 
+	// 优先下载求职者上传的附件简历（PDF）；没有附件时回退为在线简历 HTML 快照
+	if strings.TrimSpace(resume.WordResume) != "" {
+		if content, loadErr := loadOutwardFile(ctx, resume.WordResume); loadErr == nil && len(content) > 0 {
+			return &ResumeDownloadFile{
+				Filename:    outwardFilename(&resume),
+				ContentType: "application/pdf",
+				Content:     content,
+			}, nil
+		}
+	}
 	return &ResumeDownloadFile{
-		Filename: fmt.Sprintf("resume-%d.html", resume.ID),
-		Content:  buildResumeHTML(&resume, &subs),
+		Filename:    fmt.Sprintf("resume-%d.html", resume.ID),
+		ContentType: "text/html; charset=utf-8",
+		Content:     buildResumeHTML(&resume, &subs),
 	}, nil
+}
+
+// outwardFilename 附件简历下载文件名（优先用上传时的标题，兜底 resume-<id>.pdf）
+func outwardFilename(resume *hrcModel.Resume) string {
+	name := strings.TrimSpace(resume.WordResumeTitle)
+	if name == "" {
+		name = fmt.Sprintf("resume-%d", resume.ID)
+	}
+	if !strings.HasSuffix(strings.ToLower(name), ".pdf") {
+		name += ".pdf"
+	}
+	return name
+}
+
+// loadOutwardFile 读取附件简历内容：本地 OSS 直接读盘，http(s) 地址回源拉取。
+func loadOutwardFile(ctx context.Context, url string) ([]byte, error) {
+	url = strings.TrimSpace(url)
+	if url == "" {
+		return nil, errors.New("附件地址为空")
+	}
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := (&http.Client{Timeout: 15 * time.Second}).Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("附件下载失败：HTTP %d", resp.StatusCode)
+		}
+		return io.ReadAll(io.LimitReader(resp.Body, 20<<20))
+	}
+	// 本地 OSS：URL 形如 "<Local.Path>/<filename>"，磁盘文件位于 Local.StorePath
+	name := path.Base(strings.ReplaceAll(url, "\\", "/"))
+	if name == "" || name == "." || name == "/" || strings.Contains(name, "..") {
+		return nil, errors.New("非法的附件地址")
+	}
+	return os.ReadFile(filepath.Join(global.GVA_CONFIG.Local.StorePath, name))
 }
 
 func (s *CompanyApplyService) consumeResumeDownload(tx *gorm.DB, companyUID uint64) error {
@@ -191,9 +249,9 @@ func buildResumeHTML(resume *hrcModel.Resume, subs *ResumeSubTables) []byte {
 		item := subs.Education[i]
 		return fmt.Sprintf("%s %s%s", formatResumePeriod(item.StartYear, item.StartMonth, item.EndYear, item.EndMonth, item.ToDate), item.School, joinResumeDetails(item.Speciality, item.EducationCN))
 	})
-	writeResumeEntries(&body, "工作经历", len(subs.Work), func(i int) string {
+	writeResumeEntries(&body, "工作/实习经历", len(subs.Work), func(i int) string {
 		item := subs.Work[i]
-		return fmt.Sprintf("%s %s%s%s", formatResumePeriod(item.StartYear, item.StartMonth, item.EndYear, item.EndMonth, item.ToDate), item.CompanyName, joinResumeDetails(item.Jobs), joinResumeDetails(item.Achievements))
+		return fmt.Sprintf("[%s] %s %s%s%s", workTypeCN(item.WorkType), formatResumePeriod(item.StartYear, item.StartMonth, item.EndYear, item.EndMonth, item.ToDate), item.CompanyName, joinResumeDetails(item.Jobs), joinResumeDetails(item.Achievements))
 	})
 	writeResumeEntries(&body, "项目经历", len(subs.Project), func(i int) string {
 		item := subs.Project[i]
@@ -210,6 +268,18 @@ func buildResumeHTML(resume *hrcModel.Resume, subs *ResumeSubTables) []byte {
 	writeResumeEntries(&body, "证书", len(subs.Credent), func(i int) string {
 		item := subs.Credent[i]
 		return joinResumeDetails(fmt.Sprintf("%d-%02d", item.Year, item.Month), item.Name)
+	})
+	writeResumeEntries(&body, "专业技能", len(subs.Skill), func(i int) string {
+		item := subs.Skill[i]
+		return joinResumeDetails(item.Name, skillLevelCN(item.Level))
+	})
+	writeResumeEntries(&body, "个人作品", len(subs.Portfolio), func(i int) string {
+		item := subs.Portfolio[i]
+		return joinResumeDetails(item.Title, item.Description, item.URL)
+	})
+	writeResumeEntries(&body, "学生干部经历", len(subs.StudentLeader), func(i int) string {
+		item := subs.StudentLeader[i]
+		return fmt.Sprintf("%s %s%s%s", formatResumePeriod(item.StartYear, item.StartMonth, item.EndYear, item.EndMonth, item.ToDate), item.Organization, joinResumeDetails(item.Role), joinResumeDetails(item.Description))
 	})
 	writeResumeSection(&body, "自我评价", []string{resume.Specialty})
 
@@ -260,6 +330,26 @@ func formatWageRange(min, max uint16) string {
 		return fmt.Sprintf("%d 元/月以上", min)
 	}
 	return fmt.Sprintf("%d 元/月以下", max)
+}
+
+func workTypeCN(workType int8) string {
+	if workType == 2 {
+		return "实习"
+	}
+	return "工作"
+}
+
+func skillLevelCN(level uint8) string {
+	switch level {
+	case 1:
+		return "入门"
+	case 2:
+		return "熟练"
+	case 3:
+		return "精通"
+	default:
+		return ""
+	}
 }
 
 func joinResumeDetails(values ...string) string {

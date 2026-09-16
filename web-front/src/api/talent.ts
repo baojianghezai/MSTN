@@ -15,7 +15,8 @@ export interface PublicResume {
   experienceCn: string
   district: string
   districtCn: string
-  wage: number
+  wageMin: number
+  wageMax: number
   wageCn: string
   intentionJobs: string
   specialty: string
@@ -54,7 +55,8 @@ export interface TalentSearchParams {
   district?: string
   education?: number
   experience?: number
-  wage?: number
+  wageMin?: number
+  wageMax?: number
 }
 
 export interface TalentUnlockedDetail {

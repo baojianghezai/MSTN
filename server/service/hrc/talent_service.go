@@ -26,7 +26,8 @@ type TalentSearch struct {
 	District   string
 	Education  uint16
 	Experience uint16
-	Wage       uint16
+	WageMin    uint16
+	WageMax    uint16
 	TalentOnly bool
 }
 
@@ -46,7 +47,8 @@ type PublicResume struct {
 	ExperienceCN    string    `json:"experienceCn"`
 	District        string    `json:"district"`
 	DistrictCN      string    `json:"districtCn"`
-	Wage            uint16    `json:"wage"`
+	WageMin         uint16    `json:"wageMin"`
+	WageMax         uint16    `json:"wageMax"`
 	WageCN          string    `json:"wageCn"`
 	IntentionJobs   string    `json:"intentionJobs"`
 	Specialty       string    `json:"specialty"`
@@ -57,23 +59,29 @@ type PublicResume struct {
 }
 
 type PublicResumeDetail struct {
-	Resume     PublicResume               `json:"resume"`
-	Projects   []hrcModel.ResumeProject   `json:"projects"`
-	Educations []hrcModel.ResumeEducation `json:"educations"`
-	Work       []hrcModel.ResumeWork      `json:"work"`
-	Language   []hrcModel.ResumeLanguage  `json:"language"`
-	Training   []hrcModel.ResumeTraining  `json:"training"`
-	Credent    []hrcModel.ResumeCredent   `json:"credent"`
+	Resume        PublicResume                   `json:"resume"`
+	Projects      []hrcModel.ResumeProject       `json:"projects"`
+	Educations    []hrcModel.ResumeEducation     `json:"educations"`
+	Work          []hrcModel.ResumeWork          `json:"work"`
+	Language      []hrcModel.ResumeLanguage      `json:"language"`
+	Training      []hrcModel.ResumeTraining      `json:"training"`
+	Credent       []hrcModel.ResumeCredent       `json:"credent"`
+	Skill         []hrcModel.ResumeSkill         `json:"skill"`
+	Portfolio     []hrcModel.ResumePortfolio     `json:"portfolio"`
+	StudentLeader []hrcModel.ResumeStudentLeader `json:"studentLeader"`
 }
 
 type TalentUnlockedDetail struct {
-	Resume     hrcModel.Resume            `json:"resume"`
-	Projects   []hrcModel.ResumeProject   `json:"projects"`
-	Educations []hrcModel.ResumeEducation `json:"educations"`
-	Work       []hrcModel.ResumeWork      `json:"work"`
-	Language   []hrcModel.ResumeLanguage  `json:"language"`
-	Training   []hrcModel.ResumeTraining  `json:"training"`
-	Credent    []hrcModel.ResumeCredent   `json:"credent"`
+	Resume        hrcModel.Resume                `json:"resume"`
+	Projects      []hrcModel.ResumeProject       `json:"projects"`
+	Educations    []hrcModel.ResumeEducation     `json:"educations"`
+	Work          []hrcModel.ResumeWork          `json:"work"`
+	Language      []hrcModel.ResumeLanguage      `json:"language"`
+	Training      []hrcModel.ResumeTraining      `json:"training"`
+	Credent       []hrcModel.ResumeCredent       `json:"credent"`
+	Skill         []hrcModel.ResumeSkill         `json:"skill"`
+	Portfolio     []hrcModel.ResumePortfolio     `json:"portfolio"`
+	StudentLeader []hrcModel.ResumeStudentLeader `json:"studentLeader"`
 }
 
 type CompanyTalentItem struct {
@@ -105,8 +113,12 @@ func (s *TalentService) Search(ctx context.Context, info request.PageInfo, searc
 	if search.Experience > 0 {
 		db = db.Where("experience = ?", search.Experience)
 	}
-	if search.Wage > 0 {
-		db = db.Where("wage = ?", search.Wage)
+	// 期望薪资区间与筛选区间有交集即命中（0 视为该端不限）
+	if search.WageMin > 0 {
+		db = db.Where("wage_max >= ? OR wage_max = 0", search.WageMin)
+	}
+	if search.WageMax > 0 {
+		db = db.Where("wage_min <= ? OR wage_min = 0", search.WageMax)
 	}
 	if keyword := strings.TrimSpace(search.Keyword); keyword != "" {
 		like := "%" + keyword + "%"
@@ -239,6 +251,7 @@ func (s *TalentService) ListUnlocked(ctx context.Context, companyUID uint64, inf
 			return nil, 0, err
 		}
 		for _, resume := range resumes {
+			resume.WageCN = formatWageRange(resume.WageMin, resume.WageMax)
 			resumeMap[resume.ID] = resume
 		}
 	}
@@ -354,7 +367,8 @@ func publicResumeFromModel(resume hrcModel.Resume) PublicResume {
 		ID: resume.ID, Title: resume.Title, FullName: fullName, Sex: resume.Sex, SexCN: resume.SexCN,
 		Birthdate: resume.Birthdate, Education: resume.Education, EducationCN: resume.EducationCN,
 		MajorCN: resume.MajorCN, Experience: resume.Experience, ExperienceCN: resume.ExperienceCN,
-		District: resume.District, DistrictCN: resume.DistrictCN, Wage: resume.Wage, WageCN: resume.WageCN,
+		District: resume.District, DistrictCN: resume.DistrictCN,
+		WageMin: resume.WageMin, WageMax: resume.WageMax, WageCN: formatWageRange(resume.WageMin, resume.WageMax),
 		IntentionJobs: resume.IntentionJobs, Specialty: resume.Specialty, PhotoImg: photoImg,
 		CompletePercent: resume.CompletePercent, Talent: resume.Talent, Refreshtime: refreshTime,
 	}
@@ -364,12 +378,15 @@ func publicResumeDetailFromModel(resume hrcModel.Resume, subs ResumeSubTables) *
 	return &PublicResumeDetail{
 		Resume: publicResumeFromModel(resume), Projects: subs.Project, Educations: subs.Education,
 		Work: subs.Work, Language: subs.Language, Training: subs.Training, Credent: subs.Credent,
+		Skill: subs.Skill, Portfolio: subs.Portfolio, StudentLeader: subs.StudentLeader,
 	}
 }
 
 func unlockedResumeDetailFromModel(resume hrcModel.Resume, subs ResumeSubTables) *TalentUnlockedDetail {
+	resume.WageCN = formatWageRange(resume.WageMin, resume.WageMax)
 	return &TalentUnlockedDetail{
 		Resume: resume, Projects: subs.Project, Educations: subs.Education,
 		Work: subs.Work, Language: subs.Language, Training: subs.Training, Credent: subs.Credent,
+		Skill: subs.Skill, Portfolio: subs.Portfolio, StudentLeader: subs.StudentLeader,
 	}
 }

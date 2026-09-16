@@ -146,6 +146,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/personal/messages.vue')
       },
       {
+        path: 'chat',
+        name: 'PersonalChat',
+        meta: { title: '在线对话', chatScope: 'personal' },
+        component: () => import('@/views/chat/index.vue')
+      },
+      {
         path: 'applies',
         name: 'PersonalApplies',
         meta: { title: '我的投递' },
@@ -199,6 +205,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CompanyMessages',
         meta: { title: '站内信' },
         component: () => import('@/views/company/messages.vue')
+      },
+      {
+        path: 'chat',
+        name: 'CompanyChat',
+        meta: { title: '在线对话', chatScope: 'company' },
+        component: () => import('@/views/chat/index.vue')
       },
       {
         path: 'talents',

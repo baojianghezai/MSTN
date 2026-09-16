@@ -29,7 +29,9 @@ export default defineConfig(({ mode }) => {
         // hrc 业务接口：原样转发，保留 /api/v1 前缀
         '/api/v1': {
           target,
-          changeOrigin: true
+          changeOrigin: true,
+          // 在线对话 WebSocket（/api/v1/ws/chat）需要 ws 升级转发
+          ws: true
         },
         // 上传文件静态资源（如 uploads/file/xxx）
         '/uploads': {

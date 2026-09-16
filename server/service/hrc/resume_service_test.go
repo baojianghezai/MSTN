@@ -32,7 +32,7 @@ func resumeComplete() *hrcModel.Resume {
 	r.MajorCN = "软件工程"
 	r.Telephone = "13800138000"
 	r.District = "4401"
-	r.Wage = 8
+	r.WageMin = 8
 	r.IntentionJobs = "Go 开发"
 	r.Specialty = "自我评价"
 	return r
@@ -80,6 +80,9 @@ func resumeDB(t *testing.T) *gorm.DB {
 		&hrcModel.ResumeLanguage{},
 		&hrcModel.ResumeTraining{},
 		&hrcModel.ResumeCredent{},
+		&hrcModel.ResumeSkill{},
+		&hrcModel.ResumePortfolio{},
+		&hrcModel.ResumeStudentLeader{},
 	)
 }
 

@@ -26,6 +26,7 @@
         </div>
         <div class="ml-auto flex flex-none items-center gap-3">
           <span class="hidden text-sm text-slate-500 md:inline">uid: {{ userStore.uid }}</span>
+          <MessageInbox scope="personal" />
           <el-button @click="handleLogout">退出</el-button>
         </div>
       </div>
@@ -45,13 +46,16 @@
 <script setup lang="ts">
   import { onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import MessageInbox from '@/components/message-inbox.vue'
   import { useMessageStore } from '@/stores/message'
+  import { useChatStore } from '@/stores/chat'
   import { useUserStore } from '@/stores/user'
 
   const route = useRoute()
   const router = useRouter()
   const userStore = useUserStore()
   const messageStore = useMessageStore()
+  const chatStore = useChatStore()
 
   // 顶部导航（design/10 §3.2.1 ③）
   const navItems = [
@@ -59,15 +63,18 @@
     { name: 'PersonalResumes', label: '我的简历' },
     { name: 'PersonalApplies', label: '我的投递' },
     { name: 'PersonalInterviews', label: '面试邀请' },
+    { name: 'PersonalChat', label: '在线对话' },
     { name: 'PersonalMessages', label: '站内信' },
     { name: 'PersonalProfile', label: '个人资料' }
   ]
 
   onMounted(async () => {
     await messageStore.refreshUnread('personal')
+    chatStore.connect('personal', userStore.token)
   })
 
   const handleLogout = () => {
+    chatStore.disconnect()
     userStore.logout()
     router.push({ name: 'Home' })
   }

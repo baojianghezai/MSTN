@@ -18,7 +18,7 @@ var (
 	ErrResumeUnavailable = errors.New("简历不存在或已删除")
 	ErrResumeIncomplete  = errors.New("简历完善度不足，请先完善至 40% 再投递")
 	ErrApplyDailyLimit   = errors.New("今日投递次数已用完")
-	ErrAlreadyApplied    = errors.New("您已向该公司投递过简历")
+	ErrAlreadyApplied    = errors.New("您已投递过该职位")
 	ErrJobNotAvailable   = errors.New("职位不存在或已下架")
 	ErrApplyNotFound     = errors.New("投递记录不存在")
 )
@@ -29,7 +29,8 @@ const MinApplyResumeCompletePercent int8 = 40
 // ApplyService 投递服务（05 §2.1；一期未做：企业屏蔽名单、短信通知）
 type ApplyService struct{}
 
-// Apply 投递职位（每日上限 + 默认简历 + 去重「同一企业对同一份简历仅投一次」）
+// Apply 投递职位（每日上限 + 指定/默认简历 + 去重「同一份简历对同一职位仅投一次」）
+// 同一企业的不同职位允许分别投递（v6 行为；原企业级去重过严，2026-09 放宽）
 func (s *ApplyService) Apply(ctx context.Context, uid uint64, jobsIDs []uint64, resumeID uint64, notes string) error {
 	if len(jobsIDs) == 0 {
 		return errors.New("请选择职位")
@@ -70,10 +71,10 @@ func (s *ApplyService) Apply(ctx context.Context, uid uint64, jobsIDs []uint64, 
 			if err != nil {
 				return err
 			}
-			// 去重：同一企业对同一份简历（uk_uid_resume_company 兜底）
+			// 去重：同一份简历对同一职位仅投一次（uk_uid_resume_jobs 兜底）
 			var dup int64
 			if err := tx.Model(&hrcModel.PersonalJobsApply{}).
-				Where("personal_uid = ? AND resume_id = ? AND company_uid = ?", uid, resume.ID, job.UID).Count(&dup).Error; err != nil {
+				Where("personal_uid = ? AND resume_id = ? AND jobs_id = ?", uid, resume.ID, job.ID).Count(&dup).Error; err != nil {
 				return err
 			}
 			if dup > 0 {

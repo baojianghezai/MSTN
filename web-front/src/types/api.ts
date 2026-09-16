@@ -192,6 +192,7 @@ export interface ResumeWork {
   endyear: number
   endmonth: number
   todate: number
+  workType: number // 1=工作 2=实习
   companyname: string
   jobs: string
   achievements: string
@@ -236,6 +237,40 @@ export interface ResumeCredent {
   images: string
 }
 
+// 简历专业技能子表（ms_resume_skill，数组键名 skill；按需添加的加分项）
+export interface ResumeSkill {
+  id?: number
+  pid?: number
+  uid?: number
+  name: string
+  level: number // 1=入门 2=熟练 3=精通
+}
+
+// 简历个人作品子表（ms_resume_portfolio，数组键名 portfolio；按需添加的加分项）
+export interface ResumePortfolio {
+  id?: number
+  pid?: number
+  uid?: number
+  title: string
+  description: string
+  url: string
+}
+
+// 简历学生干部经历子表（ms_resume_student_leader，数组键名 studentLeader；按需添加的加分项）
+export interface ResumeStudentLeader {
+  id?: number
+  pid?: number
+  uid?: number
+  organization: string
+  role: string
+  startyear: number
+  startmonth: number
+  endyear: number
+  endmonth: number
+  todate: number
+  description: string
+}
+
 // 简历列表轻量项（#49，不返子表）
 export interface ResumeLite {
   id: number
@@ -254,7 +289,7 @@ export interface ResumeCompleteness {
   missing: string[]
 }
 
-// 简历主表可编辑字段 + 项目经历子表（04-resume.md #48/#50/#51）
+// 简历主表可编辑字段 + 子表（04-resume.md #48/#50/#51）
 export interface Resume {
   id?: number
   title: string
@@ -262,17 +297,17 @@ export interface Resume {
   sex: number
   sexCn: string
   birthdate: number // 出生年
-  residence: string
+  residence: string // 籍贯（省/市/区，斜杠分隔）
   education: number
   educationCn: string
   major: number
   majorCn: string
   experience: number
   experienceCn: string
-  district: string
+  district: string // 期望地区（省/市/区，含"不限"）
   districtCn: string
-  wage: number
-  wageCn: string
+  wageMin: number // 期望薪资下限（元/月）
+  wageMax: number // 期望薪资上限（元/月）
   intentionJobs: string
   specialty: string
   telephone: string
@@ -283,7 +318,11 @@ export interface Resume {
   mobileAudit: number
   talent: number
   entrust: number
-  // 6 子表（M3 收尾 #48/#50/#51 全量替换；注意教育经历数组键是 educations 复数，
+  // 附件简历（PDF）
+  wordResume: string
+  wordResumeTitle: string
+  wordResumeAddtime?: string
+  // 子表（#48/#50/#51 全量替换；注意教育经历数组键是 educations 复数，
   // 与主表学历编码 education 区分——handoff/2026-08-20-resume-m3.md ⚠️ 易踩点）
   educations: ResumeEducation[]
   work: ResumeWork[]
@@ -291,6 +330,9 @@ export interface Resume {
   training: ResumeTraining[]
   credent: ResumeCredent[]
   projects: ResumeProject[]
+  skill: ResumeSkill[]
+  portfolio: ResumePortfolio[]
+  studentLeader: ResumeStudentLeader[]
 }
 
 // 视频面试（05-video-interview.md，ms_video_interview）
@@ -338,6 +380,7 @@ declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
     utype?: number
+    chatScope?: 'personal' | 'company'
   }
 }
 
@@ -424,6 +467,7 @@ export interface JobItem {
 
 // 职位详情（09-jobs.md #81，编辑回显）
 export interface JobDetail extends JobItem {
+  uid?: number // 招聘企业 uid（在线沟通发起用）
   contact: JobsContact
   tags: number[]
   reason: string // 不通过原因（audit=3）

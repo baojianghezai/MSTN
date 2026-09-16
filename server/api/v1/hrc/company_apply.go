@@ -2,6 +2,7 @@ package hrc
 
 import (
 	"errors"
+	"mime"
 	"net/http"
 	"strconv"
 
@@ -110,10 +111,10 @@ func (a *CompanyApplyApi) Reply(c *gin.Context) {
 	OK(c)
 }
 
-// DownloadResume 下载完整简历（#95；首次下载扣套餐额度，重复下载不扣）
+// DownloadResume 下载简历（#95；有附件简历则下发 PDF，否则下发在线简历 HTML；首次下载扣套餐额度，重复下载不扣）
 // @Tags HrcCompanyApply
-// @Summary 下载完整简历
-// @Produce text/html
+// @Summary 下载简历（附件简历 PDF 优先，无附件回退 HTML）
+// @Produce application/octet-stream
 // @Param did path int true "投递记录 id"
 // @Success 200 {file} file
 // @Router /api/v1/company/applies/{did}/resume/download [get]
@@ -136,6 +137,11 @@ func (a *CompanyApplyApi) DownloadResume(c *gin.Context) {
 		Fail(c, code, err.Error())
 		return
 	}
-	c.Header("Content-Disposition", `attachment; filename="`+file.Filename+`"`)
-	c.Data(http.StatusOK, "text/html; charset=utf-8", file.Content)
+	// mime.FormatMediaType 对中文文件名生成 filename*=UTF-8'' 形式，避免乱码
+	c.Header("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": file.Filename}))
+	contentType := file.ContentType
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	c.Data(http.StatusOK, contentType, file.Content)
 }

@@ -28,6 +28,7 @@ type Resume struct {
 	DistrictCN        string     `gorm:"column:district_cn;size:255" json:"districtCn"`
 	WageMin           uint16     `gorm:"column:wage_min" json:"wageMin"`                      // 期望薪资下限（元/月）
 	WageMax           uint16     `gorm:"column:wage_max" json:"wageMax"`                      // 期望薪资上限（元/月）
+	WageCN            string     `gorm:"-" json:"wageCn"`                                     // 期望薪资展示文案（不落库，按上下限计算）
 	IntentionJobs     string     `gorm:"column:intention_jobs;size:255" json:"intentionJobs"` // 期望职位
 	Specialty         string     `gorm:"column:specialty;size:1000" json:"specialty"`         // 自我评价
 	Telephone         string     `gorm:"column:telephone;size:50" json:"telephone"`           // 联系电话

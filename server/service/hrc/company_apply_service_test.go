@@ -2,9 +2,12 @@ package hrc
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/internal/testutil"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
@@ -66,6 +69,9 @@ func TestCompanyApplyDownloadResumeConsumesQuotaOnce(t *testing.T) {
 		&hrcModel.ResumeTraining{},
 		&hrcModel.ResumeCredent{},
 		&hrcModel.ResumeProject{},
+		&hrcModel.ResumeSkill{},
+		&hrcModel.ResumePortfolio{},
+		&hrcModel.ResumeStudentLeader{},
 		&hrcModel.MembersSetmeal{},
 		&hrcModel.ResumeDownload{},
 		&hrcModel.Pms{},
@@ -120,6 +126,49 @@ func TestCompanyApplyDownloadResumeConsumesQuotaOnce(t *testing.T) {
 	require.ErrorIs(t, err, ErrApplyNotFound)
 }
 
+// 附件简历（PDF）优先下发：企业下载拿到 PDF 内容与文件名，而非 HTML 快照
+func TestCompanyApplyDownloadResumePrefersAttachedPDF(t *testing.T) {
+	storeDir := t.TempDir()
+	prevStore := global.GVA_CONFIG.Local.StorePath
+	global.GVA_CONFIG.Local.StorePath = storeDir
+	t.Cleanup(func() { global.GVA_CONFIG.Local.StorePath = prevStore })
+
+	pdfContent := []byte("%PDF-1.4 candidate resume")
+	require.NoError(t, os.WriteFile(filepath.Join(storeDir, "candidate.pdf"), pdfContent, 0o644))
+
+	db := testutil.NewMemoryDB(t,
+		&hrcModel.PersonalJobsApply{},
+		&hrcModel.Resume{},
+		&hrcModel.ResumeEducation{},
+		&hrcModel.ResumeWork{},
+		&hrcModel.ResumeLanguage{},
+		&hrcModel.ResumeTraining{},
+		&hrcModel.ResumeCredent{},
+		&hrcModel.ResumeProject{},
+		&hrcModel.ResumeSkill{},
+		&hrcModel.ResumePortfolio{},
+		&hrcModel.ResumeStudentLeader{},
+		&hrcModel.MembersSetmeal{},
+		&hrcModel.ResumeDownload{},
+		&hrcModel.Pms{},
+		&hrcModel.MembersMsgtip{},
+	)
+	resume := hrcModel.Resume{UID: 1, FullName: "张三", WordResume: "uploads/file/candidate.pdf", WordResumeTitle: "张三的简历.pdf"}
+	require.NoError(t, db.Create(&resume).Error)
+	apply := hrcModel.PersonalJobsApply{ResumeID: resume.ID, PersonalUID: 1, CompanyUID: 100, ResumeName: "张三"}
+	require.NoError(t, db.Create(&apply).Error)
+	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{
+		UID: 100, ExpireAt: hrcModel.Now().Add(3600 * time.Second), ResumeDownloadsTotal: 1,
+	}).Error)
+
+	svc := &CompanyApplyService{}
+	file, err := svc.DownloadResume(context.Background(), 100, apply.DID)
+	require.NoError(t, err)
+	require.Equal(t, "张三的简历.pdf", file.Filename)
+	require.Equal(t, "application/pdf", file.ContentType)
+	require.Equal(t, pdfContent, file.Content)
+}
+
 func TestCompanyApplyDownloadResumeRejectsExhaustedOrMissingEntitlement(t *testing.T) {
 	db := testutil.NewMemoryDB(t,
 		&hrcModel.PersonalJobsApply{},
@@ -130,6 +179,9 @@ func TestCompanyApplyDownloadResumeRejectsExhaustedOrMissingEntitlement(t *testi
 		&hrcModel.ResumeTraining{},
 		&hrcModel.ResumeCredent{},
 		&hrcModel.ResumeProject{},
+		&hrcModel.ResumeSkill{},
+		&hrcModel.ResumePortfolio{},
+		&hrcModel.ResumeStudentLeader{},
 		&hrcModel.MembersSetmeal{},
 		&hrcModel.ResumeDownload{},
 		&hrcModel.Pms{},

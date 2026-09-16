@@ -34,9 +34,12 @@
           {{ job.contents || '暂无描述' }}
         </div>
 
-        <!-- 标签 -->
-        <div v-if="job.tags && job.tags.length" class="mt-4 flex flex-wrap gap-2">
-          <el-tag v-for="t in job.tags" :key="t" size="small" type="info">{{ t }}</el-tag>
+        <!-- 福利待遇（tag 存的是分类编码，需映射为名称） -->
+        <div v-if="tagNames.length" class="mt-4">
+          <h2 class="text-sm font-semibold text-slate-800">福利待遇</h2>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <el-tag v-for="t in tagNames" :key="t" size="small" type="info">{{ t }}</el-tag>
+          </div>
         </div>
 
         <!-- 联系方式 -->
@@ -51,7 +54,7 @@
         </div>
 
         <!-- 投递按钮 -->
-        <div class="mt-7 flex justify-center border-t border-slate-100 pt-6">
+        <div class="mt-7 flex justify-center gap-3 border-t border-slate-100 pt-6">
           <el-button
             type="primary"
             size="large"
@@ -61,6 +64,10 @@
           >
             <span v-if="!checkingResume" class="mr-1 i-lucide-send" aria-hidden="true" />
             投递简历
+          </el-button>
+          <el-button size="large" class="min-w-36" @click="handleChat">
+            <span class="mr-1 i-lucide-message-circle" aria-hidden="true" />
+            在线沟通
           </el-button>
         </div>
       </template>
@@ -72,6 +79,20 @@
     <el-dialog v-model="applyVisible" title="投递职位" width="440px" :close-on-click-modal="false">
       <p class="text-sm text-slate-600">投递职位：<span class="font-semibold">{{ job.jobsName }}</span></p>
       <el-form label-width="80px" class="mt-4" @submit.prevent>
+        <el-form-item label="投递简历">
+          <el-select v-model="selectedResumeId" placeholder="请选择简历" style="width: 100%">
+            <el-option
+              v-for="r in resumeList"
+              :key="r.id"
+              :label="`${r.title || '未命名简历'}（完善度 ${r.completePercent}%）`"
+              :value="r.id"
+              :disabled="r.completePercent < MIN_APPLY_RESUME_PERCENT"
+            />
+          </el-select>
+          <p class="mt-1 text-xs text-slate-400">
+            完善度不足 {{ MIN_APPLY_RESUME_PERCENT }}% 的简历不可投递，可选择其他简历
+          </p>
+        </el-form-item>
         <el-form-item label="附言">
           <el-input
             v-model="applyForm.notes"
@@ -81,7 +102,6 @@
           />
         </el-form-item>
       </el-form>
-      <p class="text-xs text-slate-400">投递使用默认简历（简历列表功能 M3 完善后可选）</p>
       <template #footer>
         <el-button @click="applyVisible = false">取消</el-button>
         <el-button type="primary" :loading="applying" @click="submitApply">确认投递</el-button>
@@ -160,6 +180,12 @@
 
   const eduName = computed(() => categories.value.education.find((c) => c.id === job.value.education)?.name || '')
   const expName = computed(() => categories.value.experience.find((c) => c.id === job.value.experience)?.name || '')
+  // 福利待遇：tag 为分类编码数组，映射为中文名（映射不到时兜底展示原值）
+  const tagNames = computed(() =>
+    (job.value.tags || []).map(
+      (code) => categories.value.jobtag?.find((t) => t.id === code)?.name || String(code)
+    )
+  )
 
   const applyVisible = ref(false)
   const noResumeVisible = ref(false)
@@ -168,6 +194,8 @@
   const checkingResume = ref(false)
   const applying = ref(false)
   const applyForm = reactive({ notes: '' })
+  const resumeList = ref<ResumeLite[]>([])
+  const selectedResumeId = ref<number | null>(null)
 
   const handleApply = async () => {
     if (!userStore.token || userStore.utype !== 1) {
@@ -178,12 +206,14 @@
 
     checkingResume.value = true
     try {
-      const { data } = await listResumes({ page: 1, pageSize: 1 })
-      if (data.total === 0 || data.list.length === 0) {
+      const { data } = await listResumes({ page: 1, pageSize: 50 })
+      resumeList.value = data.list || []
+      if (resumeList.value.length === 0) {
         noResumeVisible.value = true
         return
       }
-      const defaultResume = data.list.find((resume) => resume.def === 1) || data.list[0]
+      const defaultResume = resumeList.value.find((resume) => resume.def === 1) || resumeList.value[0]
+      selectedResumeId.value = defaultResume.id
       if (defaultResume.completePercent < MIN_APPLY_RESUME_PERCENT) {
         resumeToComplete.value = defaultResume
         incompleteResumeVisible.value = true
@@ -194,6 +224,23 @@
     } finally {
       checkingResume.value = false
     }
+  }
+
+  const handleChat = () => {
+    if (!userStore.token || userStore.utype !== 1) {
+      ElMessage.warning('请先登录个人账号')
+      router.push({ name: 'Login', query: { redirect: route.fullPath } })
+      return
+    }
+    const peerUid = Number(job.value.uid)
+    if (!peerUid) {
+      ElMessage.warning('企业信息不完整，暂不能发起沟通')
+      return
+    }
+    router.push({
+      name: 'PersonalChat',
+      query: { peerUid: String(peerUid), jobsId: String(jobId), jobsName: job.value.jobsName || '' }
+    })
   }
 
   const goCreateResume = () => {
@@ -212,7 +259,7 @@
     try {
       await apply({
         jobsIds: [jobId],
-        resumeId: 0, // 0 = 用默认简历（#61）
+        resumeId: selectedResumeId.value ?? 0,
         notes: applyForm.notes.trim()
       })
       ElMessage.success('投递成功')

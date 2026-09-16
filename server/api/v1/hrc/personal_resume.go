@@ -2,6 +2,7 @@ package hrc
 
 import (
 	"strconv"
+	"strings"
 
 	middlewarehrc "github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
@@ -88,13 +89,16 @@ func (a *ResumeApi) GetResume(c *gin.Context) {
 		return
 	}
 	OKWithData(c, ResumeDetailData{
-		Resume:     *resume,
-		Projects:   subs.Project,
-		Educations: subs.Education,
-		Work:       subs.Work,
-		Language:   subs.Language,
-		Training:   subs.Training,
-		Credent:    subs.Credent,
+		Resume:        *resume,
+		Projects:      subs.Project,
+		Educations:    subs.Education,
+		Work:          subs.Work,
+		Language:      subs.Language,
+		Training:      subs.Training,
+		Credent:       subs.Credent,
+		Skill:         subs.Skill,
+		Portfolio:     subs.Portfolio,
+		StudentLeader: subs.StudentLeader,
 	})
 }
 
@@ -216,6 +220,65 @@ func (a *ResumeApi) GetCompleteness(c *gin.Context) {
 		return
 	}
 	OKWithData(c, result)
+}
+
+// UploadOutward 上传附件简历（09 §4.1 #58；仅 PDF，落主表 word_resume 系列字段）
+// @Tags HrcResume
+// @Summary 上传附件简历（PDF）
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "简历 id"
+// @Param file formData file true "PDF 文件"
+// @Param title formData string false "附件标题（默认文件名）"
+// @Success 200 {object} Response{data=map[string]string}
+// @Router /api/v1/personal/resumes/{id}/outward [post]
+func (a *ResumeApi) UploadOutward(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		Fail(c, CodeParamError, "参数错误")
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		Fail(c, CodeParamError, "接收文件失败")
+		return
+	}
+	url, err := hrcService.ServiceGroupApp.UploadService.UploadResumeAttachment(c.Request.Context(), file)
+	if err != nil {
+		Fail(c, CodeParamError, err.Error())
+		return
+	}
+	title := strings.TrimSpace(c.PostForm("title"))
+	if title == "" {
+		title = file.Filename
+	}
+	uid := middlewarehrc.GetMemberUID(c)
+	if err := hrcService.ServiceGroupApp.ResumeService.SetOutward(c.Request.Context(), uid, id, url, title); err != nil {
+		Fail(c, CodeParamError, err.Error())
+		return
+	}
+	OKWithData(c, gin.H{"url": url, "title": title})
+}
+
+// DeleteOutward 删除附件简历（清空主表 word_resume 系列字段）
+// @Tags HrcResume
+// @Summary 删除附件简历
+// @Produce json
+// @Param id path int true "简历 id"
+// @Success 200 {object} Response
+// @Router /api/v1/personal/resumes/{id}/outward [delete]
+func (a *ResumeApi) DeleteOutward(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		Fail(c, CodeParamError, "参数错误")
+		return
+	}
+	uid := middlewarehrc.GetMemberUID(c)
+	if err := hrcService.ServiceGroupApp.ResumeService.ClearOutward(c.Request.Context(), uid, id); err != nil {
+		Fail(c, CodeParamError, err.Error())
+		return
+	}
+	OK(c)
 }
 
 // resumeFromRequest 请求 DTO → 简历主表模型（服务端管理字段不在此映射）
