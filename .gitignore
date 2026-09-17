@@ -59,3 +59,6 @@ web/.env.*.local
 .DS_Store
 # Windows 系统
 Thumbs.db
+/server/uploads/file/*.pdf
+/server/uploads/file/*.jpg
+/server/uploads/file/*.png
