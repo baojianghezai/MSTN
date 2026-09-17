@@ -1,2 +1,0 @@
-[github.com/flipped-aurora/gin-vue-admin/server]2026-08-17 11:31:07.006	[33mwarn[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:369	login failed	{"node": "", "app_id": "", "env": "", "error": "密码错误"}
-[github.com/flipped-aurora/gin-vue-admin/server]2026-08-17 16:42:53.655	[33mwarn[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/api/v1/hrc/auth.go:369	login failed	{"node": "", "app_id": "", "env": "", "error": "密码错误"}

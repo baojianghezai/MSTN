@@ -1,3 +1,0 @@
-[github.com/flipped-aurora/gin-vue-admin/server]2026-08-17 13:29:29.213	[31merror[0m	C:/Users/18089/Desktop/MSTN/msrc-admin/server/core/server_run.go:37	server启动失败	{"node": "", "app_id": "", "env": "", "error": "listen tcp :8888: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted."}
-github.com/flipped-aurora/gin-vue-admin/server/core.initServer.func1
-	C:/Users/18089/Desktop/MSTN/msrc-admin/server/core/server_run.go:37
