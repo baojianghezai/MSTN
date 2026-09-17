@@ -17,6 +17,28 @@
       @click="handleCommand"
     />
 
+    <!-- 待办红点（#3）：职位审核 / 企业审核 / 待处理订单 / 推广审核 -->
+    <el-popover placement="bottom-end" :width="240" trigger="hover">
+      <template #reference>
+        <el-badge :value="pendingTotal" :max="99" :hidden="pendingTotal === 0" class="mx-1">
+          <icon-button icon="lucide:bell" label="待办" @click="goPending('companyAudit')" />
+        </el-badge>
+      </template>
+      <ul class="m-0 list-none p-0">
+        <li
+          v-for="item in pendingItems"
+          :key="item.name"
+          class="flex cursor-pointer items-center justify-between rounded px-2 py-1.5 hover:bg-slate-50"
+          @click="goPending(item.name)"
+        >
+          <span class="text-sm text-slate-600">{{ item.label }}</span>
+          <span class="text-sm font-semibold" :class="item.count > 0 ? 'text-red-500' : 'text-slate-300'">
+            {{ item.count }}
+          </span>
+        </li>
+      </ul>
+    </el-popover>
+
     <icon-button
       icon="lucide:settings"
       label="设置"
@@ -46,15 +68,43 @@
   import { useThemeStore } from '@/pinia'
   import { storeToRefs } from 'pinia'
   import GvaSetting from '@/view/layout/setting/index.vue'
-  import { ref } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { emitter } from '@/utils/bus.js'
   import CommandMenu from '@/components/commandMenu/index.vue'
   import IconButton from '@/components/iconButton/index.vue'
   import { toDoc } from '@/utils/doc'
   import { isDev } from '@/utils/env.js'
+  import { getPendingCounts } from '@/api/hrc/pending'
 
   const themeStore = useThemeStore()
   const { settings } = storeToRefs(themeStore)
+  const router = useRouter()
+
+  // 待办统计
+  const pending = ref({ jobAudit: 0, companyAudit: 0, orderPending: 0, promotionAudit: 0, total: 0 })
+  const pendingItems = computed(() => [
+    { name: 'jobsManage', label: '职位待审核', count: pending.value.jobAudit },
+    { name: 'companyAudit', label: '企业待审核', count: pending.value.companyAudit },
+    { name: 'billingManage', label: '待处理订单', count: pending.value.orderPending },
+    { name: 'promotionAudit', label: '推广待审核', count: pending.value.promotionAudit }
+  ])
+  const pendingTotal = computed(() => pending.value.total || 0)
+
+  const goPending = (name) => {
+    if (name) router.push({ name })
+  }
+
+  const loadPending = async () => {
+    try {
+      const res = await getPendingCounts()
+      pending.value = res.data || pending.value
+    } catch {
+      // 未登录/无权限时忽略
+    }
+  }
+
+  onMounted(loadPending)
   const showSettingDrawer = ref(false)
   const showRefreshAnmite = ref(false)
   const toggleRefresh = () => {

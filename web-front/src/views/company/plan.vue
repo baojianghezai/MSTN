@@ -24,6 +24,7 @@
         <div><p class="text-sm text-slate-500">在线职位</p><p class="mt-1 font-semibold">{{ current.jobsMeanwhile || '不限' }}</p></div>
         <div><p class="text-sm text-slate-500">简历下载</p><p class="mt-1 font-semibold">{{ current.resumeDownloadsTotal - current.resumeDownloadsUsed }} / {{ current.resumeDownloadsTotal }}</p></div>
         <div><p class="text-sm text-slate-500">首页推广</p><p class="mt-1 font-semibold">推流 {{ current.homePushSlots }} / 广告 {{ current.homeAdSlots }}</p></div>
+        <div><p class="text-sm text-slate-500">举办招聘会</p><p class="mt-1 font-semibold">{{ current.enableJobfair ? '支持' : '暂不支持' }}</p></div>
       </div>
       <el-empty v-else :image-size="62" description="尚未购买套餐" />
     </el-card>
@@ -41,6 +42,7 @@
             <li>首页推流：{{ plan.homePushSlots }} 位</li>
             <li>首页广告：{{ plan.homeAdSlots }} 位</li>
             <li>视频面试：{{ plan.enableVideo ? '支持' : '暂不支持' }}</li>
+            <li>举办招聘会：{{ plan.enableJobfair ? '支持' : '暂不支持' }}</li>
           </ul>
           <p v-if="plan.description" class="mt-4 text-sm text-slate-500 line-clamp-2">{{ plan.description }}</p>
           <el-button class="mt-5" type="primary" :loading="creatingId === plan.id" @click="createOrder(plan)">创建订单</el-button>

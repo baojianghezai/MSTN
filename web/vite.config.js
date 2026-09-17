@@ -27,7 +27,7 @@ export default ({ mode }) => {
   // 默认 '/'（根路径部署，与 GVA 原版一致）
   const base = env.VITE_BASE || '/'
   const root = './'
-  const outDir = 'dist'
+  const outDir = 'admin'
 
   const config = {
     base: base, // 编译后js导入的资源路径

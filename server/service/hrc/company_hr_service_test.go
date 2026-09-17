@@ -11,13 +11,14 @@ import (
 
 // 主账号创建/管理 HR 子账号；归属与隔离
 func TestCompanyHRCreateListAndOwnership(t *testing.T) {
-	db := testutil.NewMemoryDB(t, &hrcModel.Members{})
+	db := testutil.NewMemoryDB(t, &hrcModel.Members{}, &hrcModel.MembersInfo{})
 	svc := &CompanyHRService{}
 	ctx := context.Background()
 
-	item, err := svc.Create(ctx, 100, "13900000001", "Abc1234567!")
+	item, err := svc.Create(ctx, 100, "13900000001", "Abc1234567!", "张经理", smsMasterKey)
 	require.NoError(t, err)
 	require.NotZero(t, item.UID)
+	require.Equal(t, "张经理", item.RealName)
 
 	var member hrcModel.Members
 	require.NoError(t, db.Where("uid = ?", item.UID).First(&member).Error)
@@ -25,7 +26,7 @@ func TestCompanyHRCreateListAndOwnership(t *testing.T) {
 	require.Equal(t, int8(2), member.Utype)
 
 	// 手机号重复
-	_, err = svc.Create(ctx, 100, "13900000001", "Abc1234567!")
+	_, err = svc.Create(ctx, 100, "13900000001", "Abc1234567!", "", smsMasterKey)
 	require.ErrorIs(t, err, ErrHRMobileExists)
 
 	// 列表仅本人企业可见
@@ -43,13 +44,24 @@ func TestCompanyHRCreateListAndOwnership(t *testing.T) {
 	require.NoError(t, svc.SetStatus(ctx, 100, item.UID, 2))
 	require.NoError(t, svc.ResetPassword(ctx, 100, item.UID, "Xyz9876543!"))
 
-	// 移除后列表为空
+	// 移除后列表为空，数据库物理删除，且手机号可复用
 	require.NoError(t, svc.Delete(ctx, 100, item.UID))
 	list, err = svc.List(ctx, 100)
 	require.NoError(t, err)
 	require.Len(t, list, 0)
 
+	var remain int64
+	require.NoError(t, db.Model(&hrcModel.Members{}).Where("uid = ?", item.UID).Count(&remain).Error)
+	require.Equal(t, int64(0), remain, "HR 记录应物理删除")
+	var infoCount int64
+	require.NoError(t, db.Model(&hrcModel.MembersInfo{}).Where("uid = ?", item.UID).Count(&infoCount).Error)
+	require.Equal(t, int64(0), infoCount, "HR 资料应一并删除")
+
+	recreated, err := svc.Create(ctx, 100, "13900000001", "Abc1234567!", "", smsMasterKey)
+	require.NoError(t, err, "删除后同一手机号应可重新创建")
+	require.NotEqual(t, item.UID, recreated.UID)
+
 	// 弱密码拒绝
-	_, err = svc.Create(ctx, 100, "13900000002", "short")
+	_, err = svc.Create(ctx, 100, "13900000002", "short", "", smsMasterKey)
 	require.Error(t, err)
 }

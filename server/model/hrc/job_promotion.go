@@ -17,6 +17,8 @@ type JobPromotion struct {
 	AdTitle    string    `gorm:"column:ad_title;size:60" json:"adTitle"`
 	AdSubtitle string    `gorm:"column:ad_subtitle;size:120" json:"adSubtitle"`
 	AdImage    string    `gorm:"column:ad_image;size:255" json:"adImage"`
+	Audit      int8      `gorm:"column:audit;default:0;index" json:"audit"` // 0待审 1通过 3不通过（投放需后台审核）
+	Reason     string    `gorm:"column:reason;size:255" json:"reason"`      // 不通过原因
 	Sort       int       `gorm:"column:sort;default:0" json:"sort"`
 	CreatedAt  time.Time `gorm:"column:created_at;index" json:"createdAt"`
 }

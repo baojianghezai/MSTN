@@ -62,6 +62,7 @@ func bizModel() error {
 		&hrcModel.CategoryJobs{},
 		// 内容一期简版（资讯/招聘会/帮助）
 		&hrcModel.Article{},
+		&hrcModel.JobfairSignup{},
 
 		// M3 收尾批：简历五张结构化子表（04 §2.4-2.8）
 		&hrcModel.ResumeEducation{},
@@ -92,6 +93,16 @@ func bizModel() error {
 		if err := db.Migrator().DropIndex(&hrcModel.PersonalJobsApply{}, "uk_uid_resume_company"); err != nil {
 			return err
 		}
+	}
+
+	// 在线对话由「企业级」改为「每个 HR 独立」：清理旧唯一索引并把历史会话归给企业主账号
+	if db.Migrator().HasIndex(&hrcModel.ImSession{}, "uk_im_personal_company") {
+		if err := db.Migrator().DropIndex(&hrcModel.ImSession{}, "uk_im_personal_company"); err != nil {
+			return err
+		}
+	}
+	if err := db.Exec("UPDATE ms_im_session SET company_hr_uid = company_uid WHERE company_hr_uid = 0").Error; err != nil {
+		return err
 	}
 
 	// M4 商业化最小闭环：套餐、企业权益与订单。

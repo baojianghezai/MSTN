@@ -9,6 +9,12 @@ type MessageListener = (message: ChatMessageItem) => void
 const RECONNECT_DELAY = 5000
 const POLL_INTERVAL = 5000
 
+// 客户端密钥（WebSocket 无法带自定义 Header，走后端 query 校验）
+function clientKeySuffix(): string {
+  const key = import.meta.env.VITE_CLIENT_KEY
+  return key ? `&clientKey=${encodeURIComponent(key)}` : ''
+}
+
 export const useChatStore = defineStore('chat', () => {
   const unread = ref(0)
   const connected = ref(false)
@@ -62,7 +68,7 @@ export const useChatStore = defineStore('chat', () => {
   const openSocket = () => {
     if (!currentToken) return
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-    const url = `${protocol}://${window.location.host}/api/v1/ws/chat?token=${encodeURIComponent(currentToken)}`
+    const url = `${protocol}://${window.location.host}/api/v1/ws/chat?token=${encodeURIComponent(currentToken)}${clientKeySuffix()}`
     try {
       socket = new WebSocket(url)
     } catch {

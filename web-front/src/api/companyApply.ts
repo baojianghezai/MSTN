@@ -32,7 +32,10 @@ export const downloadResume = async (did: number) => {
   const { token } = useUserStore()
   const apiBase = import.meta.env.VITE_API_BASE || '/api/v1'
   const response = await axios.get(`${apiBase}/company/applies/${did}/resume/download`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'X-Client-Key': import.meta.env.VITE_CLIENT_KEY || ''
+    },
     responseType: 'blob'
   })
 

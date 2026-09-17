@@ -14,6 +14,8 @@ type CompanyHRApi struct{}
 type CompanyHRCreateRequest struct {
 	Mobile   string `json:"mobile" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	RealName string `json:"realName"`
+	Code     string `json:"code" binding:"required"`
 }
 
 type CompanyHRStatusRequest struct {
@@ -61,7 +63,7 @@ func (a *CompanyHRApi) Create(c *gin.Context) {
 		return
 	}
 	ownerUID := middlewarehrc.GetMemberUID(c)
-	item, err := hrcService.ServiceGroupApp.CompanyHRService.Create(c.Request.Context(), ownerUID, req.Mobile, req.Password)
+	item, err := hrcService.ServiceGroupApp.CompanyHRService.Create(c.Request.Context(), ownerUID, req.Mobile, req.Password, req.RealName, req.Code)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return

@@ -16,7 +16,18 @@
           <el-descriptions-item label="举办时间">{{ article.holdTime || '-' }}</el-descriptions-item>
           <el-descriptions-item label="举办地点">{{ article.address || '-' }}</el-descriptions-item>
           <el-descriptions-item label="主办方">{{ article.organizer || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="已报名">{{ signupCount }} 人</el-descriptions-item>
         </el-descriptions>
+
+        <div v-if="article.type === 2" class="mt-4">
+          <el-button
+            :type="signed ? 'success' : 'primary'"
+            plain
+            @click="toggleSignup"
+          >
+            {{ signed ? '已报名（点击取消）' : '参加招聘会' }}
+          </el-button>
+        </div>
 
         <div class="mt-5 whitespace-pre-wrap text-sm leading-7 text-slate-700">{{ article.content }}</div>
 
@@ -48,16 +59,21 @@
 <script setup lang="ts">
   import { onMounted, ref, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getArticle } from '@/api/content'
+  import { ElMessage } from 'element-plus'
+  import { cancelJobfairSignup, getArticle, getMyJobfairSignups, signupJobfair } from '@/api/content'
   import type { ArticleItem } from '@/types/api'
   import { formatDate } from '@/utils/format'
+  import { useUserStore } from '@/stores/user'
 
   const route = useRoute()
   const router = useRouter()
+  const userStore = useUserStore()
 
   const article = ref<ArticleItem | null>(null)
   const loading = ref(false)
   const qrOk = ref(true)
+  const signed = ref(false)
+  const signupCount = ref(0)
 
   const load = async () => {
     const id = Number(route.params.id)
@@ -66,10 +82,40 @@
     try {
       const { data } = await getArticle(id)
       article.value = data
+      signupCount.value = data.signupCount || 0
+      if (data.type === 2 && userStore.token && userStore.utype === 1) {
+        const { data: ids } = await getMyJobfairSignups()
+        signed.value = ids.includes(id)
+      } else {
+        signed.value = false
+      }
     } catch {
       article.value = null
     } finally {
       loading.value = false
+    }
+  }
+
+  const toggleSignup = async () => {
+    if (!article.value) return
+    if (!userStore.token) {
+      router.push({ name: 'Login', query: { redirect: route.fullPath } })
+      return
+    }
+    if (userStore.utype !== 1) {
+      ElMessage.warning('请使用个人账号报名招聘会')
+      return
+    }
+    if (signed.value) {
+      await cancelJobfairSignup(article.value.id)
+      signed.value = false
+      signupCount.value = Math.max(0, signupCount.value - 1)
+      ElMessage.success('已取消报名')
+    } else {
+      await signupJobfair(article.value.id)
+      signed.value = true
+      signupCount.value += 1
+      ElMessage.success('报名成功')
     }
   }
 

@@ -43,6 +43,7 @@ func (s *CmsService) ListArticles(ctx context.Context, typ int8, info request.Pa
 	if err := db.Order("sort desc, addtime desc, id desc").Limit(limit).Offset(offset).Find(&list).Error; err != nil {
 		return nil, 0, err
 	}
+	(&JobfairService{}).fillSignupCounts(ctx, list)
 	return list, total, nil
 }
 
@@ -59,6 +60,9 @@ func (s *CmsService) GetArticle(ctx context.Context, id uint64) (*hrcModel.Artic
 	if err := db.Model(&hrcModel.Article{}).Where("id = ?", id).UpdateColumn("click", gorm.Expr("click + 1")).Error; err != nil {
 		return nil, err
 	}
+	list := []hrcModel.Article{article}
+	(&JobfairService{}).fillSignupCounts(ctx, list)
+	article.SignupCount = list[0].SignupCount
 	return &article, nil
 }
 

@@ -92,14 +92,18 @@
           v-if="detail.logo"
           :src="imgUrl(detail.logo)"
           fit="contain"
-          class="max-h-40 rounded border"
+          :preview-src-list="[imgUrl(detail.logo)]"
+          preview-teleported
+          class="h-32 w-full rounded border border-slate-200 bg-slate-50"
         />
         <p class="font-semibold">营业执照：</p>
         <el-image
           v-if="detail.certificateImg"
           :src="imgUrl(detail.certificateImg)"
           fit="contain"
-          class="max-h-40 rounded border"
+          :preview-src-list="[imgUrl(detail.certificateImg)]"
+          preview-teleported
+          class="h-48 w-full rounded border border-slate-200 bg-slate-50"
         />
       </div>
     </el-drawer>

@@ -10,6 +10,7 @@ import (
 	middlewarehrc "github.com/flipped-aurora/gin-vue-admin/server/middleware/hrc"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var (
@@ -23,17 +24,22 @@ type CompanyHRItem struct {
 	UID      uint64    `json:"uid"`
 	Username string    `json:"username"`
 	Mobile   string    `json:"mobile"`
-	Status   int8      `json:"status"` // 1=启用 2=禁用
+	RealName string    `json:"realName"` // HR 姓名（在线对话展示接待人）
+	Status   int8      `json:"status"`   // 1=启用 2=禁用
 	RegTime  time.Time `json:"regTime"`
 }
 
 // CompanyHRService 企业多 HR 子账号（#21：主账号创建/管理，共享企业数据）
 type CompanyHRService struct{}
 
-// Create 创建 HR 子账号（归属企业主账号；手机号+密码登录，数据共享企业主体）
-func (s *CompanyHRService) Create(ctx context.Context, ownerUID uint64, mobile, password string) (*CompanyHRItem, error) {
+// Create 创建 HR 子账号（归属企业主账号；手机号+验证码+密码，数据共享企业主体）
+func (s *CompanyHRService) Create(ctx context.Context, ownerUID uint64, mobile, password, realname, code string) (*CompanyHRItem, error) {
 	mobile = strings.TrimSpace(mobile)
 	if err := (&AuthService{}).ValidateMobile(mobile); err != nil {
+		return nil, err
+	}
+	// 手机号验证码校验（场景 hr；支持统一万能验证码）
+	if err := (&AuthService{}).CheckSmsCode(mobile, "hr", strings.TrimSpace(code)); err != nil {
 		return nil, err
 	}
 	if err := validateMemberPassword(password); err != nil {
@@ -68,7 +74,13 @@ func (s *CompanyHRService) Create(ctx context.Context, ownerUID uint64, mobile, 
 		}
 		return nil, err
 	}
-	return &CompanyHRItem{UID: hr.UID, Username: hr.Username, Mobile: hr.Mobile, Status: hr.Status, RegTime: hr.RegTime}, nil
+	// HR 姓名存 MembersInfo（在线对话中对端可显示接待人姓名）
+	if name := strings.TrimSpace(realname); name != "" {
+		if err := db.Create(&hrcModel.MembersInfo{UID: hr.UID, RealName: name}).Error; err != nil {
+			return nil, err
+		}
+	}
+	return &CompanyHRItem{UID: hr.UID, Username: hr.Username, Mobile: hr.Mobile, RealName: strings.TrimSpace(realname), Status: hr.Status, RegTime: hr.RegTime}, nil
 }
 
 // List 企业 HR 子账号列表
@@ -80,8 +92,21 @@ func (s *CompanyHRService) List(ctx context.Context, ownerUID uint64) ([]Company
 		return nil, err
 	}
 	items := make([]CompanyHRItem, 0, len(members))
+	if len(members) == 0 {
+		return items, nil
+	}
+	uids := make([]uint64, 0, len(members))
 	for _, m := range members {
-		items = append(items, CompanyHRItem{UID: m.UID, Username: m.Username, Mobile: m.Mobile, Status: m.Status, RegTime: m.RegTime})
+		uids = append(uids, m.UID)
+	}
+	var infos []hrcModel.MembersInfo
+	_ = global.GVA_DB.WithContext(ctx).Select("uid", "realname").Where("uid IN ?", uids).Find(&infos).Error
+	nameMap := make(map[uint64]string, len(infos))
+	for _, info := range infos {
+		nameMap[info.UID] = info.RealName
+	}
+	for _, m := range members {
+		items = append(items, CompanyHRItem{UID: m.UID, Username: m.Username, Mobile: m.Mobile, RealName: nameMap[m.UID], Status: m.Status, RegTime: m.RegTime})
 	}
 	return items, nil
 }
@@ -128,18 +153,21 @@ func (s *CompanyHRService) ResetPassword(ctx context.Context, ownerUID uint64, h
 	return nil
 }
 
-// Delete 移除 HR 子账号（软删 + 禁用）
+// Delete 移除 HR 子账号（真正删除会员与其资料，释放手机号/用户名唯一索引；历史会话保留）
 func (s *CompanyHRService) Delete(ctx context.Context, ownerUID uint64, hrUID uint64) error {
-	now := hrcModel.Now()
-	res := global.GVA_DB.WithContext(ctx).Model(&hrcModel.Members{}).
-		Where("uid = ? AND company_uid = ? AND deleted_at IS NULL", hrUID, ownerUID).
-		Updates(map[string]interface{}{"deleted_at": now, "status": 2})
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return ErrHRNotFound
-	}
-	middlewarehrc.InvalidateSession(hrUID)
-	return nil
+	return global.GVA_DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var hr hrcModel.Members
+		if err := tx.Where("uid = ? AND company_uid = ?", hrUID, ownerUID).First(&hr).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrHRNotFound
+			}
+			return err
+		}
+		middlewarehrc.InvalidateSession(hrUID)
+		if err := tx.Where("uid = ?", hrUID).Delete(&hrcModel.MembersInfo{}).Error; err != nil {
+			return err
+		}
+		// Members 的 DeletedAt 非 gorm.DeletedAt，Delete 为物理删除；HR 子账号无需保留审计
+		return tx.Where("uid = ?", hrUID).Delete(&hrcModel.Members{}).Error
+	})
 }

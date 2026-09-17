@@ -4,7 +4,8 @@ import "time"
 
 // JobsBase 职位公共字段（ms_jobs / ms_jobs_tmp 共用，01 §2.2 按 五点五 裁剪）
 type JobsBase struct {
-	UID             uint64     `gorm:"column:uid;index" json:"uid"` // 发布企业 uid
+	UID             uint64     `gorm:"column:uid;index" json:"uid"`      // 发布企业 uid
+	HrUID           uint64     `gorm:"column:hr_uid;index" json:"hrUid"` // 发布人真实账号（主账号或 HR 子账号；在线沟通路由到该账号）
 	JobsName        string     `gorm:"column:jobs_name;size:50;index" json:"jobsName"`
 	CompanyName     string     `gorm:"column:companyname;size:50" json:"companyname"`
 	CompanyID       uint64     `gorm:"column:company_id;index" json:"companyId"`

@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(import.meta.dirname, 'src')
       }
     },
+     build: {
+      outDir: 'www',
+    },
     server: {
       port: Number(env.VITE_PORT || 8081),
       watch: {

@@ -271,6 +271,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CompanyHRs',
         meta: { title: '员工账号' },
         component: () => import('@/views/company/hrs.vue')
+      },
+      {
+        path: 'jobfairs',
+        name: 'CompanyJobfairs',
+        meta: { title: '举办招聘会' },
+        component: () => import('@/views/company/jobfairs.vue')
       }
     ]
   },

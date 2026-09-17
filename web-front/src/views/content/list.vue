@@ -27,6 +27,17 @@
           </div>
           <span class="flex-none text-xs text-slate-400">{{ formatDate(item.addtime) }}</span>
         </div>
+        <div v-if="type === 2" class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+          <span class="text-xs text-slate-400">已报名 {{ item.signupCount || 0 }} 人</span>
+          <el-button
+            size="small"
+            :type="signedIds.includes(item.id) ? 'success' : 'primary'"
+            plain
+            @click.stop="toggleSignup(item)"
+          >
+            {{ signedIds.includes(item.id) ? '已报名（点击取消）' : '参加' }}
+          </el-button>
+        </div>
       </el-card>
     </div>
 
@@ -47,12 +58,15 @@
 <script setup lang="ts">
   import { computed, onMounted, ref, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getArticles } from '@/api/content'
+  import { ElMessage } from 'element-plus'
+  import { cancelJobfairSignup, getArticles, getMyJobfairSignups, signupJobfair } from '@/api/content'
   import type { ArticleItem } from '@/types/api'
   import { formatDate } from '@/utils/format'
+  import { useUserStore } from '@/stores/user'
 
   const route = useRoute()
   const router = useRouter()
+  const userStore = useUserStore()
 
   const type = computed(() => Number(route.meta.contentType) || 1)
   const title = computed(() => (route.meta.contentTitle as string) || '资讯')
@@ -68,6 +82,42 @@
   const page = ref(1)
   const pageSize = ref(10)
   const loading = ref(false)
+  const signedIds = ref<number[]>([])
+
+  const loadSigned = async () => {
+    if (!userStore.token || userStore.utype !== 1) {
+      signedIds.value = []
+      return
+    }
+    try {
+      const { data } = await getMyJobfairSignups()
+      signedIds.value = data
+    } catch {
+      signedIds.value = []
+    }
+  }
+
+  const toggleSignup = async (item: ArticleItem) => {
+    if (!userStore.token) {
+      router.push({ name: 'Login', query: { redirect: route.fullPath } })
+      return
+    }
+    if (userStore.utype !== 1) {
+      ElMessage.warning('请使用个人账号报名招聘会')
+      return
+    }
+    if (signedIds.value.includes(item.id)) {
+      await cancelJobfairSignup(item.id)
+      signedIds.value = signedIds.value.filter((id) => id !== item.id)
+      item.signupCount = Math.max(0, (item.signupCount || 0) - 1)
+      ElMessage.success('已取消报名')
+    } else {
+      await signupJobfair(item.id)
+      signedIds.value = [...signedIds.value, item.id]
+      item.signupCount = (item.signupCount || 0) + 1
+      ElMessage.success('报名成功')
+    }
+  }
 
   const load = async () => {
     loading.value = true
@@ -84,7 +134,10 @@
     router.push({ name: detailName.value, params: { id } })
   }
 
-  onMounted(load)
+  onMounted(() => {
+    load()
+    loadSigned()
+  })
   watch(
     () => route.fullPath,
     () => {

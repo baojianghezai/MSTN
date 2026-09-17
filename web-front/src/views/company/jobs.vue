@@ -94,6 +94,7 @@
             default-first-option
             placeholder="请选择职位名称"
             class="w-full"
+            @change="onJobTitleChange"
           >
             <el-option v-if="historyTitleOption" :label="form.jobsName" :value="form.jobsName" />
             <el-option v-for="t in jobTitles" :key="t.id" :label="t.name" :value="t.name" />
@@ -311,6 +312,25 @@
   }
   const onSubClassChange = () => {
     fillCategoryCn()
+  }
+
+  // #2：选择职位名称后，按名称在职位分类树中匹配三级分类并自动回填一/二/三级
+  const onJobTitleChange = () => {
+    const name = form.jobsName
+    if (!name) return
+    const cats = jobCategories.value
+    const hasChild = (id: number) => cats.some((c) => c.parentId === id)
+    // 优先匹配三级（叶子）节点名称
+    const leaf = cats.find((c) => c.name === name && c.parentId !== 0 && !hasChild(c.id))
+    if (!leaf) return
+    const mid = cats.find((c) => c.id === leaf.parentId)
+    const top = mid ? cats.find((c) => c.id === mid.parentId) : undefined
+    if (mid && top) {
+      form.topclass = top.id
+      form.category = mid.id
+      form.subclass = leaf.id
+      fillCategoryCn()
+    }
   }
 
   const fillCategoryCn = () => {

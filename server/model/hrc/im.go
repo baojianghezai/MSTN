@@ -2,14 +2,16 @@ package hrc
 
 import "time"
 
-// ImSession 在线对话会话（个人 ↔ 企业，唯一；设计依据：11 §1.1 IM 能力一期最小实现）
-// 一期不做多客服/多 HR：同一「个人 + 企业」只有一条会话，职位仅作为发起上下文展示。
+// ImSession 在线对话会话
+// 归属维度：求职者 + 企业 + 企业侧接待账号（公司_HR）——
+// 主账号与不同 HR 子账号各自与求职者独立会话，互不可见（2026-09 决议）。
 type ImSession struct {
 	ID             uint64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	PersonalUID    uint64     `gorm:"column:personal_uid;index;uniqueIndex:uk_im_personal_company" json:"personalUid"`
-	CompanyUID     uint64     `gorm:"column:company_uid;index;uniqueIndex:uk_im_personal_company" json:"companyUid"`
-	JobsID         uint64     `gorm:"column:jobs_id" json:"jobsId"`             // 发起上下文职位（可选）
-	JobsName       string     `gorm:"column:jobs_name;size:60" json:"jobsName"` // 职位名快照
+	PersonalUID    uint64     `gorm:"column:personal_uid;index;uniqueIndex:uk_im_personal_company_hr" json:"personalUid"`
+	CompanyUID     uint64     `gorm:"column:company_uid;index;uniqueIndex:uk_im_personal_company_hr" json:"companyUid"`
+	CompanyHRUID   uint64     `gorm:"column:company_hr_uid;index;uniqueIndex:uk_im_personal_company_hr" json:"companyHrUid"` // 企业侧接待账号（主账号或 HR 子账号，= 真实登录 uid）
+	JobsID         uint64     `gorm:"column:jobs_id" json:"jobsId"`                                                          // 发起上下文职位（可选）
+	JobsName       string     `gorm:"column:jobs_name;size:60" json:"jobsName"`                                              // 职位名快照
 	PersonalName   string     `gorm:"column:personal_name;size:60" json:"personalName"`
 	CompanyName    string     `gorm:"column:company_name;size:60" json:"companyName"`
 	LastContent    string     `gorm:"column:last_content;size:500" json:"lastContent"`          // 最后一条消息预览

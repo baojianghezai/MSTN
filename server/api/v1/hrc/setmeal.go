@@ -22,6 +22,7 @@ type SetmealSaveRequest struct {
 	HomePushSlots   int    `json:"homePushSlots"`
 	HomeAdSlots     int    `json:"homeAdSlots"`
 	EnableVideo     bool   `json:"enableVideo"`
+	EnableJobfair   bool   `json:"enableJobfair"`
 	Display         bool   `json:"display"`
 	Sort            int    `json:"sort"`
 	Description     string `json:"description"`
@@ -63,7 +64,7 @@ func (a *SetmealApi) AdminCreate(c *gin.Context) {
 	plan := hrcModel.Setmeal{
 		Name: req.Name, Price: req.Price, DurationDays: req.DurationDays,
 		JobsMeanwhile: req.JobsMeanwhile, ResumeDownloads: req.ResumeDownloads, HomePushSlots: req.HomePushSlots, HomeAdSlots: req.HomeAdSlots,
-		EnableVideo: req.EnableVideo, Display: req.Display, Sort: req.Sort, Description: req.Description,
+		EnableVideo: req.EnableVideo, EnableJobfair: req.EnableJobfair, Display: req.Display, Sort: req.Sort, Description: req.Description,
 	}
 	if err := hrcService.ServiceGroupApp.SetmealService.Save(c.Request.Context(), &plan); err != nil {
 		Fail(c, CodeParamError, err.Error())
@@ -86,7 +87,7 @@ func (a *SetmealApi) AdminUpdate(c *gin.Context) {
 	plan := hrcModel.Setmeal{
 		ID: id, Name: req.Name, Price: req.Price, DurationDays: req.DurationDays,
 		JobsMeanwhile: req.JobsMeanwhile, ResumeDownloads: req.ResumeDownloads, HomePushSlots: req.HomePushSlots, HomeAdSlots: req.HomeAdSlots,
-		EnableVideo: req.EnableVideo, Display: req.Display, Sort: req.Sort, Description: req.Description,
+		EnableVideo: req.EnableVideo, EnableJobfair: req.EnableJobfair, Display: req.Display, Sort: req.Sort, Description: req.Description,
 	}
 	if err := hrcService.ServiceGroupApp.SetmealService.Save(c.Request.Context(), &plan); err != nil {
 		Fail(c, CodeParamError, err.Error())

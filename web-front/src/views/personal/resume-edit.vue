@@ -1119,7 +1119,7 @@
   }
 
   // 附件简历（PDF）上传：el-upload 直传，成功后刷新主表字段
-  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
+  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}`, 'X-Client-Key': import.meta.env.VITE_CLIENT_KEY || '' }))
   const outwardAction = computed(() => `/api/v1/personal/resumes/${resumeId}/outward`)
   const outwardUrl = computed(() => {
     const url = form.wordResume
@@ -1160,7 +1160,31 @@
     }
   }
 
+  // #4 时间范围合理性校验：结束时间不得早于开始时间（至今可选）
+  const monthValue = (y: unknown, m: unknown) => (Number(y) || 0) * 100 + (Number(m) || 0)
+  const findTimeError = (): string | null => {
+    const check = (label: string, rows: { startyear: unknown; startmonth: unknown; endyear: unknown; endmonth: unknown; todate: number }[]) => {
+      for (const r of rows) {
+        if (r.todate === 1) continue
+        const start = monthValue(r.startyear, r.startmonth)
+        const end = monthValue(r.endyear, r.endmonth)
+        if (start > 0 && end > 0 && end < start) {
+          return `${label}存在「结束时间早于开始时间」`
+        }
+      }
+      return null
+    }
+    return (
+      check('教育经历', form.educations) ||
+      check('工作/实习经历', form.work) ||
+      check('项目经历', form.projects) ||
+      check('培训经历', form.training) ||
+      check('学生干部经历', form.studentLeader)
+    )
+  }
+
   const handleSave = async () => {
+    if (saving.value) return // #5 防重复提交（首次创建多次点击）
     if (!form.fullname.trim()) {
       ElMessage.warning('请填写姓名')
       return
@@ -1171,6 +1195,11 @@
     }
     if (form.projects.length > 6) {
       ElMessage.warning('项目经历最多 6 条')
+      return
+    }
+    const timeErr = findTimeError()
+    if (timeErr) {
+      ElMessage.warning(timeErr)
       return
     }
     normalizeNums()

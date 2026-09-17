@@ -1,9 +1,12 @@
 package main
 
 import (
+	"os"
+
 	"github.com/flipped-aurora/gin-vue-admin/server/core"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/initialize"
+	"github.com/gin-gonic/gin"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
@@ -42,6 +45,11 @@ import (
 // @name                        x-token
 // @BasePath                    /
 func main() {
+	// 默认以 release 模式运行（关闭 gin 调试日志与路由打印）；
+	// 本地调试时设置环境变量 GIN_MODE=debug 覆盖
+	if os.Getenv(gin.EnvGinMode) == "" {
+		gin.SetMode(gin.DebugMode)
+	}
 	// 初始化系统
 	initializeSystem()
 	// 运行服务器

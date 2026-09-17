@@ -24,3 +24,24 @@ export const getArticles = (params: { type: number; page?: number; pageSize?: nu
 /** 内容详情（#17） */
 export const getArticle = (id: number) =>
   request.get<ApiResponse<ArticleItem>>(`/articles/${id}`)
+
+// ---- 招聘会报名（#2，个人）----
+
+/** 我报名的招聘会 id 列表 */
+export const getMyJobfairSignups = () =>
+  request.get<ApiResponse<number[]>>('/personal/jobfairs/signups')
+
+/** 我参加的招聘会（分页） */
+export const getMyJobfairs = (params: { page: number; pageSize: number }) =>
+  request.get<ApiResponse<{ list: ArticleItem[]; total: number; page: number; pageSize: number }>>(
+    '/personal/jobfairs/mine',
+    { params }
+  )
+
+/** 报名参加招聘会 */
+export const signupJobfair = (id: number) =>
+  request.post<ApiResponse>(`/personal/jobfairs/${id}/signup`)
+
+/** 取消报名 */
+export const cancelJobfairSignup = (id: number) =>
+  request.delete<ApiResponse>(`/personal/jobfairs/${id}/signup`)

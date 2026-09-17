@@ -63,9 +63,9 @@ func seedSetmeals(db *gorm.DB) error {
 		return seedDefaultPromotionSlots(db)
 	}
 	if err := db.Create(&[]hrcModel.Setmeal{
-		{Name: "基础版", Price: 9900, DurationDays: 30, JobsMeanwhile: 3, ResumeDownloads: 10, HomePushSlots: 0, HomeAdSlots: 0, EnableVideo: false, Display: true, Sort: 1, Description: "适合初次招聘的企业"},
-		{Name: "专业版", Price: 29900, DurationDays: 90, JobsMeanwhile: 10, ResumeDownloads: 80, HomePushSlots: 1, HomeAdSlots: 0, EnableVideo: true, Display: true, Sort: 2, Description: "适合稳定招聘的企业"},
-		{Name: "旗舰版", Price: 69900, DurationDays: 365, JobsMeanwhile: 30, ResumeDownloads: 500, HomePushSlots: 3, HomeAdSlots: 1, EnableVideo: true, Display: true, Sort: 3, Description: "适合全年招聘需求"},
+		{Name: "基础版", Price: 9900, DurationDays: 30, JobsMeanwhile: 3, ResumeDownloads: 10, HomePushSlots: 0, HomeAdSlots: 0, EnableVideo: false, EnableJobfair: false, Display: true, Sort: 1, Description: "适合初次招聘的企业"},
+		{Name: "专业版", Price: 29900, DurationDays: 90, JobsMeanwhile: 10, ResumeDownloads: 80, HomePushSlots: 1, HomeAdSlots: 0, EnableVideo: true, EnableJobfair: true, Display: true, Sort: 2, Description: "适合稳定招聘的企业"},
+		{Name: "旗舰版", Price: 69900, DurationDays: 365, JobsMeanwhile: 30, ResumeDownloads: 500, HomePushSlots: 3, HomeAdSlots: 1, EnableVideo: true, EnableJobfair: true, Display: true, Sort: 3, Description: "适合全年招聘需求"},
 	}).Error; err != nil {
 		return err
 	}
@@ -90,6 +90,14 @@ func seedDefaultPromotionSlots(db *gorm.DB) error {
 		if err := db.Model(&hrcModel.Setmeal{}).
 			Where("name = ? AND description = ? AND home_push_slots = 0 AND home_ad_slots = 0", item.name, item.description).
 			Updates(map[string]interface{}{"home_push_slots": item.push, "home_ad_slots": item.ad}).Error; err != nil {
+			return err
+		}
+	}
+	// 举办招聘会权益回填（专业版/旗舰版；仅补默认未开启的行）
+	for _, name := range []string{"专业版", "旗舰版"} {
+		if err := db.Model(&hrcModel.Setmeal{}).
+			Where("name = ? AND enable_jobfair = ?", name, false).
+			Update("enable_jobfair", true).Error; err != nil {
 			return err
 		}
 	}

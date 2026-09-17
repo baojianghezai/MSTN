@@ -155,7 +155,7 @@
   const saving = ref(false)
 
   // 头像（#16）：上传后随资料保存；未设置时用默认头像
-  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
+  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}`, 'X-Client-Key': import.meta.env.VITE_CLIENT_KEY || '' }))
   const avatarUrl = computed(() => {
     const url = form.avatar
     if (!url) return '/default-avatar.svg'

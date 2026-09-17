@@ -11,6 +11,7 @@ export interface Setmeal {
   homePushSlots: number
   homeAdSlots: number
   enableVideo: boolean
+  enableJobfair: boolean
   display: boolean
   description: string
 }
@@ -25,6 +26,7 @@ export interface CurrentSetmeal {
   homePushSlots: number
   homeAdSlots: number
   enableVideo: boolean
+  enableJobfair: boolean
 }
 
 export interface BillingOrder {

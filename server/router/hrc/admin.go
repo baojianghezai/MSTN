@@ -65,4 +65,9 @@ func (r *AdminRouter) InitAdminRouter(Router *gin.RouterGroup) {
 	Router.GET("jobs/tmp", hrcAdminJobsApi.AdminListJobsTmp)
 	Router.GET("jobs/:id", hrcAdminJobsApi.AdminGetJobDetail)
 	Router.PUT("jobs/:id/audit", hrcAdminJobsApi.AuditJob)
+
+	// 后台待办统计 + 推广投放审核（#3/#8）
+	Router.GET("pending-counts", hrcAdminOpsApi.PendingCounts)
+	Router.GET("promotions", hrcAdminOpsApi.PromotionList)
+	Router.PUT("promotions/:id/audit", hrcAdminOpsApi.PromotionAudit)
 }

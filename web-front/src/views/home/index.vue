@@ -32,14 +32,31 @@
         </div>
 
         <div class="flex flex-none items-center gap-3">
-          <button
-            type="button"
-            class="flex h-10 items-center gap-1.5 rounded-lg bg-green-500 px-3 text-sm font-medium text-white shadow-sm transition-transform hover:-translate-y-0.5"
-            @click="comingSoon('关注公众号')"
-          >
-            <span class="i-lucide-message-circle" aria-hidden="true" />
-            公众号
-          </button>
+          <!-- 公众号：鼠标悬浮在按钮旁边浮现二维码 -->
+          <el-popover placement="left" :width="170" trigger="hover" popper-class="public-nav-popover">
+            <template #reference>
+              <button
+                type="button"
+                class="flex h-10 items-center gap-1.5 rounded-lg bg-green-500 px-3 text-sm font-medium text-white shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                <span class="i-lucide-message-circle" aria-hidden="true" />
+                公众号
+              </button>
+            </template>
+            <div class="flex flex-col items-center gap-2">
+              <img
+                v-if="qrOk"
+                src="/mp-qrcode.png"
+                alt="名硕人才网公众号二维码"
+                class="h-40 w-40 object-contain"
+                @error="qrOk = false"
+              />
+              <div v-else class="flex h-40 w-40 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
+                公众号二维码
+              </div>
+              <p class="text-xs text-slate-500">扫码关注名硕人才网公众号</p>
+            </div>
+          </el-popover>
         </div>
       </div>
     </section>
@@ -138,9 +155,11 @@
                     class="absolute inset-0 h-full w-full object-cover"
                   />
                   <div
+                    v-if="!slide.image"
                     class="absolute inset-0"
                     :class="slide.gradient || 'bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800'"
                   />
+                  <div v-else class="absolute inset-0 bg-black/30" />
                   <div class="absolute inset-0 flex flex-col justify-center px-8 sm:px-10">
                     <span class="w-fit rounded border border-white/50 px-2 py-1 text-xs">{{ slide.tag }}</span>
                     <h2 class="mt-4 text-3xl font-black leading-tight sm:text-4xl">{{ slide.title }}</h2>
@@ -166,7 +185,7 @@
           <aside class="border-t border-slate-100 p-5 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0">
             <div v-if="userStore.token" class="flex h-full flex-col justify-center">
               <div class="flex items-center gap-3">
-                <el-avatar :size="44" class="bg-primary-50 text-primary-600">
+                <el-avatar :size="44" :src="avatarUrl" class="bg-primary-50 text-primary-600">
                   <span class="i-lucide-user-round" aria-hidden="true" />
                 </el-avatar>
                 <div class="min-w-0">
@@ -242,6 +261,37 @@
       </div>
     </section>
 
+    <!-- 首页推流推荐（#10） -->
+    <section v-if="pushJobs.length" class="home-push bg-white pt-10">
+      <div class="mx-auto max-w-[1200px] px-4">
+        <div class="flex items-end justify-between">
+          <div>
+            <h2 class="text-2xl font-black text-slate-800">热招推荐</h2>
+            <p class="mt-1 text-sm text-slate-500">企业付费推流职位，优先展示</p>
+          </div>
+          <router-link to="/jobs" class="text-sm text-primary-600 hover:underline">更多职位 &gt;</router-link>
+        </div>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <router-link
+            v-for="job in pushJobs"
+            :key="job.id"
+            :to="`/jobs/${job.id}`"
+            class="group rounded-xl border border-slate-100 bg-white p-4 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="truncate font-semibold text-slate-800">{{ job.jobsName }}</span>
+              <span class="flex-none rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">推荐</span>
+            </div>
+            <p class="mt-1 truncate text-sm text-slate-500">{{ job.companyname }}</p>
+            <p class="mt-2 text-sm font-medium text-accent-600">
+              {{ job.negotiable === 1 ? '面议' : `${job.minwage}-${job.maxwage} 元` }}
+            </p>
+            <p class="mt-1 truncate text-xs text-slate-400">{{ job.districtCn || job.categoryCn || '' }}</p>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
     <!-- 下方企业展示区 -->
     <section class="home-showcase bg-white py-10">
       <div class="mx-auto max-w-[1200px] px-4">
@@ -277,6 +327,8 @@
   import { getJobList } from '@/api/category'
   import { getDistricts } from '@/api/content'
   import { getHomePromotions, type HomeAdItem } from '@/api/promotion'
+  import type { PublicJobItem } from '@/api/jobs'
+  import { getPersonalProfile } from '@/api/profile'
   import { searchCompanies, type PublicCompany } from '@/api/companies'
   import { loginBySms } from '@/api/auth'
   import { useUserStore } from '@/stores/user'
@@ -310,6 +362,8 @@
 
   const keyword = ref('')
   const district = ref('')
+  // 公众号二维码（截图缺失时显示占位块）
+  const qrOk = ref(true)
   const districts = ref<CategoryItem[]>([])
   const menuCategories = ref<CategoryTreeNode[]>([])
   const hoveredCategoryId = ref<number | null>(null)
@@ -342,8 +396,16 @@
   }
 
   const ads = ref<HomeAdItem[]>([])
+  const pushJobs = ref<PublicJobItem[]>([])
   const companies = ref<PublicCompany[]>([])
   const submitting = ref(false)
+
+  // 登录区头像（#6：优先个人头像，无则默认图标）
+  const avatar = ref('')
+  const avatarUrl = computed(() => {
+    if (!avatar.value) return ''
+    return /^https?:\/\//i.test(avatar.value) ? avatar.value : `/${avatar.value.replace(/^\/+/, '')}`
+  })
 
   const smsForm = reactive({ mobile: '', code: '', utype: 1 })
 
@@ -515,8 +577,17 @@
     getHomePromotions()
       .then(({ data }) => {
         ads.value = data.ads
+        pushJobs.value = data.push || []
       })
       .catch(() => {})
+
+    if (userStore.token && userStore.utype === 1) {
+      getPersonalProfile()
+        .then(({ data }) => {
+          avatar.value = data.avatar || ''
+        })
+        .catch(() => {})
+    }
 
     searchCompanies({ page: 1, pageSize: 3 })
       .then(({ data }) => {

@@ -232,7 +232,7 @@
       router.push({ name: 'Login', query: { redirect: route.fullPath } })
       return
     }
-    const peerUid = Number(job.value.uid)
+    const peerUid = Number(job.value.hrUid || job.value.uid)
     if (!peerUid) {
       ElMessage.warning('企业信息不完整，暂不能发起沟通')
       return

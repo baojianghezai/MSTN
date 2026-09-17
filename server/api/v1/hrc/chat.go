@@ -38,7 +38,8 @@ func (a *ChatApi) ListSessions(c *gin.Context) {
 	_ = c.ShouldBindQuery(&pageInfo)
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	list, total, err := hrcService.ServiceGroupApp.ChatService.ListSessions(c.Request.Context(), uid, utype, pageInfo)
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	list, total, err := hrcService.ServiceGroupApp.ChatService.ListSessions(c.Request.Context(), uid, utype, realUID, pageInfo)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
@@ -62,7 +63,8 @@ func (a *ChatApi) OpenSession(c *gin.Context) {
 	}
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	session, err := hrcService.ServiceGroupApp.ChatService.OpenSession(c.Request.Context(), uid, utype, req.PeerUID, req.JobsID, req.JobsName)
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	session, err := hrcService.ServiceGroupApp.ChatService.OpenSession(c.Request.Context(), uid, utype, realUID, req.PeerUID, req.JobsID, req.JobsName)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
@@ -88,7 +90,8 @@ func (a *ChatApi) Messages(c *gin.Context) {
 	_ = c.ShouldBindQuery(&pageInfo)
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	list, total, err := hrcService.ServiceGroupApp.ChatService.Messages(c.Request.Context(), uid, utype, id, pageInfo)
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	list, total, err := hrcService.ServiceGroupApp.ChatService.Messages(c.Request.Context(), uid, utype, realUID, id, pageInfo)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
@@ -117,7 +120,8 @@ func (a *ChatApi) SendMessage(c *gin.Context) {
 	}
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	item, peerUID, err := hrcService.ServiceGroupApp.ChatService.SendMessage(c.Request.Context(), uid, utype, id, req.Content)
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	item, peerUID, err := hrcService.ServiceGroupApp.ChatService.SendMessage(c.Request.Context(), uid, utype, realUID, id, req.Content)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
@@ -140,7 +144,8 @@ func (a *ChatApi) MarkRead(c *gin.Context) {
 	}
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	if err := hrcService.ServiceGroupApp.ChatService.MarkRead(c.Request.Context(), uid, utype, id); err != nil {
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	if err := hrcService.ServiceGroupApp.ChatService.MarkRead(c.Request.Context(), uid, utype, realUID, id); err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
 	}
@@ -161,7 +166,8 @@ func (a *ChatApi) DeleteSession(c *gin.Context) {
 	}
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	if err := hrcService.ServiceGroupApp.ChatService.DeleteSession(c.Request.Context(), uid, utype, id); err != nil {
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	if err := hrcService.ServiceGroupApp.ChatService.DeleteSession(c.Request.Context(), uid, utype, realUID, id); err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
 	}
@@ -177,7 +183,8 @@ func (a *ChatApi) DeleteSession(c *gin.Context) {
 func (a *ChatApi) Unread(c *gin.Context) {
 	uid := middlewarehrc.GetMemberUID(c)
 	utype := middlewarehrc.GetMemberUtype(c)
-	total, err := hrcService.ServiceGroupApp.ChatService.UnreadTotal(c.Request.Context(), uid, utype)
+	realUID := middlewarehrc.GetMemberRealUID(c)
+	total, err := hrcService.ServiceGroupApp.ChatService.UnreadTotal(c.Request.Context(), uid, utype, realUID)
 	if err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return

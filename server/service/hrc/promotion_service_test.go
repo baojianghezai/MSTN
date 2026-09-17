@@ -30,6 +30,9 @@ func TestPromotionCreateListAndDelete(t *testing.T) {
 	})
 	require.NoError(t, err)
 
+	// 投放需后台审核：通过后才在首页展示（#8）
+	require.NoError(t, db.Model(&hrcModel.JobPromotion{}).Where("uid = ?", 100).Update("audit", 1).Error)
+
 	home, err := svc.ListHome(context.Background())
 	require.NoError(t, err)
 	require.Len(t, home.Push, 1)
@@ -83,7 +86,7 @@ func TestPromotionLegacyAdFallsBackToCompanyLogo(t *testing.T) {
 	require.NoError(t, db.Create(&job).Error)
 	require.NoError(t, db.Create(&hrcModel.CompanyProfile{UID: 200, CompanyName: &companyName, Logo: "uploads/company-logo.png"}).Error)
 	require.NoError(t, db.Create(&hrcModel.MembersSetmeal{UID: 200, ExpireAt: hrcModel.Now().Add(3600 * time.Second), HomeAdSlots: 1}).Error)
-	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 200, JobID: job.ID, Type: hrcModel.JobPromotionTypeAd, CreatedAt: hrcModel.Now()}).Error)
+	require.NoError(t, db.Create(&hrcModel.JobPromotion{UID: 200, JobID: job.ID, Type: hrcModel.JobPromotionTypeAd, Audit: 1, CreatedAt: hrcModel.Now()}).Error)
 
 	home, err := (&PromotionService{}).ListHome(context.Background())
 	require.NoError(t, err)

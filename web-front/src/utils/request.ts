@@ -18,6 +18,11 @@ service.interceptors.request.use((config) => {
   if (userStore.token) {
     config.headers.Authorization = `Bearer ${userStore.token}`
   }
+  // 客户端密钥（后端 system.client-auth-enable 开启时校验，只允许自家前端调用）
+  const clientKey = import.meta.env.VITE_CLIENT_KEY
+  if (clientKey) {
+    config.headers['X-Client-Key'] = clientKey
+  }
   return config
 })
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	hrcModel "github.com/flipped-aurora/gin-vue-admin/server/model/hrc"
 	"gorm.io/gorm"
 )
@@ -179,6 +180,7 @@ func (s *PromotionService) Create(ctx context.Context, uid, jobID uint64, promot
 			promotion.AdImage = creative.AdImage
 		}
 		promotion.CreatedAt = time.Now()
+		promotion.Audit = 0 // 投放需后台审核通过后才展示（#8）
 		if err := tx.Create(promotion).Error; err != nil {
 			return err
 		}
@@ -188,6 +190,50 @@ func (s *PromotionService) Create(ctx context.Context, uid, jobID uint64, promot
 		return nil, err
 	}
 	return promotion, nil
+}
+
+// AdminPromotionItem 后台推广列表项
+type AdminPromotionItem struct {
+	hrcModel.JobPromotion
+	JobsName    string `json:"jobsName"`
+	CompanyName string `json:"companyname"`
+}
+
+// AdminList 后台推广投放列表（audit>=0 时按审核状态筛选）
+func (s *PromotionService) AdminList(ctx context.Context, audit int8, info request.PageInfo) ([]AdminPromotionItem, int64, error) {
+	db := global.GVA_DB.WithContext(ctx).Table("ms_job_promotion AS promotion").
+		Joins("JOIN ms_jobs AS jobs ON jobs.id = promotion.job_id").
+		Where("jobs.deleted_at IS NULL")
+	if audit >= 0 {
+		db = db.Where("promotion.audit = ?", audit)
+	}
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	limit, offset := info.LimitOffset()
+	var list []AdminPromotionItem
+	if err := db.Select("promotion.*, jobs.jobs_name, jobs.companyname").
+		Order("promotion.audit asc, promotion.created_at desc").Limit(limit).Offset(offset).Scan(&list).Error; err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}
+
+// AuditPromotion 审核推广投放（1=通过 3=不通过+原因）
+func (s *PromotionService) AuditPromotion(ctx context.Context, id uint64, audit int8, reason string) error {
+	if audit != 1 && audit != 3 {
+		return errors.New("审核结果仅支持 1=通过 3=不通过")
+	}
+	res := global.GVA_DB.WithContext(ctx).Model(&hrcModel.JobPromotion{}).Where("id = ?", id).
+		Updates(map[string]interface{}{"audit": audit, "reason": strings.TrimSpace(reason)})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrPromotionNotFound
+	}
+	return nil
 }
 
 func (s *PromotionService) Delete(ctx context.Context, uid, id uint64) error {
@@ -218,6 +264,7 @@ func (s *PromotionService) activeQuery(db *gorm.DB) *gorm.DB {
 		Joins("JOIN ms_jobs AS jobs ON jobs.id = promotion.job_id").
 		Joins("LEFT JOIN ms_company_profile AS company ON company.uid = jobs.uid").
 		Joins("JOIN ms_members_setmeal AS entitlement ON entitlement.uid = promotion.uid").
-		Where("entitlement.expire_at > ? AND jobs.display = 1 AND jobs.audit = 1 AND jobs.deleted_at IS NULL AND (jobs.deadline IS NULL OR jobs.deadline > ?)", now, now).
+		Where("entitlement.expire_at > ? AND jobs.display = 1 AND jobs.audit = 1 AND jobs.deleted_at IS NULL AND (jobs.deadline IS NULL OR jobs.deadline = ? OR jobs.deadline > ?)", now, time.Time{}, now).
+		Where("promotion.audit = 1").
 		Order("promotion.type asc, promotion.sort desc, promotion.created_at desc")
 }

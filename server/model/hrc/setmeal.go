@@ -13,6 +13,7 @@ type Setmeal struct {
 	HomePushSlots   int    `gorm:"column:home_push_slots;default:0" json:"homePushSlots"`
 	HomeAdSlots     int    `gorm:"column:home_ad_slots;default:0" json:"homeAdSlots"`
 	EnableVideo     bool   `gorm:"column:enable_video;default:false" json:"enableVideo"`
+	EnableJobfair   bool   `gorm:"column:enable_jobfair;default:false" json:"enableJobfair"` // 是否可举办招聘会
 	Display         bool   `gorm:"column:display;index" json:"display"`
 	Sort            int    `gorm:"column:sort;default:0" json:"sort"`
 	Description     string `gorm:"column:description;type:text" json:"description"`
@@ -34,6 +35,7 @@ type MembersSetmeal struct {
 	HomePushSlots        int       `gorm:"column:home_push_slots;default:0" json:"homePushSlots"`
 	HomeAdSlots          int       `gorm:"column:home_ad_slots;default:0" json:"homeAdSlots"`
 	EnableVideo          bool      `gorm:"column:enable_video;default:false" json:"enableVideo"`
+	EnableJobfair        bool      `gorm:"column:enable_jobfair;default:false" json:"enableJobfair"`
 	UpdatedAt            time.Time `gorm:"column:updated_at" json:"updatedAt"`
 }
 

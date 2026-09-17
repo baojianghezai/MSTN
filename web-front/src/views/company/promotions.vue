@@ -78,6 +78,13 @@
         <el-table-column label="类型" width="130">
           <template #default="{ row }"><el-tag :type="row.type === 1 ? 'warning' : 'success'">{{ row.type === 1 ? '首页推流' : '广告位' }}</el-tag></template>
         </el-table-column>
+        <el-table-column label="审核状态" width="120">
+          <template #default="{ row }">
+            <el-tooltip :disabled="row.audit !== 3 || !row.reason" :content="row.reason || ''">
+              <el-tag :type="auditTag(row.audit)" size="small">{{ auditText(row.audit) }}</el-tag>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column label="广告创意" min-width="220">
           <template #default="{ row }">
             <div v-if="row.type === 2" class="flex items-center gap-2">
@@ -116,9 +123,12 @@
   const data = reactive<CompanyPromotionData>({ list: [], homePushSlots: 0, homeAdSlots: 0, pushUsed: 0, adUsed: 0 })
   const form = reactive({ jobId: 0, type: 1 as 1 | 2, adTitle: '', adSubtitle: '', adImage: '' })
 
-  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
+  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}`, 'X-Client-Key': import.meta.env.VITE_CLIENT_KEY || '' }))
 
   const eligibleJobs = computed(() => jobs.value.filter((job) => !job.pending && job.display === 1 && job.audit === 1))
+
+  const auditText = (audit: number) => ({ 0: '待审核', 1: '已通过', 3: '未通过' }[audit] || '待审核')
+  const auditTag = (audit: number) => ({ 0: 'warning', 1: 'success', 3: 'danger' }[audit] || 'warning')
 
   const load = async () => {
     loading.value = true

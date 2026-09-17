@@ -404,6 +404,7 @@ export interface ArticleItem {
   sort: number
   display: number
   click: number
+  signupCount: number // 招聘会报名人数
   addtime: string
   updateTime: string
 }
@@ -492,6 +493,7 @@ export interface JobItem {
 // 职位详情（09-jobs.md #81，编辑回显）
 export interface JobDetail extends JobItem {
   uid?: number // 招聘企业 uid（在线沟通发起用）
+  hrUid?: number // 职位发布人真实账号（HR 子账号时为该 HR，沟通路由到该账号）
   contact: JobsContact
   tags: number[]
   reason: string // 不通过原因（audit=3）

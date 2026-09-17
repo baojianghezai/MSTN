@@ -222,6 +222,7 @@ func grantOrderEntitlement(tx *gorm.DB, order *hrcModel.Order, now time.Time) er
 		HomePushSlots:        plan.HomePushSlots,
 		HomeAdSlots:          plan.HomeAdSlots,
 		EnableVideo:          plan.EnableVideo,
+		EnableJobfair:        plan.EnableJobfair,
 		UpdatedAt:            now,
 	}
 	if err == nil {

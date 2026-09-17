@@ -167,7 +167,7 @@
   const saving = ref(false)
 
   // 上传接口走 el-upload 自己的 XHR，需手动带会员 token
-  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }))
+  const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}`, 'X-Client-Key': import.meta.env.VITE_CLIENT_KEY || '' }))
 
   onMounted(async () => {
     const [profileRes, categoriesRes, auditRes] = await Promise.all([

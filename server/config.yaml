@@ -35,14 +35,26 @@ cloudflare-r2:
 cors:
     mode: strict-whitelist
     whitelist:
-        - allow-origin: example1.com
-          allow-methods: POST, GET
-          allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id
+        # 仅放行自家前端域名（带 Origin 的浏览器跨域请求）；服务端/回调不带 Origin 不受影响
+        - allow-origin: http://localhost:8081
+          allow-methods: POST, GET, OPTIONS, DELETE, PUT
+          allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Client-Key
           expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
           allow-credentials: true
-        - allow-origin: example2.com
-          allow-methods: GET, POST
-          allow-headers: content-type
+        - allow-origin: http://localhost:8080
+          allow-methods: POST, GET, OPTIONS, DELETE, PUT
+          allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Client-Key
+          expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
+          allow-credentials: true
+        - allow-origin: http://127.0.0.1:8081
+          allow-methods: POST, GET, OPTIONS, DELETE, PUT
+          allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Client-Key
+          expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
+          allow-credentials: true
+        # 生产：改成实际域名
+        - allow-origin: https://your-domain.com
+          allow-methods: POST, GET, OPTIONS, DELETE, PUT
+          allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Client-Key
           expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
           allow-credentials: true
 db-list:
@@ -228,6 +240,10 @@ system:
     addr: 8888
     iplimit-count: 15000
     iplimit-time: 3600
+    # 客户端密钥校验：开启后仅允许携带 X-Client-Key 的自家前端/网关调用 /api/v1/**
+    # 生产建议开启并改成足够随机的长字符串；前端用 VITE_CLIENT_KEY 配置同一值
+    client-auth-enable: false
+    client-key: ""
     use-multipoint: false
     use-redis: true
     use-mongo: false

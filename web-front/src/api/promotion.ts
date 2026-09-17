@@ -10,6 +10,8 @@ export interface CompanyPromotionItem {
   adTitle: string
   adSubtitle: string
   adImage: string
+  audit: number // 0待审 1通过 3不通过
+  reason: string
   sort: number
   createdAt: string
   jobsName: string

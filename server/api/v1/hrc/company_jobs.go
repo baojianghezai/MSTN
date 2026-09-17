@@ -29,7 +29,9 @@ func (a *CompanyJobsApi) CreateJob(c *gin.Context) {
 		return
 	}
 	uid := middlewarehrc.GetMemberUID(c)
-	id, err := hrcService.ServiceGroupApp.JobsService.CreateJob(c.Request.Context(), uid, jobsFromRequest(req), jobsContactFromRequest(req), req.Tags)
+	job := jobsFromRequest(req)
+	job.HrUID = middlewarehrc.GetMemberRealUID(c)
+	id, err := hrcService.ServiceGroupApp.JobsService.CreateJob(c.Request.Context(), uid, job, jobsContactFromRequest(req), req.Tags)
 	if err != nil {
 		code := CodeParamError
 		if errors.Is(err, hrcService.ErrSetmealJobLimit) {
@@ -111,7 +113,9 @@ func (a *CompanyJobsApi) UpdateJob(c *gin.Context) {
 		return
 	}
 	uid := middlewarehrc.GetMemberUID(c)
-	if err := hrcService.ServiceGroupApp.JobsService.UpdateJob(c.Request.Context(), uid, id, pending, jobsFromRequest(req), jobsContactFromRequest(req), req.Tags); err != nil {
+	job := jobsFromRequest(req)
+	job.HrUID = middlewarehrc.GetMemberRealUID(c)
+	if err := hrcService.ServiceGroupApp.JobsService.UpdateJob(c.Request.Context(), uid, id, pending, job, jobsContactFromRequest(req), req.Tags); err != nil {
 		Fail(c, CodeParamError, err.Error())
 		return
 	}

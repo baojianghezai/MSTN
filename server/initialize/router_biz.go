@@ -26,7 +26,10 @@ func initBizRouter(Router *gin.Engine, routers ...*gin.RouterGroup) {
 	hrcRouter := router.RouterGroupApp.Hrc
 
 	// hrc 会员业务域（独立 /api/v1 前缀，会员 JWT 在路由内部自行挂载）
+	// 先挂客户端密钥校验（只允许自家系统调用）与 IP 限流
 	v1Group := Router.Group("/api/v1")
+	v1Group.Use(middleware.ClientKeyAuth())
+	v1Group.Use(middleware.DefaultLimit())
 	hrcRouter.InitAuthRouter(v1Group)
 	hrcRouter.InitAppealRouter(v1Group)
 	hrcRouter.InitProfileRouter(v1Group)
@@ -39,6 +42,7 @@ func initBizRouter(Router *gin.Engine, routers ...*gin.RouterGroup) {
 	hrcRouter.InitMessageRouter(v1Group)
 	hrcRouter.InitChatRouter(v1Group)
 	hrcRouter.InitCompanyHRRouter(v1Group)
+	hrcRouter.InitJobfairRouter(v1Group)
 	hrcRouter.InitTalentRouter(v1Group)
 	hrcRouter.InitJobsRouter(v1Group)
 	hrcRouter.InitCompanyPublicRouter(v1Group)

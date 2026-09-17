@@ -20,7 +20,7 @@ server/go.work.sum
 # 依赖包（体积巨大，必须忽略）
 web/node_modules/
 # 打包后的生产代码
-web/dist/
+web/admin/
 web/dist-ssr/
 # Vite 构建缓存
 web/.vite/
@@ -32,7 +32,7 @@ web/.eslintcache
 # 依赖包（体积巨大，必须忽略）
 web-front/node_modules/
 # 打包后的生产代码
-web-front/dist/
+web-front/www/
 web-front/dist-ssr/
 # Vite 构建缓存
 web-front/.vite/

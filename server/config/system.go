@@ -7,6 +7,8 @@ type System struct {
 	Addr               int    `mapstructure:"addr" json:"addr" yaml:"addr"` // 端口值
 	LimitCountIP       int    `mapstructure:"iplimit-count" json:"iplimit-count" yaml:"iplimit-count"`
 	LimitTimeIP        int    `mapstructure:"iplimit-time" json:"iplimit-time" yaml:"iplimit-time"`
+	ClientAuthEnable   bool   `mapstructure:"client-auth-enable" json:"client-auth-enable" yaml:"client-auth-enable"`       // 校验客户端密钥（只允许自家系统调用）
+	ClientKey          string `mapstructure:"client-key" json:"client-key" yaml:"client-key"`                               // 客户端密钥（X-Client-Key / WS query clientKey）
 	UseMultipoint      bool   `mapstructure:"use-multipoint" json:"use-multipoint" yaml:"use-multipoint"`                   // 多点登录拦截
 	UseRedis           bool   `mapstructure:"use-redis" json:"use-redis" yaml:"use-redis"`                                  // 使用redis
 	UseMongo           bool   `mapstructure:"use-mongo" json:"use-mongo" yaml:"use-mongo"`                                  // 使用mongo

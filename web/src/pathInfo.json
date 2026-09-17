@@ -21,6 +21,7 @@
   "/src/view/hrc/dashboard/index.vue": "HrcDashboard",
   "/src/view/hrc/dataCleanup/index.vue": "HrcDataCleanup",
   "/src/view/hrc/jobs/list.vue": "JobsManage",
+  "/src/view/hrc/promotion/list.vue": "PromotionAudit",
   "/src/view/hrc/statistics/index.vue": "HrcStatistics",
   "/src/view/hrc/videoInterview/list.vue": "VideoInterviewList",
   "/src/view/hrc/wxpayLog/list.vue": "WxpayLogList",

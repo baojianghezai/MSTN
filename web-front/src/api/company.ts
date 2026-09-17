@@ -1,6 +1,6 @@
 // 企业资料接口封装（02-account.md #107-#110）
 import request from '@/utils/request'
-import type { ApiResponse, CompanyAudit, CompanyCancellation, CompanyProfile } from '@/types/api'
+import type { ApiResponse, ArticleItem, CompanyAudit, CompanyCancellation, CompanyProfile } from '@/types/api'
 
 /** 企业资料读取 */
 export const getCompanyProfile = () =>
@@ -28,6 +28,7 @@ export interface CompanyHRItem {
   uid: number
   username: string
   mobile: string
+  realName: string
   status: number // 1=启用 2=禁用
   regTime: string
 }
@@ -36,8 +37,8 @@ export interface CompanyHRItem {
 export const listCompanyHRs = () =>
   request.get<ApiResponse<CompanyHRItem[]>>('/company/hrs')
 
-/** 新增 HR 子账号（手机号 + 密码登录，数据共享企业主体） */
-export const createCompanyHR = (data: { mobile: string; password: string }) =>
+/** 新增 HR 子账号（手机号 + 验证码 + 密码登录，数据共享企业主体） */
+export const createCompanyHR = (data: { mobile: string; password: string; realName?: string; code: string }) =>
   request.post<ApiResponse<CompanyHRItem>>('/company/hrs', data)
 
 /** 启用/禁用 HR 子账号 */
@@ -51,3 +52,31 @@ export const resetCompanyHRPassword = (uid: number, password: string) =>
 /** 移除 HR 子账号 */
 export const deleteCompanyHR = (uid: number) =>
   request.delete<ApiResponse>(`/company/hrs/${uid}`)
+
+// ---- 招聘会（#2，需套餐含「举办招聘会」权益）----
+
+export interface CompanyJobfairPayload {
+  title: string
+  summary?: string
+  cover?: string
+  content?: string
+  holdTime: string
+  address: string
+  organizer?: string
+}
+
+/** 我举办的招聘会 */
+export const listCompanyJobfairs = () =>
+  request.get<ApiResponse<ArticleItem[]>>('/company/jobfairs')
+
+/** 举办招聘会 */
+export const createCompanyJobfair = (data: CompanyJobfairPayload) =>
+  request.post<ApiResponse<ArticleItem>>('/company/jobfairs', data)
+
+/** 编辑招聘会 */
+export const updateCompanyJobfair = (id: number, data: CompanyJobfairPayload) =>
+  request.put<ApiResponse>(`/company/jobfairs/${id}`, data)
+
+/** 下架招聘会 */
+export const deleteCompanyJobfair = (id: number) =>
+  request.delete<ApiResponse>(`/company/jobfairs/${id}`)
